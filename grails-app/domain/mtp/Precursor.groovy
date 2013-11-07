@@ -2,16 +2,17 @@ package mtp
 
 class Precursor {
 
-    String mirid
-    String acc
-    String seq
+    String preid
+    String preacc
+    String preseq
     
     static constraints = {
-    	mirid(blank:false,unique: true)
-    	acc(blank:false,unique: true)
-    	seq(blank:false)
+    	preid(blank:false,unique: true)
+    	preacc(blank:false,unique: true)
+    	preseq(blank:false)
     }
     static mapping = {
-        seq type: "text"
+        preseq type: "text"
     }
+    static hasMany = [mature:Mature]
 }
