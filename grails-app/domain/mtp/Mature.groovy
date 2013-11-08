@@ -5,13 +5,12 @@ class Mature {
     String matid
     String matacc
     String matseq
-    Integer arm
+    String arm
     
     static constraints = {
     	matid(blank:false)
     	matacc(blank:false)
     	matseq(blank:false)
-    	arm(blank:false)
     }
     static mapping = {
         matseq type: "text"

@@ -15,4 +15,5 @@ class Precursor {
         preseq type: "text"
     }
     static hasMany = [mature:Mature]
+    static belongsTo = [family:Family]
 }
