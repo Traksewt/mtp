@@ -190,18 +190,17 @@ def mirbase(){
 	//catch the last one
 	//println "\n### "+preid+" ###"
 	if ((matcher = preid =~ /^hsa-.*/)){
-		println preMap
-
-		//get matures
-		if (three == true){
-			threeMap.seq = seq[threestart..threestop]
+		//println preMap
+		Precursor pre = new Precursor(preMap)
+		Family fam = Family.findByFamid(famToMir."${preid}")
+		if (fam != null){
+			fam.addToPrecursor(pre)
+		}else{
+			//print "No family!"
+			fam = Family.findByFamid("no family")
+			fam.addToPrecursor(pre)
 		}
-		if (five == true){
-			fiveMap.seq = seq[fivestart..fivestop]
-		}
-		if (noarm == true){
-			noarmMap.seq = seq[noarmstart..noarmstop]
-		}
+		fam.save()
 	}
 }
 
