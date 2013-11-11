@@ -1,6 +1,5 @@
 package mtp
 
-//family()
 mirbase()
 //location()
 
@@ -66,6 +65,7 @@ def family(){
 
 def mirbase(){
 	def famToMir = family()
+	def locToMir = location()
 	print "Adding mirbase data..."
 	print "Downloading miRNA.dat.gz"
 	def mir_file = new File("data/miRNA.dat")
@@ -90,7 +90,7 @@ def mirbase(){
 	def noarmMap = [:]
 	def (preid,preid_new,matid,matseq,matacc,matstart,matstop,matarm,threestart,threestop,fivestart,fivestop,noarmstartnoarmstop) = []
 	def inseq = three = five = noarm = false
-	
+	print "Adding precursor data..."
 	mir_file.eachLine{ line ->
 		if ((matcher = line =~ /^ID\s+(.*?)\s+.*/)){
 		preid_new = matcher[0][1]
@@ -98,10 +98,20 @@ def mirbase(){
 				seq = seq.replaceAll("[0-9]", "")
 				seq = seq.replaceAll(" ", "")
 				seq = seq.replaceAll("/", "")
-				preMap.preseq = seq
+				preMap.preseq = seq				
 				if ((matcher = preid =~ /^hsa-.*/)){
-					count++
 					//println "\n### "+preid+" ###"
+					if (locToMir."${preid}"){
+						preMap.chr = locToMir."${preid}"[0]
+						preMap.start = locToMir."${preid}"[1]
+						preMap.stop = locToMir."${preid}"[2]
+					}else{
+						//print "no match for "+preid
+						preMap.chr = "n/a"
+						preMap.start = 0
+						preMap.stop = 0
+					}
+					count++
 					Precursor pre = new Precursor(preMap)
 					Family fam = Family.findByFamid(famToMir."${preid}")
 					if (fam != null){
@@ -115,20 +125,121 @@ def mirbase(){
 						fam.save(flush:true)
 						cleanUpGorm()
 						print count
+						println new Date()
 					}else{
 						fam.save()
 					}
-					//println preMap
+				}
+			}
+			seq = ""
+			inseq = false
+			preid = preid_new
+			preMap.preid = preid
+		}
+		if ((matcher = line =~ /^AC\s+(.*?);/)){
+			preMap.preacc = matcher[0][1]
+		}
+		if ((matcher = line =~ /^\s+/)){
+			inseq = true
+		}
+		if (inseq == true){
+			seq <<= line
+		}
+	}
+	//catch the last one
+	//println "\n### "+preid+" ###"
+	if ((matcher = preid =~ /^hsa-.*/)){
+		//println preMap
+		if (locToMir."${preid}"){
+			preMap.chr = locToMir."${preid}"[0]
+			preMap.start = locToMir."${preid}"[1]
+			preMap.stop = locToMir."${preid}"[2]
+		}else{
+			preMap.chr = "n/a"
+			preMap.start = 0
+			preMap.stop = 0
+		}
+		Precursor pre = new Precursor(preMap)
+		Family fam = Family.findByFamid(famToMir."${preid}")
+		if (fam != null){
+			fam.addToPrecursor(pre)
+		}else{
+			//print "No family!"
+			fam = Family.findByFamid("no family")
+			fam.addToPrecursor(pre)
+		}
+		fam.save()
+	}
+	print count
+	count=0
+	
+	//re-read to get the mature sequence
+	print "Adding mature data..."
+	mir_file.eachLine{ line ->
+		if ((matcher = line =~ /^ID\s+(.*?)\s+.*/)){
+		preid_new = matcher[0][1]
+			if (seq != ""){
+				seq = seq.replaceAll("[0-9]", "")
+				seq = seq.replaceAll(" ", "")
+				seq = seq.replaceAll("/", "")
+				preMap.preseq = seq
+				if ((matcher = preid =~ /^hsa-.*/)){
+					count++
 
-					//get matures
+					//get matures - for some reason can't use the pre value above so recall it
+					Precursor pre_find = Precursor.findByPreid(preid)
 					if (three == true){
 						threeMap.matseq = seq[threestart..threestop]
+						threeMap.arm = "3"
+						if (locToMir."${matid}"){
+							threeMap.chr = locToMir."${matid}"[0]
+							threeMap.start = locToMir."${matid}"[1]
+							threeMap.stop = locToMir."${matid}"[2]
+						}else{
+							threeMap.chr = "n/a"
+							threeMap.start = 0
+							threeMap.stop = 0
+						}
+						Mature mat = new Mature(threeMap)
+						pre_find.addToMature(mat)
+						pre_find.save(flush:true)
 					}
 					if (five == true){
-						fiveMap.matseq = seq[fivestart..fivestop]
-					}
-					if (noarm == true){
-						noarmMap.matseq = seq[noarmstart..noarmstop]
+ 						fiveMap.matseq = seq[fivestart..fivestop]
+ 						fiveMap.arm = "5"
+ 						if (locToMir."${matid}"){
+							fiveMap.chr = locToMir."${matid}"[0]
+							fiveMap.start = locToMir."${matid}"[1]
+							fiveMap.stop = locToMir."${matid}"[2]
+						}else{
+							fiveMap.chr = "n/a"
+							fiveMap.start = 0
+							fiveMap.stop = 0
+						}
+ 						Mature mat = new Mature(fiveMap)
+ 						pre_find.addToMature(mat)
+ 						pre_find.save(flush:true)
+ 					}
+ 					if (noarm == true){
+ 						noarmMap.matseq = seq[noarmstart..noarmstop]
+ 						noarmMap.arm = "0"
+ 						if (locToMir."${matid}"){
+							noarmMap.chr = locToMir."${matid}"[0]
+							noarmMap.start = locToMir."${matid}"[1]
+							noarmMap.stop = locToMir."${matid}"[2]
+						}else{
+							noarmMap.chr = "n/a"
+							noarmMap.start = 0
+							noarmMap.stop = 0
+						}
+ 						Mature mat = new Mature(noarmMap)
+ 						pre_find.addToMature(mat)
+ 						pre_find.save(flush:true)
+ 					}
+ 					if ((count % 100) == 0){
+						cleanUpGorm()
+						print count
+						println new Date()
 					}
 				}
 				
@@ -142,9 +253,6 @@ def mirbase(){
 			inseq = false
 			preid = preid_new
 			preMap.preid = preid
-		}
-		if ((matcher = line =~ /^AC\s+(.*?);/)){
-			preMap.preacc = matcher[0][1]
 		}
 		if ((matcher = line =~ /^\s+/)){
 			inseq = true
@@ -188,28 +296,73 @@ def mirbase(){
 		}
 	}
 	//catch the last one
-	//println "\n### "+preid+" ###"
-	if ((matcher = preid =~ /^hsa-.*/)){
-		//println preMap
-		Precursor pre = new Precursor(preMap)
-		Family fam = Family.findByFamid(famToMir."${preid}")
-		if (fam != null){
-			fam.addToPrecursor(pre)
+	Precursor pre_find = Precursor.findByPreid(preid)
+	if (three == true){
+		threeMap.matseq = seq[threestart..threestop]
+		threeMap.arm = "3"
+		if (locToMir."${matid}"){
+			threeMap.chr = locToMir."${matid}"[0]
+			threeMap.start = locToMir."${matid}"[1]
+			threeMap.stop = locToMir."${matid}"[2]
 		}else{
-			//print "No family!"
-			fam = Family.findByFamid("no family")
-			fam.addToPrecursor(pre)
+			threeMap.chr = "n/a"
+			threeMap.start = 0
+			threeMap.stop = 0
 		}
-		fam.save()
+		Mature mat = new Mature(threeMap)
+		pre_find.addToMature(mat)
+		pre_find.save(flush:true)
 	}
+	if (five == true){
+		fiveMap.matseq = seq[fivestart..fivestop]
+		fiveMap.arm = "5"
+		if (locToMir."${matid}"){
+			fiveMap.chr = locToMir."${matid}"[0]
+			fiveMap.start = locToMir."${matid}"[1]
+			fiveMap.stop = locToMir."${matid}"[2]
+		}else{
+			fiveMap.chr = "n/a"
+			fiveMap.start = 0
+			fiveMap.stop = 0
+		}
+		Mature mat = new Mature(fiveMap)
+		pre_find.addToMature(mat)
+		pre_find.save(flush:true)
+	}
+	if (noarm == true){
+		noarmMap.matseq = seq[noarmstart..noarmstop]
+		noarmMap.arm = "0"
+		if (locToMir."${matid}"){
+			noarmMap.chr = locToMir."${matid}"[0]
+			noarmMap.start = locToMir."${matid}"[1]
+			noarmMap.stop = locToMir."${matid}"[2]
+		}else{
+			noarmMap.chr = "n/a"
+			noarmMap.start = 0
+			noarmMap.stop = 0
+		}
+		Mature mat = new Mature(noarmMap)
+		pre_find.addToMature(mat)
+		pre_find.save(flush:true)
+	}
+	print count
 }
 
 
 def location(){
+	def locToMir = [:]
 	print "Adding location data..."
+	print "Downloading hsa.gff3"
+	def loc_file = new File("data/hsa.gff3")
+	if (loc_file.exists()){
+		print "Already done"
+	}else{ 
+		def wget =  "wget ftp://mirbase.org/pub/mirbase/CURRENT/genomes/hsa.gff3 -P data/"
+		def proc = wget.execute()
+		proc.waitFor()
+	}
 	def locMap = [:]
 	def mirid
-	def loc_file = new File("/Users/ben/Work/data/mirbase/hsa.gff3")
 	loc_file.eachLine{ line ->
 		if ((matcher = line =~ /^chr.*/)){
 			//print line
@@ -221,13 +374,17 @@ def location(){
 				if ((matcher = s[8] =~ /.*?Name=(.*)/)){
 					mirid = matcher[0][1]
 				}
-				print "\n\nprecursor: mirid = "+mirid+"\n"+locMap+"\n"
+				//print "\n\nprecursor: mirid = "+mirid+"\n"+locMap+"\n"
+				locToMir."${mirid}"=[locMap.chr,locMap.start,locMap.stop]
 			}else{
 				if ((matcher = s[8] =~ /.*?Name=(.*?);/)){
 					mirid = matcher[0][1]
 				}
-				print "mature: mirid = "+mirid+"\n"+locMap+"\n"
+				//print "mature: mirid = "+mirid+"\n"+locMap+"\n"
+				locToMir."${mirid}"=[locMap.chr,locMap.start,locMap.stop]
 			}
 		}
 	}
+	//print locToMir
+	return locToMir
 }

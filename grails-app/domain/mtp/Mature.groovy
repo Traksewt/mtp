@@ -6,11 +6,17 @@ class Mature {
     String matacc
     String matseq
     String arm
+    String chr
+    int start
+    int stop
     
     static constraints = {
-    	matid(blank:false)
-    	matacc(blank:false)
+    	matid(blank:false,unique: true)
+    	matacc(blank:false,unique: true)
     	matseq(blank:false)
+    	chr(blank:false)
+    	start(blank:false)
+    	stop(blank:false)
     }
     static mapping = {
         matseq type: "text"
