@@ -1,7 +1,8 @@
 package mtp
 
-mirbase()
-//location()
+//mirbase()
+//starbase()
+mirtarbase()
 
 def cleanUpGorm() { 
     def sessionFactory = ctx.getBean("sessionFactory")
@@ -388,3 +389,128 @@ def location(){
 	//print locToMir
 	return locToMir
 }
+
+def starbase(){
+	def count = 0
+	print "Adding starbase data..."
+	def starMap = [:]
+	def star_file = new File("data/starBase_Human_Interactions2013-11-04_05-18.xls")
+	star_file.eachLine{ line ->
+		def s = line.split("\t")
+		if (s[8].toInteger() > 2){
+			starMap.gene = s[1]
+			starMap.source = "s"
+			//print starMap
+			count++
+			Mature mat = Mature.findByMatid(s[0])
+			Mir2mrna star = new Mir2mrna(starMap)
+			mat.addToMir2mrna(star)
+			if ((count % 1000) == 0){
+				mat.save(flush:true)
+				println new Date()
+				cleanUpGorm()
+				print count
+			}else{
+				mat.save()
+			}
+		}
+	}
+	print count
+}
+
+def mirtarbase(){
+	def count = 0
+	print "Adding mirtarbase data..."
+	def mtMap = [:]
+
+	def mt_file = new File("data/miRTarBase_hsa_MTI.txt")
+
+	mt_file.eachLine{ line ->
+		if ((matcher = line =~ /^MIR.*/)){
+			def s = line.split("\t")
+			if ((matcher = s[7] != /Weak/)){
+				if ((matcher = s[1] =~ /^hsa.*/)){
+					mtMap.gene = s[3]
+					mtMap.source = "m"
+					//print mtMap
+					count++
+					Mature mat = Mature.findByMatid(s[1])
+					Mir2mrna mt = new Mir2mrna(mtMap)
+					mat.addToMir2mrna(mt)
+					if ((count % 1000) == 0){
+						mat.save(flush:true)
+						println new Date()
+						cleanUpGorm()
+						print count
+					}else{
+						mat.save()
+					}
+				}
+			}
+		}
+	}
+	print count
+}
+
+// def starbase(){
+// 	def count = 0
+// 	print "Adding starbase data..."
+// 	def starMap = [:]
+// 	def star_file = new File("data/starBase_Human_Interactions2013-11-04_05-18.xls")
+// 	star_file.eachLine{ line ->
+// 		def s = line.split("\t")
+// 		if (s[8].toInteger() > 2){
+// 			starMap.gene = s[1]
+// 			starMap.pnum = s[8]
+// 			//print starMap
+// 			count++
+// 			Mature mat = Mature.findByMatid(s[0])
+// 			Starbase star = new Starbase(starMap)
+// 			mat.addToStarbase(star)
+// 			if ((count % 1000) == 0){
+// 				mat.save(flush:true)
+// 				println new Date()
+// 				cleanUpGorm()
+// 				print count
+// 			}else{
+// 				mat.save()
+// 			}
+// 		}
+// 	}
+// 	print count
+// }
+// 
+// def mirtarbase(){
+// 	def count = 0
+// 	print "Adding mirtarbase data..."
+// 	def mtMap = [:]
+// 
+// 	def mt_file = new File("data/miRTarBase_hsa_MTI.txt")
+// 
+// 	mt_file.eachLine{ line ->
+// 		if ((matcher = line =~ /^MIR.*/)){
+// 			def s = line.split("\t")
+// 			if ((matcher = s[7] != /Weak/)){
+// 				if ((matcher = s[1] =~ /^hsa.*/)){
+// 					mtMap.gene = s[3]
+// 					mtMap.mtid = s[0]
+// 					mtMap.ref = s[8]
+// 					//print mtMap
+// 					count++
+// 					Mature mat = Mature.findByMatid(s[1])
+// 					Mirtarbase mt = new Mirtarbase(mtMap)
+// 					mat.addToMirtarbase(mt)
+// 					if ((count % 1000) == 0){
+// 						mat.save(flush:true)
+// 						println new Date()
+// 						cleanUpGorm()
+// 						print count
+// 					}else{
+// 						mat.save()
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
+// 	print count
+// }
