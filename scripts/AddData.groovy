@@ -1,8 +1,8 @@
 package mtp
 
 //mirbase()
-//starbase()
-mirtarbase()
+//starbase_full()
+mirtarbase_full()
 
 def cleanUpGorm() { 
     def sessionFactory = ctx.getBean("sessionFactory")
@@ -23,7 +23,8 @@ def family(){
 	if (fam_file.exists()){
 		print "Already done"
 	}else{ 
-		def wget =  "wget ftp://mirbase.org/pub/mirbase/CURRENT/miFam.dat.gz -P data/"
+		//def wget =  "wget ftp://mirbase.org/pub/mirbase/CURRENT/miFam.dat.gz -P data/"
+		def wget = "wget ftp://mirbase.org/pub/mirbase/19/miFam.dat.gz -P data/"
 		def proc = wget.execute()
 		proc.waitFor()
 		print "Unzipping..."
@@ -73,7 +74,8 @@ def mirbase(){
 	if (mir_file.exists()){
 		print "Already done"
 	}else{ 
-		def wget =  "wget ftp://mirbase.org/pub/mirbase/CURRENT/miRNA.dat.gz -P data/"
+		//def wget =  "wget ftp://mirbase.org/pub/mirbase/CURRENT/miRNA.dat.gz -P data/"
+		def wget =  "wget ftp://mirbase.org/pub/mirbase/19/miRNA.dat.gz -P data/"
 		def proc = wget.execute()
 		proc.waitFor()
 		print "Unzipping..."
@@ -358,7 +360,8 @@ def location(){
 	if (loc_file.exists()){
 		print "Already done"
 	}else{ 
-		def wget =  "wget ftp://mirbase.org/pub/mirbase/CURRENT/genomes/hsa.gff3 -P data/"
+		//def wget =  "wget ftp://mirbase.org/pub/mirbase/CURRENT/genomes/hsa.gff3 -P data/"
+		def wget =  "wget ftp://mirbase.org/pub/mirbase/19/genomes/hsa.gff3 -P data/"
 		def proc = wget.execute()
 		proc.waitFor()
 	}
@@ -390,7 +393,7 @@ def location(){
 	return locToMir
 }
 
-def starbase(){
+def starbase_basic(){
 	def count = 0
 	print "Adding starbase data..."
 	def starMap = [:]
@@ -418,7 +421,7 @@ def starbase(){
 	print count
 }
 
-def mirtarbase(){
+def mirtarbase_basic(){
 	def count = 0
 	print "Adding mirtarbase data..."
 	def mtMap = [:]
@@ -452,65 +455,72 @@ def mirtarbase(){
 	print count
 }
 
-// def starbase(){
-// 	def count = 0
-// 	print "Adding starbase data..."
-// 	def starMap = [:]
-// 	def star_file = new File("data/starBase_Human_Interactions2013-11-04_05-18.xls")
-// 	star_file.eachLine{ line ->
-// 		def s = line.split("\t")
-// 		if (s[8].toInteger() > 2){
-// 			starMap.gene = s[1]
-// 			starMap.pnum = s[8]
-// 			//print starMap
-// 			count++
-// 			Mature mat = Mature.findByMatid(s[0])
-// 			Starbase star = new Starbase(starMap)
-// 			mat.addToStarbase(star)
-// 			if ((count % 1000) == 0){
-// 				mat.save(flush:true)
-// 				println new Date()
-// 				cleanUpGorm()
-// 				print count
-// 			}else{
-// 				mat.save()
-// 			}
-// 		}
-// 	}
-// 	print count
-// }
-// 
-// def mirtarbase(){
-// 	def count = 0
-// 	print "Adding mirtarbase data..."
-// 	def mtMap = [:]
-// 
-// 	def mt_file = new File("data/miRTarBase_hsa_MTI.txt")
-// 
-// 	mt_file.eachLine{ line ->
-// 		if ((matcher = line =~ /^MIR.*/)){
-// 			def s = line.split("\t")
-// 			if ((matcher = s[7] != /Weak/)){
-// 				if ((matcher = s[1] =~ /^hsa.*/)){
-// 					mtMap.gene = s[3]
-// 					mtMap.mtid = s[0]
-// 					mtMap.ref = s[8]
-// 					//print mtMap
-// 					count++
-// 					Mature mat = Mature.findByMatid(s[1])
-// 					Mirtarbase mt = new Mirtarbase(mtMap)
-// 					mat.addToMirtarbase(mt)
-// 					if ((count % 1000) == 0){
-// 						mat.save(flush:true)
-// 						println new Date()
-// 						cleanUpGorm()
-// 						print count
-// 					}else{
-// 						mat.save()
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
-// 	print count
-// }
+def starbase_full(){
+	def count = 0
+	print "Adding starbase data..."
+	def starMap = [:]
+	def star_file = new File("data/starBase_Human_Interactions2013-11-04_05-18.xls")
+	star_file.eachLine{ line ->
+		def s = line.split("\t")
+		//if (s[8].toInteger() > 2){
+			starMap.gene = s[1]
+			starMap.pnum = s[8]
+			//print starMap
+			count++
+			Mature mat = Mature.findByMatid(s[0])
+			if (mat != null){
+				Starbase star = new Starbase(starMap)
+				mat.addToStarbase(star)
+				if ((count % 1000) == 0){
+					mat.save(flush:true)
+					println new Date()
+					cleanUpGorm()
+					print count
+				}else{
+					mat.save()
+				}
+			}
+		//}
+	}
+	print count
+}
+
+def mirtarbase_full(){
+	def count = 0
+	print "Adding mirtarbase data..."
+	def mtMap = [:]
+
+	def mt_file = new File("data/miRTarBase_hsa_MTI.txt")
+
+	mt_file.eachLine{ line ->
+		if ((matcher = line =~ /^MIR.*/)){
+			def s = line.split("\t")
+			if (s.size() == 9){
+				if ((matcher = s[1] =~ /^hsa.*/)){
+					mtMap.gene = s[3]
+					mtMap.mtid = s[0]
+					mtMap.reference = s[8]
+					mtMap.evidence = s[7]
+					//print mtMap
+					count++
+					Mature mat = Mature.findByMatid(s[1])
+					if (mat != null){
+						Mirtarbase mt = new Mirtarbase(mtMap)
+						mat.addToMirtarbase(mt)
+						if ((count % 10) == 0){
+							mat.save(flush:true)
+							println new Date()
+							cleanUpGorm()
+							print count
+						}else{
+							mat.save()
+						}
+					}
+				}
+			}else{
+				print "Missing data!!! - "+mtMap
+			}
+		}
+	}
+	print count
+}
