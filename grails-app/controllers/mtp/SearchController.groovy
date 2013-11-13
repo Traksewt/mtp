@@ -23,6 +23,7 @@ class SearchController {
         def searchSql = "select family.*,precursor.*,mature.* from family,precursor,mature where ("+mirList+") and family.id = precursor.family_id and precursor.id = mature.precursor_id;";
         //println searchSql
         def mirRes = sql.rows(searchSql)
+        
         def starSql = "select mature.matid,count(distinct(gene)) from mature,starbase where ("+mirList+") and starbase.mature_id = mature.id and starbase.pnum > ${starEv} group by mature.matid;"
         //print starSql
         def starRes = sql.rows(starSql)
@@ -33,6 +34,7 @@ class SearchController {
         starRes.each{
         	starMap."${it.matid}" = it.count
         }
+        
         def weak = ""
         if (params.mEv == '1'){
         	weak = "and mirtarbase.evidence !~ '(Weak)'"
@@ -47,7 +49,19 @@ class SearchController {
         mtRes.each{
         	mtMap."${it.matid}" = it.count
         }
-        return [mirRes: mirRes, starMap: starMap, mirList: p, mtMap: mtMap, sEv:params.sEv, mEv: params.mEv]    
+        
+        def tsSql = "select mature.matid,count(distinct(gene)) from mature,tscan where ("+mirList+") and tscan.mature_id = mature.id group by mature.matid;"
+        print tsSql
+        def tsRes = sql.rows(tsSql)
+        def tsMap = [:]
+        mirRes.each{
+        	tsMap."${it.matid}" = 0
+        }
+        tsRes.each{
+        	tsMap."${it.matid}" = it.count
+        }
+        
+        return [mirList: p, mirRes: mirRes, starMap: starMap, mtMap: mtMap, tsMap:tsMap, sEv:params.sEv, mEv: params.mEv]    
     }
     
     def genes(){

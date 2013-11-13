@@ -24,7 +24,7 @@
 		<h1>Results</h1>
 		<table id="search">
             <thead>
-				<tr><th>Mature</th><th>Family ID</th><th>Precursor</th><th>Sequence</th><th>Chromosome</th><th>StarBase</th><th>MiRTarBase</th></tr>
+				<tr><th>Mature</th><th>Family ID</th><th>Precursor</th><th>Sequence</th><th>Chromosome</th><th>StarBase</th><th>MiRTarBase</th><th>TargetScan</th></tr>
 			</thead>
 			<tbody>
 				<g:each var="r" in="${mirRes}">
@@ -35,6 +35,7 @@
 					<td>${r.matseq}</td><td><a href="http://asia.ensembl.org/Homo_sapiens/Location/View?db=core;r=${r.chr}:${r.start}-${r.stop}" target="_blank">${r.chr}: ${r.start}-${r.stop}</a></td>
 					<td><g:link action="genes" params="[matid:r.matid, sEv:sEv, mEv:mEv]"><%=starMap."${r.matid}" %></g:link></td>
 					<td><%=mtMap."${r.matid}" %></td>
+					<td><%=tsMap."${r.matid}" %></td>
 				</tr>
 				</g:each>
 			</tbody>
