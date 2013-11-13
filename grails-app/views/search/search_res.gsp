@@ -33,7 +33,7 @@
 					<td><a href="http://mirbase.org/cgi-bin/mirna_summary.pl?fam=${r.famacc}" target="_blank">${r.famid}</a></td>
 					<td><a href="http://www.mirbase.org/cgi-bin/mirna_entry.pl?acc=${r.preacc}" target="_blank">${r.preid}</a></td>
 					<td>${r.matseq}</td><td><a href="http://asia.ensembl.org/Homo_sapiens/Location/View?db=core;r=${r.chr}:${r.start}-${r.stop}" target="_blank">${r.chr}: ${r.start}-${r.stop}</a></td>
-					<td><g:link action="genes" params="[matid:r.matid]"><%=starMap."${r.matid}" %></g:link></td>
+					<td><g:link action="genes" params="[matid:r.matid, sEv:sEv, mEv:mEv]"><%=starMap."${r.matid}" %></g:link></td>
 					<td><%=mtMap."${r.matid}" %></td>
 				</tr>
 				</g:each>

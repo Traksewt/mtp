@@ -3,6 +3,8 @@ package mtp
 //mirbase()
 //starbase_full()
 mirtarbase_full()
+//tscan_full()
+
 
 def cleanUpGorm() { 
     def sessionFactory = ctx.getBean("sessionFactory")
@@ -507,7 +509,7 @@ def mirtarbase_full(){
 					if (mat != null){
 						Mirtarbase mt = new Mirtarbase(mtMap)
 						mat.addToMirtarbase(mt)
-						if ((count % 10) == 0){
+						if ((count % 1000) == 0){
 							mat.save(flush:true)
 							println new Date()
 							cleanUpGorm()
@@ -519,6 +521,41 @@ def mirtarbase_full(){
 				}
 			}else{
 				print "Missing data!!! - "+mtMap
+			}
+		}
+	}
+	print count
+}
+
+def tscan_full(){
+	def count = 0
+	print "Adding targetscan data..."
+	def tsMap = [:]
+
+	def ts_file = new File("data/TCS_0.5_hsa.txt")
+
+	ts_file.eachLine{ line ->
+		if ((matcher = line =~ /^NM_.*/)){
+			def s = line.split("\t")
+			if ((matcher = s[12] =~ /^hsa.*/)){
+				tsMap.gene = s[1]
+				tsMap.mtid = s[12]
+				tsMap.tcs = s[13]
+				//print tsMap
+				count++
+				Mature mat = Mature.findByMatid(s[12])
+				if (mat != null){
+					Tscan ts = new Tscan(tsMap)
+					mat.addToTscan(ts)
+					if ((count % 10000) == 0){
+						mat.save(flush:true)
+						println new Date()
+						cleanUpGorm()
+						print count
+					}else{
+						mat.save()
+					}
+				}
 			}
 		}
 	}

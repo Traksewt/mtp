@@ -47,34 +47,39 @@ class SearchController {
         mtRes.each{
         	mtMap."${it.matid}" = it.count
         }
-        return [mirRes: mirRes, starMap: starMap, mirList: p, mtMap: mtMap]    
+        return [mirRes: mirRes, starMap: starMap, mirList: p, mtMap: mtMap, sEv:params.sEv, mEv: params.mEv]    
     }
     
     def genes(){
 	    def sql = new Sql(dataSource)
 		def miR = Mature.findMatid(params.matid)
-		def starAllSql = "select distinct(gene) from mature,starbase where mature.matid = '"+params.matid+"' and starbase.mature_id = mature.id;"
+		def starEv = params.sEv
+		def starAllSql = "select distinct(gene) from mature,starbase where mature.matid = '"+params.matid+"' and starbase.mature_id = mature.id and starbase.pnum > ${starEv};"
 		print starAllSql
 		def starAll = sql.rows(starAllSql)
-		def interGeneMap = [:]
+		def unionGeneMap = [:]
 		def starGenes = ""
 		starAll.each{
-			interGeneMap."${it.gene}"=""
+			unionGeneMap."${it.gene}"=""
 			starGenes <<= it.gene+"\n"
 		}
-		def mtAllSql = "select distinct(gene) from mature,mirtarbase where mature.matid = '"+params.matid+"' and mirtarbase.mature_id = mature.id;"
+		def weak = ""
+        if (params.mEv == '1'){
+        	weak = "and mirtarbase.evidence !~ '(Weak)'"
+        }
+		def mtAllSql = "select distinct(gene) from mature,mirtarbase where mature.matid = '"+params.matid+"' and mirtarbase.mature_id = mature.id ${weak};"
 		print mtAllSql
 		def mtAll = sql.rows(mtAllSql)
 		def mtGenes = ""
 		mtAll.each{
-			interGeneMap."${it.gene}"=""
+			unionGeneMap."${it.gene}"=""
 			mtGenes <<= it.gene+"\n"
 		}
-		def inter = ""
-		interGeneMap.each{
-			inter <<= it.key+"\n"
+		def union = ""
+		unionGeneMap.each{
+			union <<= it.key+"\n"
 		}
 		
-		return [miR:miR, starAll:starAll, starGenes:starGenes, mtAll:mtAll, mtGenes:mtGenes, interGenes:inter, interGeneMap: interGeneMap]
+		return [miR:miR, starAll:starAll, starGenes:starGenes, mtAll:mtAll, mtGenes:mtGenes, unionGenes:union, unionGeneMap: unionGeneMap]
 	}
 }

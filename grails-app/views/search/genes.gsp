@@ -26,10 +26,10 @@
             <a href="#" onclick="document.mirDownload.submit()">${mtAll.size()} MirTarBase genes</a>
     	</g:form>
     	<br>
-    	<g:form name="interDownload" url="[controller:'Download', action:'gene_download']" style="display: inline" >
+    	<g:form name="unionDownload" url="[controller:'Download', action:'gene_download']" style="display: inline" >
         	<g:hiddenField name="fileData" value="${interGenes}"/>
-            <g:hiddenField name="fileName" value="${params.matid}.intersection.txt"/>
-            <a href="#" onclick="document.interDownload.submit()">${interGeneMap.size()} intersection genes</a>
+            <g:hiddenField name="fileName" value="${params.matid}.union.txt"/>
+            <a href="#" onclick="document.unionDownload.submit()">${unionGeneMap.size()} union genes</a>
     	</g:form>
 	</body>
 </html>
