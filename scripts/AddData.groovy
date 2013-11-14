@@ -2,9 +2,9 @@ package mtp
 
 //mirbase()
 //starbase_full()
-mirtarbase_full()
+//mirtarbase_full()
 //tscan_full()
-
+diana_full()
 
 def cleanUpGorm() { 
     def sessionFactory = ctx.getBean("sessionFactory")
@@ -555,6 +555,43 @@ def tscan_full(){
 					}else{
 						mat.save()
 					}
+				}
+			}
+		}
+	}
+	print count
+}
+
+def diana_full(){
+	def count = 0
+	print "Adding DIANA-microT-CDS data..."
+	def diMap = [:]
+
+	def di_file = new File("data/microtcds_hsa_0.7_data.csv")
+
+	di_file.eachLine{ line ->
+		if ((matcher = line =~ /^ENST.*/)){
+			def s = line.split(",")
+			if ((matcher = s[1] =~ /.*?\((.*?)\)/)){
+				diMap.gene = matcher[0][1]
+			}
+			if ((matcher = s[2] =~ /(.*?)\(.*/)){
+				diMap.mtid = s[2] = matcher[0][1]
+			}
+			diMap.threshold = s[3]
+			//print diMap
+			count++
+			Mature mat = Mature.findByMatid(s[2])
+			if (mat != null){
+				Diana di = new Diana(diMap)
+				mat.addToDiana(di)
+				if ((count % 10000) == 0){
+					mat.save(flush:true)
+					println new Date()
+					cleanUpGorm()
+					print count
+				}else{
+					mat.save()
 				}
 			}
 		}

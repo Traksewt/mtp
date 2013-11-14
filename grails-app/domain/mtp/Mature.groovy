@@ -22,5 +22,5 @@ class Mature {
         matseq type: "text"
     }
     static belongsTo = [ precursor: Precursor ]
-    static hasMany = [ starbase : Starbase, mirtarbase : Mirtarbase, mir2mrna: Mir2mrna, tscan: Tscan ]
+    static hasMany = [ starbase : Starbase, mirtarbase : Mirtarbase, mir2mrna: Mir2mrna, tscan: Tscan, diana: Diana ]
 }
