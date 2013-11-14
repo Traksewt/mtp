@@ -46,12 +46,37 @@
 						data: <%=famCount%>
 					}]
 				});
+				
+				$('#position').highcharts({
+					chart: {
+						type: 'column'
+					},
+					title: {
+						text: 'Frequency of miRNA per chromosome'
+					},
+					xAxis: {
+						categories: <%=posList%>,
+						labels: {
+               	 			rotation: -90
+            			}
+					},
+					yAxis: {
+						title: {
+							text: 'Chromosome'
+						}
+					},
+					series: [{
+						name: '',
+						data: <%=posCount%>
+					}]
+				});
 			});
   		</script>
 	</head>
 	<body>
 		<h1>Results</h1>
 		<div id="family" style="width:100%; height:400px;"></div>
+		<div id="position" style="width:100%; height:400px;"></div>
 		<table id="search">
             <thead>
 				<tr><th>Mature</th><th>Family</th><th>Precursor</th><th>Sequence</th><th>Location</th><th>StarBase</th><th>MiRTarBase</th><th>TargetScan</th><th>Diana</th><th>Download</th></tr>

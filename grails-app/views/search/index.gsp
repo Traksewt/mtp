@@ -115,7 +115,9 @@
 		<div id="page-body" role="main">
 			<h1>Search</h1>
 			Example lists: <a href = "javascript:void(0)" onclick="demoMir('1')">Top down regulated</a> | <a href = "javascript:void(0)" onclick="demoMir('2')">Top synthetic lethals</a>
-			<g:form name="search_mir" action="search_res">
+			
+			<g:uploadForm name="search_mir" action="search_res" method="post">
+				<br>Upload a file <input type="file" name="myFile"/>
 				<g:textArea name="mirList" rows="5" cols="40" style="width: 60%;"/>
 				<br>StarBase evidence: 
 				<select name="sEv">
@@ -131,7 +133,7 @@
 					<option value="1">No weak evidence</option>
 				</select>
 				<br><input class="smallbuttons" type="button" value="Search" id="process" onclick="submit()" >
-			</g:form>
+			</g:uploadForm>
 		</div>
 	</body>
 </html>

@@ -2,6 +2,7 @@ package mtp
 
 import groovy.sql.Sql
 import grails.converters.JSON
+import org.xml.sax.InputSource
 
 class SearchController {
 	
@@ -12,7 +13,18 @@ class SearchController {
     def search_res(){
     	def sql = new Sql(dataSource)
     	def mirList = "("
-    	def p = params.mirList.replaceAll("\r\n|\n\r|\n|\r"," ") 
+    	def mirFile = params.mirList
+    	def upload = request.getFile('myFile')
+			if (!upload.empty) {
+					println "Uploaded file for BLAST"
+					println "Class: ${upload.class}"
+					println "Name: ${upload.name}"
+					println "OriginalFileName: ${upload.originalFilename}"
+					println "Size: ${upload.size}"
+					println "ContentType: ${upload.contentType}"
+					mirFile = upload.inputStream.text
+			}
+    	def p = mirFile.replaceAll("\r\n|\n\r|\n|\r"," ") 
     	def a = p.split(" ")
     	def starEv = params.sEv
     	a.each{
@@ -25,7 +37,7 @@ class SearchController {
         //println searchSql
         def mirRes = sql.rows(searchSql)
         
-        def famsql = "select famid,count(famid) from mature,precursor,family where ("+mirList+") and mature.precursor_id = precursor.id and precursor.family_id = family.id group by family.famid;"
+        def famsql = "select famid,count(famid) from mature,precursor,family where ("+mirList+") and mature.precursor_id = precursor.id and precursor.family_id = family.id group by family.famid order by count desc;"
         def famData = sql.rows(famsql)
         def famList = []
         def famCount = []
@@ -35,6 +47,18 @@ class SearchController {
         }
 		def famListJSON = famList as JSON
         def famListDecode = famListJSON.decodeURL()
+		
+		def possql = "select chr,count(distinct(matid)) from mature where ("+mirList+") group by chr order by count desc;"
+        println possql
+        def posData = sql.rows(possql)
+        def posList = []
+        def posCount = []
+        posData.each{
+        	posList.add(it.chr)
+        	posCount.add(it.count)
+        }
+		def posListJSON = posList as JSON
+        def posListDecode = posListJSON.decodeURL()
 		
         def starSql = "select mature.matid,count(distinct(gene)) from mature,starbase where ("+mirList+") and starbase.mature_id = mature.id and starbase.pnum > ${starEv} group by mature.matid;"
         //print starSql
@@ -84,7 +108,7 @@ class SearchController {
         	diMap."${it.matid}" = it.count
         }
         
-        return [famList:famListDecode, famCount:famCount, mirList: p, mirRes: mirRes, starMap: starMap, mtMap: mtMap, tsMap:tsMap, diMap: diMap, sEv:params.sEv, mEv: params.mEv]    
+        return [posList: posListDecode, posCount: posCount, famList:famListDecode, famCount:famCount, mirList: p, mirRes: mirRes, starMap: starMap, mtMap: mtMap, tsMap:tsMap, diMap: diMap, sEv:params.sEv, mEv: params.mEv]    
     }
     
     def genes(){
