@@ -79,7 +79,9 @@
 				}
 			}
 		</style>
+
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 		<script>
   			function demoMir(a){
   				if (a == '1'){
@@ -88,7 +90,10 @@
   					$("#mirList").val("hsa-miR-380-3p\nhsa-miR-3181\nhsa-miR-3934-5p\nhsa-miR-515-3p\nhsa-miR-518c-5p\nhsa-miR-3151\nhsa-miR-652-3p\nhsa-miR-513c-5p\nhsa-miR-3162-5p\nhsa-miR-125a-3p\nhsa-miR-199b-5p\nhsa-miR-4264\nhsa-miR-3670\nhsa-miR-411-3p\nhsa-miR-299-3p\nhsa-miR-4302\nhsa-miR-190b\nhsa-let-7a-3p\nhsa-miR-320c\nhsa-miR-4275\nhsa-miR-10a-5p\nhsa-miR-625-3p\nhsa-miR-639\nhsa-miR-1909-5p\nhsa-miR-3664-5p\nhsa-miR-1252\nhsa-miR-3617-5p\nhsa-miR-941\nhsa-miR-127-3p\nhsa-miR-122-3p\nhsa-miR-4267");
   				}
   			}
+  			
   		</script>
+
+  		
 	</head>
 	<body>
 		<a href="#page-body" class="skip"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
@@ -114,6 +119,8 @@
 		</div>
 		<div id="page-body" role="main">
 			<h1>Search</h1>
+
+				<div class="chart"></div>
 			Example lists: <a href = "javascript:void(0)" onclick="demoMir('1')">Top down regulated</a> | <a href = "javascript:void(0)" onclick="demoMir('2')">Top synthetic lethals</a>
 			
 			<g:uploadForm name="search_mir" action="search_res" method="post">

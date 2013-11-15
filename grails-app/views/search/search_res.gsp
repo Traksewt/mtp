@@ -28,7 +28,7 @@
 						type: 'column'
 					},
 					title: {
-						text: 'Frequency of miRNA per Family'
+						text: 'Frequency of miRNAs per Family'
 					},
 					xAxis: {
 						categories: <%=famList%>,
@@ -39,12 +39,16 @@
 					yAxis: {
 						title: {
 							text: 'miRNA Family'
-						}
+						},
 					},
 					series: [{
 						name: '',
-						data: <%=famCount%>
-					}]
+						data: <%=famCount%>,
+						color: '#FF0000'
+					}],
+					legend: {
+            			enabled: false
+        			}
 				});
 				
 				$('#position').highcharts({
@@ -52,7 +56,7 @@
 						type: 'column'
 					},
 					title: {
-						text: 'Frequency of miRNA per chromosome'
+						text: 'Frequency of miRNAs per chromosome'
 					},
 					xAxis: {
 						categories: <%=posList%>,
@@ -68,7 +72,10 @@
 					series: [{
 						name: '',
 						data: <%=posCount%>
-					}]
+					}],
+					legend: {
+            			enabled: false
+        			},
 				});
 			});
   		</script>

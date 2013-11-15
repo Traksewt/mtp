@@ -10,6 +10,8 @@ class SearchController {
 	
     def index() { }
     
+    def test() { }
+    
     def search_res(){
     	def sql = new Sql(dataSource)
     	def mirList = "("
