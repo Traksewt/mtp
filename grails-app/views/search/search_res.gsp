@@ -82,15 +82,14 @@
 	</head>
 	<body>
 		<h1>Results</h1>
-		<div id="family" style="width:100%; height:400px;"></div>
-		<div id="position" style="width:100%; height:400px;"></div>
 		<table id="search">
             <thead>
-				<tr><th>Mature</th><th>Family</th><th>Precursor</th><th>Sequence</th><th>Location</th><th>StarBase</th><th>MiRTarBase</th><th>TargetScan</th><th>Diana</th><th>Download</th></tr>
+				<tr><% if(rank.size()>0){%><th>Score</th><%}%><th>Mature</th><th>Family</th><th>Precursor</th><th>Sequence</th><th>Location</th><th>S</th><th>M</th><th>T</th><th>D</th><th>Flag</th><th>Data</th></tr>
 			</thead>
 			<tbody>
 				<g:each var="r" in="${mirRes}">
 				<tr>
+					<% if(rank.size()>0){%><td><%=rank."${r.matid}" %></td><%}%>
 					<td><a href="http://mirbase.org/cgi-bin/mirna_entry.pl?acc=${r.matacc}" target="_blank">${r.matid}</a></td>
 					<td><a href="http://mirbase.org/cgi-bin/mirna_summary.pl?fam=${r.famacc}" target="_blank">${r.famid}</a></td>
 					<td><a href="http://www.mirbase.org/cgi-bin/mirna_entry.pl?acc=${r.preacc}" target="_blank">${r.preid}</a></td>
@@ -98,11 +97,14 @@
 					<td><a href="http://starbase.sysu.edu.cn/viewMatureMirInfo.php?table=miRNAClipTargets&database=hg19&name=${r.matid}" target="_blank"><%=starMap."${r.matid}" %></a></td>
 					<td><a href="http://mirtarbase.mbc.nctu.edu.tw/index.php" target="_blank"><%=mtMap."${r.matid}" %></a></td>
 					<td><a href="http://www.targetscan.org/cgi-bin/targetscan/vert_61/targetscan.cgi?species=Human&gid=&mir_sc=&mir_c=&mir_nc=&mirg=${r.matid}" target="_blank"><%=tsMap."${r.matid}" %></a></td>
-					<td><a href="<a href="http://diana.imis.athena-innovation.gr/DianaTools/index.php?r=microT_CDS/results&keywords=${r.matid}&genes=&mirnas=${r.matid}%20&descr=&threshold=0.7" target="_blank"><%=diMap."${r.matid}" %></a></td>
+					<td><a href="http://diana.imis.athena-innovation.gr/DianaTools/index.php?r=microT_CDS/results&keywords=${r.matid}&genes=&mirnas=${r.matid}%20&descr=&threshold=0.7" target="_blank"><%=diMap."${r.matid}" %></a></td>
+					<td><% if (flagMap."${r.matid}"){print flagMap."${r.matid}"}else{print "None"} %></td>
 					<td><g:link action="genes" params="[matid:r.matid, sEv:sEv, mEv:mEv]">Link</g:link></td>
 				</tr>
 				</g:each>
 			</tbody>
 		</table>
+		<div id="family" style="width:100%; height:400px;"></div>
+		<div id="position" style="width:100%; height:400px;"></div>
 	</body>
 </html>

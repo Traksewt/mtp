@@ -44,10 +44,10 @@
 	var dataset = [249250621,243199373,198022430,191154276,180915260,171115067,159138663,146364022,141213431,135534747,135006516,133851895,115169878,107349540,102531392,90354753,81195210,78077248,59128983,63025520,48129895,51304566,155270560,59373566]
 	var miRCounts = [9,8,12,4,5,1,1,1,0,0,17,0,2,2,2,2,3,4,5,6,1,1,0,2];
 	//Width and height
-	var w = 1100;
+	var w = 1000;
 	var h = 300;
 	var barPadding = 1;
-	var moveRight = 40;
+	var moveRight = 70;
 	var moveUp = 10;
 	var testD = [1000000, 110000000, 120000000]
 	
@@ -57,21 +57,29 @@
 		.domain([0, d3.max(dataset)])
 		.range([0, w]);
 	var yScale = d3.scale.linear()
-			 .domain([0, d3.max(dataset)])
-			 .range([0, h]);
-	
+		.domain([0, d3.max(dataset)])
+		.range([0, h]);
 	var x2Scale = d3.scale.linear()
 		.domain([0, d3.max(miRCounts)])
 		.range([0, w]);
 	var y2Scale = d3.scale.linear()
 		.domain([0, d3.max(miRCounts)])
 		.range([0, h]);
+	
+	//make scales for axis with reversed ranges
+	var yAxisScale1 = d3.scale.linear()
+		.domain([0, d3.max(dataset)])
+		.range([h, 0]);		
+	var yAxisScale2 = d3.scale.linear()
+		.domain([0, d3.max(miRCounts)])
+		.range([h, 0]);
 			 
 	//Create SVG element
 	var svg = d3.select("body")
-				.append("svg")
-				.attr("width", w+moveRight)
-				.attr("height", h);
+		.append("svg")
+		.attr("width", w+moveRight)
+		.attr("height", h);
+		
 	//create the bars
 	var rects = svg.selectAll("rect")
 	   .data(dataset)
@@ -92,16 +100,7 @@
 	   //colours the bars
 	   .attr("fill", function(d,i) {
 			return "rgb(0, 0, " + i * 20 + ")";
-	   });
-	
-	var myLine = svg.append("svg:line")
-    .attr("x1", 40)
-    .attr("y1", 50)
-    .attr("x2", 80)
-    .attr("y2", 50)
-    .attr("x3", 100)
-    .attr("y3", 150)
-    .style("stroke", "rgb(6,120,155)");   
+	   });   
     
 	//add some text
 	svg.selectAll("text.chr")
@@ -155,39 +154,34 @@
 		.attr("stroke", "red")
         .attr("stroke-width", 2)
     	.attr("fill", "none");
-/*			
-var data = [4, 8, 15, 16, 23, 42];
-
- var width = 420,
-     barHeight = 20;
- 
- var x = d3.scale.linear()
-     .domain([0, d3.max(data)])
-     .range([0, width]);
- 
- //set the size of the canvas
- var chart = d3.select(".chart")
-     .attr("width", width)
-     .attr("height", barHeight * data.length);
- 
- //read the data and set the distance between bars
- var bar = chart.selectAll("g")
-     .data(data)
-     .enter().append("g")
-     .attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
- 
- //set the length and width of the bar
- bar.append("rect")
-     .attr("width", x)
-     .attr("height", barHeight - 1);
- 
- //set the text position
- bar.append("text")
-     .attr("x", function(d) { return 30; })
-     .attr("y", barHeight / 2)
-     .attr("dy", ".35em")
-     .text(function(d,i) { return "Chr "+chrNum[i]; });
-*/
+    	
+    var yAxis1 = d3.svg.axis()
+        .scale(yAxisScale1)
+        .orient("left");
+        
+    svg.append("g")
+    	.attr("class", "axis")
+    	.attr("transform", "translate(" + 60 + ",0)")
+    	.call(yAxis1);    
+    	
+    var yAxis2 = d3.svg.axis()
+        .scale(yAxisScale2)
+        .orient("right");
+        
+    svg.append("g")
+    	.attr("class", "axis")
+    	.attr("transform", "translate(" + (w + moveRight) + ",0)")
+    	.call(yAxis2);    			
+	
+	//add the miR lines 
+	var myLine = svg.append("svg:line")
+    .attr("x1", 40)
+    .attr("y1", 50)
+    .attr("x2", 80)
+    .attr("y2", 50)
+    .attr("x3", 100)
+    .attr("y3", 150)
+    .style("stroke", "rgb(6,120,155)");
 </script>
 
 	</body>

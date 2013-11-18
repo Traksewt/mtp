@@ -4,7 +4,8 @@ package mtp
 //starbase_full()
 //mirtarbase_full()
 //tscan_full()
-diana_full()
+//diana_full()
+cardiac_flag()
 
 def cleanUpGorm() { 
     def sessionFactory = ctx.getBean("sessionFactory")
@@ -597,4 +598,37 @@ def diana_full(){
 		}
 	}
 	print count
+}
+
+def cardiac_flag(){
+	print "Adding cardiac data..."
+	def cMap = [:]
+	print "Adding increase data..."
+	def cFile = new File("data/twofold_increase_proliferation.tsv")
+	cFile.eachLine{ line ->
+		def s = line.split("\t")
+		cMap.score = s[6]
+		cMap.description = "Cardiac increase"
+		//print cMap
+		Mature mat = Mature.findByMatacc(s[1])
+		if (mat != null){
+			Flag flag = new Flag(cMap)
+			mat.addToFlag(flag)
+			mat.save(flush:true)
+		}
+	}
+	print "Adding decrease data..."
+	cFile = new File("data/twofold_decrease_proliferation.tsv")
+	cFile.eachLine{ line ->
+		def s = line.split("\t")
+		cMap.score = s[5]
+		cMap.description = "Cardiac decrease"
+		//print cMap
+		Mature mat = Mature.findByMatacc(s[1])
+		if (mat != null){
+			Flag flag = new Flag(cMap)
+			mat.addToFlag(flag)
+			mat.save(flush:true)
+		}
+	}
 }

@@ -29,15 +29,30 @@ class SearchController {
     	def p = mirFile.replaceAll("\r\n|\n\r|\n|\r"," ") 
     	def a = p.split(" ")
     	def starEv = params.sEv
+    	def rank = [:]
     	a.each{
     		it = it.replaceAll("\n","")
-    		mirList <<= "or mature.matid = '"+it+"' "
+    		def s = it.split("\t")
+    		mirList <<= "or mature.matid = '"+s[0]+"' "
+    		if (s.size() == 2){
+    			rank."${s[0]}"=s[1]
+    		}
     	}
     	mirList = mirList[4..-2]
+    	
     	
         def searchSql = "select family.*,precursor.*,mature.* from family,precursor,mature where ("+mirList+") and family.id = precursor.family_id and precursor.id = mature.precursor_id;";
         //println searchSql
         def mirRes = sql.rows(searchSql)
+        
+        def flagsql = "select flag.*,mature.* from flag,mature where ("+mirList+") and flag.mature_id = mature.id;";
+        print flagsql
+        def flagData = sql.rows(flagsql)
+        def flagMap = [:]
+        flagData.each{
+        	flagMap."${it.matid}"=it.description
+        }
+        
         
         def famsql = "select famid,count(famid) from mature,precursor,family where ("+mirList+") and mature.precursor_id = precursor.id and precursor.family_id = family.id group by family.famid order by count desc;"
         def famData = sql.rows(famsql)
@@ -110,7 +125,7 @@ class SearchController {
         	diMap."${it.matid}" = it.count
         }
         
-        return [posList: posListDecode, posCount: posCount, famList:famListDecode, famCount:famCount, mirList: p, mirRes: mirRes, starMap: starMap, mtMap: mtMap, tsMap:tsMap, diMap: diMap, sEv:params.sEv, mEv: params.mEv]    
+        return [flagMap:flagMap, rank:rank, posList: posListDecode, posCount: posCount, famList:famListDecode, famCount:famCount, mirList: p, mirRes: mirRes, starMap: starMap, mtMap: mtMap, tsMap:tsMap, diMap: diMap, sEv:params.sEv, mEv: params.mEv]    
     }
     
     def genes(){
@@ -124,7 +139,10 @@ class SearchController {
 		def starGenes = ""
 		starAll.each{
 			unionGeneMap."${it.gene}"=""
-			starGenes <<= it.gene+"\n"
+			starGenes <<= it.gene+","
+		}
+		if (starGenes.size()>0){
+			starGenes = starGenes[0..-2]
 		}
 		
 		def weak = ""
@@ -137,16 +155,22 @@ class SearchController {
 		def mtGenes = ""
 		mtAll.each{
 			unionGeneMap."${it.gene}"=""
-			mtGenes <<= it.gene+"\n"
+			mtGenes <<= it.gene+","
 		}
-
+		if (mtGenes.size()>0){
+			mtGenes = mtGenes[0..-2]
+		}
+		
 		def tsAllSql = "select distinct(gene) from mature,tscan where mature.matid = '"+params.matid+"' and tscan.mature_id = mature.id;"
 		print tsAllSql
 		def tsAll = sql.rows(tsAllSql)
 		def tsGenes = ""
 		tsAll.each{
 			unionGeneMap."${it.gene}"=""
-			tsGenes <<= it.gene+"\n"
+			tsGenes <<= it.gene+","
+		}
+		if (tsGenes.size()>0){
+			tsGenes = tsGenes[0..-2]
 		}
 		
 		def diAllSql = "select distinct(gene) from mature,diana where mature.matid = '"+params.matid+"' and diana.mature_id = mature.id;"
@@ -155,13 +179,18 @@ class SearchController {
 		def diGenes = ""
 		diAll.each{
 			unionGeneMap."${it.gene}"=""
-			diGenes <<= it.gene+"\n"
+			diGenes <<= it.gene+","
 		}
-		
+		if (diGenes.size()>0){
+			diGenes = diGenes[0..-2]
+		}
 		
 		def union = ""
 		unionGeneMap.each{
-			union <<= it.key+"\n"
+			union <<= it.key+","
+		}
+		if (union.size()>0){
+			union = union[0..-2]
 		}
 		
 		return [miR:miR, starAll:starAll, starGenes:starGenes, mtAll:mtAll, mtGenes:mtGenes, tsAll:tsAll, tsGenes:tsGenes, diAll:diAll, diGenes:diGenes, unionGenes:union, unionGeneMap: unionGeneMap]
