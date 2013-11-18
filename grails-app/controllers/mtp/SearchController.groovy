@@ -10,7 +10,30 @@ class SearchController {
 	
     def index() { }
     
-    def test() { }
+    def test() { 
+    	def sql = new Sql(dataSource)
+    	def matcher
+    	def mirCountSql = "select chr,count(distinct(matid)) from mature where (mature.matid = 'hsa-miR-4314' or mature.matid = 'hsa-miR-1294' or mature.matid = 'hsa-miR-552' or mature.matid = 'hsa-miR-4297' or mature.matid = 'hsa-miR-550a-3p' or mature.matid = 'hsa-miR-432-3p' or mature.matid = 'hsa-miR-193b-3p' or mature.matid = 'hsa-miR-342-5p' or mature.matid = 'hsa-miR-541-3p' or mature.matid = 'hsa-miR-193a-3p' or mature.matid = 'hsa-miR-489' or mature.matid = 'hsa-miR-3192' or mature.matid = 'hsa-miR-892b' or mature.matid = 'hsa-miR-148b-5p' or mature.matid = 'hsa-miR-3140-3p' or mature.matid = 'hsa-miR-654-5p' or mature.matid = 'hsa-miR-876-3p' or mature.matid = 'hsa-miR-3160-3p' or mature.matid = 'hsa-miR-3189-3p' or mature.matid = 'hsa-miR-1289' or mature.matid = 'hsa-miR-19b-1-5p' or mature.matid = 'hsa-miR-1293' or mature.matid = 'hsa-miR-634' or mature.matid = 'hsa-miR-3165' or mature.matid = 'hsa-miR-323a-5p' or mature.matid = 'hsa-miR-1285-3p') group by chr order by count desc;"
+    	print mirCountSql
+    	def mirCount = sql.rows(mirCountSql)
+    	def miRList = []
+    	def miRMap = [:]
+    	def chrList = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"]
+    	chrList.each{
+    		miRMap."${it}" = 0
+    	}
+    	mirCount.each{
+    		if ((matcher = it.chr =~ /chr(.*)/)){ 
+    			miRMap."${matcher[0][1]}"=it.count
+    		}
+    	}
+    	miRMap.each{
+    		miRList.add(it.value)
+    	}
+    	print miRList
+    	print miRMap
+    	return [miRList:miRList]
+    }
     
     def search_res(){
     	def sql = new Sql(dataSource)
