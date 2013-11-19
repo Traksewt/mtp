@@ -30,9 +30,15 @@ class SearchController {
     	miRMap.each{
     		miRList.add(it.value)
     	}
-    	print miRList
-    	print miRMap
-    	return [miRList:miRList]
+    	//print miRList
+    	//print miRMap
+    	
+    	def mirLocSql = "select chr,start from mature where (mature.matid = 'hsa-miR-4314' or mature.matid = 'hsa-miR-1294' or mature.matid = 'hsa-miR-552' or mature.matid = 'hsa-miR-4297' or mature.matid = 'hsa-miR-550a-3p' or mature.matid = 'hsa-miR-432-3p' or mature.matid = 'hsa-miR-193b-3p' or mature.matid = 'hsa-miR-342-5p' or mature.matid = 'hsa-miR-541-3p' or mature.matid = 'hsa-miR-193a-3p' or mature.matid = 'hsa-miR-489' or mature.matid = 'hsa-miR-3192' or mature.matid = 'hsa-miR-892b' or mature.matid = 'hsa-miR-148b-5p' or mature.matid = 'hsa-miR-3140-3p' or mature.matid = 'hsa-miR-654-5p' or mature.matid = 'hsa-miR-876-3p' or mature.matid = 'hsa-miR-3160-3p' or mature.matid = 'hsa-miR-3189-3p' or mature.matid = 'hsa-miR-1289' or mature.matid = 'hsa-miR-19b-1-5p' or mature.matid = 'hsa-miR-1293' or mature.matid = 'hsa-miR-634' or mature.matid = 'hsa-miR-3165' or mature.matid = 'hsa-miR-323a-5p' or mature.matid = 'hsa-miR-1285-3p') group by chr,start;";
+    	def mirLoc = sql.rows(mirLocSql)
+    	def mirLocJSON = mirLoc as JSON
+        def mirLocDecode = mirLocJSON.decodeURL()
+    	print "mirLoc = "+mirLocDecode
+    	return [miRList:miRList, mirLoc:mirLocDecode]
     }
     
     def search_res(){
