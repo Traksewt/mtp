@@ -43,6 +43,8 @@ class SearchController {
     
     def search_res(){
     	def sql = new Sql(dataSource)
+    	
+    	//generate the list of miRs to search
     	def mirList = "("
     	def mirFile = params.mirList
     	def upload = request.getFile('myFile')
@@ -68,8 +70,7 @@ class SearchController {
     		}
     	}
     	mirList = mirList[4..-2]
-    	
-    	
+    	    	
         def searchSql = "select family.*,precursor.*,mature.* from family,precursor,mature where ("+mirList+") and family.id = precursor.family_id and precursor.id = mature.precursor_id;";
         //println searchSql
         def mirRes = sql.rows(searchSql)
@@ -94,17 +95,33 @@ class SearchController {
 		def famListJSON = famList as JSON
         def famListDecode = famListJSON.decodeURL()
 		
-		def possql = "select chr,count(distinct(matid)) from mature where ("+mirList+") group by chr order by count desc;"
-        println possql
-        def posData = sql.rows(possql)
-        def posList = []
-        def posCount = []
-        posData.each{
-        	posList.add(it.chr)
-        	posCount.add(it.count)
-        }
-		def posListJSON = posList as JSON
-        def posListDecode = posListJSON.decodeURL()
+        //get the data for the mir/chromosome plot
+    	def matcher
+    	def mirCountSql = "select chr,count(distinct(matid)) from mature where ("+mirList+") group by chr order by count desc;"
+    	print mirCountSql
+    	def mirCount = sql.rows(mirCountSql)
+    	def miRLister = []
+    	def miRMap = [:]
+    	def chrList = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"]
+    	chrList.each{
+    		miRMap."${it}" = 0
+    	}
+    	mirCount.each{
+    		if ((matcher = it.chr =~ /chr(.*)/)){ 
+    			miRMap."${matcher[0][1]}"=it.count
+    		}
+    	}
+    	miRMap.each{
+    		miRLister.add(it.value)
+    	}
+    	//print miRList
+    	//print miRMap
+    	
+    	def mirLocSql = "select chr,start from mature where ("+mirList+") order by chr,start;";
+    	def mirLoc = sql.rows(mirLocSql)
+    	def mirLocJSON = mirLoc as JSON
+        def mirLocDecode = mirLocJSON.decodeURL()
+    	print "mirLoc = "+mirLocDecode
 		
         def starSql = "select mature.matid,count(distinct(gene)) from mature,starbase where ("+mirList+") and starbase.mature_id = mature.id and starbase.pnum > ${starEv} group by mature.matid;"
         //print starSql
@@ -154,7 +171,7 @@ class SearchController {
         	diMap."${it.matid}" = it.count
         }
         
-        return [flagMap:flagMap, rank:rank, posList: posListDecode, posCount: posCount, famList:famListDecode, famCount:famCount, mirList: p, mirRes: mirRes, starMap: starMap, mtMap: mtMap, tsMap:tsMap, diMap: diMap, sEv:params.sEv, mEv: params.mEv]    
+        return [miRLister:miRLister, mirLoc:mirLocDecode, flagMap:flagMap, rank:rank, famList:famListDecode, famCount:famCount, mirList: p, mirRes: mirRes, starMap: starMap, mtMap: mtMap, tsMap:tsMap, diMap: diMap, sEv:params.sEv, mEv: params.mEv]    
     }
     
     def genes(){

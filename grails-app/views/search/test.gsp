@@ -6,15 +6,6 @@
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 		<style>
-
-		.bar {
-		  fill: steelblue;
-		}
-
-		.bar:hover {
-		  fill: brown;
-		}
-
 		.axis {
 		  font: 10px sans-serif;
 		}
@@ -29,7 +20,6 @@
 		.x.axis path {
 		  display: none;
 		}
-
 		</style>
 		
 
@@ -169,7 +159,7 @@
 		var chr = c[1]
 		if (chr.match(/X/)){ chr = "23"}
 		if (chr.match(/Y/)){ chr = "24"}
-		alert("chromosome: "+chr+ "start: "+miRdata[i].start)
+		//alert("chromosome: "+chr+ "start: "+miRdata[i].start)
 		chart.append("svg:line")
 			.attr("x1", (parseInt(chr)-1) * (w / dataset.length) + moveRight)			
     		.attr("y1", h - (yScale(miRdata[i].start) - moveUp))
