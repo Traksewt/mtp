@@ -72,7 +72,7 @@
 		<h1>Results</h1>
 		<table id="search">
             <thead>
-				<tr><% if(rank.size()>0){%><th>Score</th><%}%><th>Mature</th><th>Family</th><th>Precursor</th><th>Sequence</th><th>Location</th><th>S</th><th>M</th><th>T</th><th>D</th><th>Flag</th><th>Data</th></tr>
+				<tr><% if(rank.size()>0){%><th>Score</th><%}%><th>Mature</th><th>Family</th><th>Precursor</th><th>Sequence</th><th>Location</th><th><a href="#" title="StarBase">S</a></th><th><a href="#" title="MiRTarBase">M</a></th><th><a href="#" title="TargetScan">T</a></th><th><a href="#" title="DIANA MicroT-CDS">D</a></th><th>Flag</th><th>Data</th></tr>
 			</thead>
 			<tbody>
 				<g:each var="r" in="${mirRes}">
