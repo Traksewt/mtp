@@ -13,5 +13,5 @@ class Mirtarbase {
     	evidence(blank:false)
     	reference(blank:false)
     }
-    static belongsTo = [mature: Mature]
+    static belongsTo = [mature: Mature,genes:Genes]
 }

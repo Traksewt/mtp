@@ -198,7 +198,7 @@
     .attr("x", -moveRight-20)
     .attr("dy", ".75em")
     .attr("transform", "rotate(-90)")
-    .text("Number of miRs");
+    .text("Relative frequency of miRNAs");
 	
 	//add the miR lines 
 	for (var i=0;i<miRdata.length;i++){

@@ -13,22 +13,40 @@ class SearchController {
     def test() { 
     	def sql = new Sql(dataSource)
     	def matcher
+    	
+    	//get counts of miRs per chrom
+    	def freqSql = "select distinct(count(matid)),chr from mature group by chr order by chr;";
+    	def freq = sql.rows(freqSql)
+    	def freqMap = [:]
+    	freq.each{
+    		if ((matcher = it.chr =~ /chr(.*)/)){ 
+    			freqMap."${matcher[0][1]}"=it.count
+    		}
+    	}
+    	
     	def mirCountSql = "select chr,count(distinct(matid)) from mature where (mature.matid = 'hsa-miR-4314' or mature.matid = 'hsa-miR-1294' or mature.matid = 'hsa-miR-552' or mature.matid = 'hsa-miR-4297' or mature.matid = 'hsa-miR-550a-3p' or mature.matid = 'hsa-miR-432-3p' or mature.matid = 'hsa-miR-193b-3p' or mature.matid = 'hsa-miR-342-5p' or mature.matid = 'hsa-miR-541-3p' or mature.matid = 'hsa-miR-193a-3p' or mature.matid = 'hsa-miR-489' or mature.matid = 'hsa-miR-3192' or mature.matid = 'hsa-miR-892b' or mature.matid = 'hsa-miR-148b-5p' or mature.matid = 'hsa-miR-3140-3p' or mature.matid = 'hsa-miR-654-5p' or mature.matid = 'hsa-miR-876-3p' or mature.matid = 'hsa-miR-3160-3p' or mature.matid = 'hsa-miR-3189-3p' or mature.matid = 'hsa-miR-1289' or mature.matid = 'hsa-miR-19b-1-5p' or mature.matid = 'hsa-miR-1293' or mature.matid = 'hsa-miR-634' or mature.matid = 'hsa-miR-3165' or mature.matid = 'hsa-miR-323a-5p' or mature.matid = 'hsa-miR-1285-3p') group by chr order by count desc;"
     	print mirCountSql
     	def mirCount = sql.rows(mirCountSql)
+    	def miRListRel = []
     	def miRList = []
+    	def miRMapRel = [:]
     	def miRMap = [:]
     	def chrList = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"]
     	chrList.each{
     		miRMap."${it}" = 0
+    		miRMapRel."${it}" = 0
     	}
     	mirCount.each{
     		if ((matcher = it.chr =~ /chr(.*)/)){ 
     			miRMap."${matcher[0][1]}"=it.count
+    			miRMapRel."${matcher[0][1]}"=it.count/freqMap."${matcher[0][1]}"*100
     		}
     	}
     	miRMap.each{
     		miRList.add(it.value)
+    	}
+    	miRMapRel.each{
+    		miRListRel.add(it.value)
     	}
     	//print miRList
     	//print miRMap
@@ -37,13 +55,15 @@ class SearchController {
     	def mirLoc = sql.rows(mirLocSql)
     	def mirLocJSON = mirLoc as JSON
         def mirLocDecode = mirLocJSON.decodeURL()
-    	print "mirLoc = "+mirLocDecode
-    	return [miRList:miRList, mirLoc:mirLocDecode]
+    	//print "mirLoc = "+mirLocDecode
+    	
+    	
+    	return [miRList:miRList, miRListRel:miRListRel, mirLoc:mirLocDecode]
     }
     
     def search_res(){
     	def sql = new Sql(dataSource)
-    	
+    	def matcher
     	//generate the list of miRs to search
     	def mirList = "("
     	def mirFile = params.mirList
@@ -96,7 +116,17 @@ class SearchController {
         def famListDecode = famListJSON.decodeURL()
 		
         //get the data for the mir/chromosome plot
-    	def matcher
+        
+        //get counts of miRs per chrom
+    	def freqSql = "select distinct(count(matid)),chr from mature group by chr order by chr;";
+    	def freq = sql.rows(freqSql)
+    	def freqMap = [:]
+    	freq.each{
+    		if ((matcher = it.chr =~ /chr(.*)/)){ 
+    			freqMap."${matcher[0][1]}"=it.count
+    		}
+    	}
+        
     	def mirCountSql = "select chr,count(distinct(matid)) from mature where ("+mirList+") group by chr order by count desc;"
     	print mirCountSql
     	def mirCount = sql.rows(mirCountSql)
@@ -108,7 +138,7 @@ class SearchController {
     	}
     	mirCount.each{
     		if ((matcher = it.chr =~ /chr(.*)/)){ 
-    			miRMap."${matcher[0][1]}"=it.count
+    			miRMap."${matcher[0][1]}"=it.count/freqMap."${matcher[0][1]}"*100
     		}
     	}
     	miRMap.each{

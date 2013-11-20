@@ -5,7 +5,8 @@ package mtp
 //mirtarbase_full()
 //tscan_full()
 //diana_full()
-cardiac_flag()
+//cardiac_flag()
+gene_loc()
 
 def cleanUpGorm() { 
     def sessionFactory = ctx.getBean("sessionFactory")
@@ -631,4 +632,51 @@ def cardiac_flag(){
 			mat.save(flush:true)
 		}
 	}
+}
+def gene_loc(){
+	def count=0
+	print "Adding gene location data..."
+	def gMap = [:]
+	print "Downloading gencode annotation file"
+	def gFile = new File("data/gencode.v18.annotation.gtf")
+	if (gFile.exists()){
+		print "Already done"
+	}else{ 
+		def wget =  "wget ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_18/gencode.v18.annotation.gtf.gz -P data/"
+		def proc = wget.execute()
+		proc.waitFor()
+		print "Unzipping..."
+		def gunzip = "gunzip data/gencode.v18.annotation.gtf.gz"
+		proc = gunzip.execute()
+		proc.waitFor()
+	}
+	
+	gFile.eachLine{ line ->
+		if ((matcher = line =~ /^chr.*/)){
+			def s = line.split("\t")
+			if ((matcher = s[2] =~ /gene/)){
+				count++
+				gMap.chr = s[0]
+				gMap.start = s[3]
+				gMap.stop = s[4]
+				if ((matcher = s[8] =~ /.*?transcipt_name\s+"(.*?)";.*/)){
+					gMap.name = matcher[0][1]
+				}
+				gMap.strand = s[6]
+			
+				//print gMap
+				Genes g = new Genes(gMap)
+				if ((count % 1000) == 0){
+					print gMap
+					g.save(flush:true)
+					println new Date()
+					cleanUpGorm()
+					print count
+				}else{
+					g.save()
+				}
+			}
+		}
+	}
+	print count
 }

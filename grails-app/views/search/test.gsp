@@ -21,8 +21,6 @@
 		  display: none;
 		}
 		</style>
-		
-
 	</head>
 	<body>
 	<svg id="mir_chart"></svg>
@@ -32,6 +30,7 @@
 	//data
 	var chrNum = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"];
 	var dataset = [249250621,243199373,198022430,191154276,180915260,171115067,159138663,146364022,141213431,135534747,135006516,133851895,115169878,107349540,102531392,90354753,81195210,78077248,59128983,63025520,48129895,51304566,155270560,59373566]
+	var miRCountsRel = <%=miRListRel%>
 	var miRCounts = <%=miRList%>
 	//var miRdata = [{chr:"chr1",loc:23370803},{chr:"chr1",loc:35135215},{chr:"chr1",loc:110141562},{chr:"chr1",loc:201777743},{chr:"chr1",loc:220373891},{chr:"chr10",loc:131641613},{chr:"chr11",loc:46473408},{chr:"chr11",loc:65211944},{chr:"chr11",loc:71783318},{chr:"chr12",loc:50627965},{chr:"chr12",loc:54731062},{chr:"chr14",loc:100576052},{chr:"chr14",loc:101350881},{chr:"chr14",loc:101492119},{chr:"chr14",loc:101506606},{chr:"chr14",loc:101530885},{chr:"chr16",loc:14397874},{chr:"chr16",loc:15248806},{chr:"chr17",loc:7991384},{chr:"chr17",loc:11985283},{chr:"chr17",loc:29887069},{chr:"chr17",loc:64783250},{chr:"chr19",loc:10829095},{chr:"chr19",loc:13947261},{chr:"chr19",loc:18497417},{chr:"chr19",loc:46142267},{chr:"chr20",loc:18451268},{chr:"chr20",loc:33054190},{chr:"chr22",loc:41488549},{chr:"chr4",loc:153410488},{chr:"chr5",loc:131701205},{chr:"chr5",loc:132763307},{chr:"chr5",loc:153726713},{chr:"chr7",loc:32772653},{chr:"chr7",loc:63081478},{chr:"chr7",loc:91833341},{chr:"chr7",loc:93113259},{chr:"chr7",loc:151130612},{chr:"chr9",loc:28863634},{chr:"chrX",loc:133303713},{chr:"chrX",loc:145078726}]
 	var miRdata = <%=mirLoc%>
@@ -150,7 +149,7 @@
     .attr("x", -moveRight-20)
     .attr("dy", ".75em")
     .attr("transform", "rotate(-90)")
-    .text("Number of miRs");
+    .text("Relative frequency of miRNAs");
 	
 	//add the miR lines 
 	for (var i=0;i<miRdata.length;i++){
@@ -168,16 +167,21 @@
     		.style("stroke", "rgb(6,120,155)");
 	} 
 	//add line - https://www.dashingd3js.com/svg-paths-and-d3js
-	var array = [10,20,30,40,50,60]
 	var line = d3.svg.line()
     	.x(function(d,i) { return i * (w / dataset.length) + (w / dataset.length - barPadding) / 2 + moveRight })
     	.y(function(d) { return h - (y2Scale(d) - moveUp)});
     
-    var addpath = chart.append('path')
+    var addpath1 = chart.append('path')
 		.attr('d', line(miRCounts))
 		.attr("stroke", "red")
         .attr("stroke-width", 2)
     	.attr("fill", "none");
+    	
+    var addpath2 = chart.append('path')
+		.attr('d', line(miRCountsRel))
+		.attr("stroke", "green")
+        .attr("stroke-width", 2)
+    	.attr("fill", "none");	
     	
     var yAxis1 = d3.svg.axis()
         .scale(yAxisScale1)

@@ -9,5 +9,5 @@ class Tscan {
     	gene(blank:false)
     	tcs(blank:false)
     }
-    static belongsTo = [mature: Mature]
+    static belongsTo = [mature: Mature,genes:Genes]
 }

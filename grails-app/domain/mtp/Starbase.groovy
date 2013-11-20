@@ -9,5 +9,5 @@ class Starbase {
     	gene(blank:false)
     	pnum(blank:false)
     }
-    static belongsTo = [mature: Mature]
+    static belongsTo = [mature: Mature,genes:Genes]
 }
