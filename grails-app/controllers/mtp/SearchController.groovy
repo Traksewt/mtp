@@ -200,14 +200,17 @@ class SearchController {
         diRes.each{
         	diMap."${it.matid}" = it.count
         }
-        
+        print miRLister
+        print mirLoc
         return [miRLister:miRLister, mirLoc:mirLocDecode, flagMap:flagMap, rank:rank, famList:famListDecode, famCount:famCount, mirList: p, mirRes: mirRes, starMap: starMap, mtMap: mtMap, tsMap:tsMap, diMap: diMap, sEv:params.sEv, mEv: params.mEv]    
     }
     
     def genes(){
 	    def sql = new Sql(dataSource)
+	    def matcher
 		def miR = Mature.findByMatid(params.matid)
 		def unionGeneMap = [:]
+		def chrList = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"]
 		
 		def starEv = params.sEv
 		def starAllSql = "select genes.* from mature,starbase,genes where mature.matid = '"+params.matid+"' and starbase.mature_id = mature.id and starbase.pnum > ${starEv} and starbase.genes_id = genes.id;"
@@ -262,21 +265,20 @@ class SearchController {
         def tsDecode = cJSON.decodeURL()
     	print "tsDecode = "+tsDecode
 		
-		def diAllSql = "select genes.* from mature,diana,genes where mature.matid = '"+params.matid+"' and diana.mature_id = mature.id and diana.genes_id = genes.id;"
-		print diAllSql
-		def diAll = sql.rows(diAllSql)
-		def diGenes = []
-		diAll.each{
-			unionGeneMap."${it.name}"=""
-			diGenes.add(it.name)
-		}
-		def diCount = diGenes.unique()
-		diGenes = diCount.join(", ")
-		cSql = "select genes.chr,count(name) from mature,diana,genes where mature.matid = '"+params.matid+"' and diana.mature_id = mature.id and diana.genes_id = genes.id group by genes.chr order by chr;";
+		
+		cSql = "select genes.chr,genes.start,genes.name from mature,diana,genes where mature.matid = '"+params.matid+"' and diana.mature_id = mature.id and diana.genes_id = genes.id order by chr,start;";
 		c = sql.rows(cSql)
 		cJSON = c as JSON
         def diDecode = cJSON.decodeURL()
     	print "diDecode = "+diDecode
+		
+		def diGenes = []
+		c.each{
+			unionGeneMap."${it.name}"=""
+			diGenes.add(it.name)
+		}	
+		def diCount = diGenes.unique()
+		diGenes = diCount.join(", ")
 		
 		def union = ""
 		unionGeneMap.each{
@@ -285,7 +287,25 @@ class SearchController {
 		if (union.size()>0){
 			union = union[0..-2]
 		}
+		def diGCountSql = "select genes.chr,count(name) from mature,diana,genes where mature.matid = '"+params.matid+"' and diana.mature_id = mature.id and diana.genes_id = genes.id group by genes.chr;";
+    	print diGCountSql
+    	def diGCount = sql.rows(diGCountSql)
+    	def diLister = []
+    	def diMap = [:]
+    	chrList.each{
+    		diMap."${it}" = 0
+    	}
+    	diGCount.each{
+    		if ((matcher = it.chr =~ /chr(.*)/)){ 
+    			diMap."${matcher[0][1]}"=it.count
+    		}
+    	}
+    	diMap.each{
+    		diLister.add(it.value)
+    	}
 		
-		return [miR:miR, starGenes:starGenes, starCount:starCount, mtGenes:mtGenes, mtCount:mtCount, tsGenes:tsGenes, tsCount:tsCount, diGenes:diGenes, diCount:diCount, unionGenes:union, unionGeneMap: unionGeneMap]
+		print diLister
+		print diDecode
+		return [miR:miR, starGenes:starGenes, starCount:starCount, starDecode:starDecode, mtGenes:mtGenes, mtCount:mtCount, mtDecode:mtDecode, tsGenes:tsGenes, tsCount:tsCount, tsDecode:tsDecode, diGenes:diGenes, diCount:diCount, diDecode:diDecode, diLister:diLister, unionGenes:union, unionGeneMap: unionGeneMap]
 	}
 }
