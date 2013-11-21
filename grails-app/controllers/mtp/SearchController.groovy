@@ -153,7 +153,7 @@ class SearchController {
         def mirLocDecode = mirLocJSON.decodeURL()
     	print "mirLoc = "+mirLocDecode
 		
-        def starSql = "select mature.matid,count(distinct(gene)) from mature,starbase where ("+mirList+") and starbase.mature_id = mature.id and starbase.pnum > ${starEv} group by mature.matid;"
+        def starSql = "select mature.matid,count(distinct(starbase.genes_id)) from mature,starbase where ("+mirList+") and starbase.mature_id = mature.id and starbase.pnum > ${starEv} group by mature.matid;"
         //print starSql
         def starRes = sql.rows(starSql)
         def starMap = [:]
@@ -168,7 +168,7 @@ class SearchController {
         if (params.mEv == '1'){
         	weak = "and mirtarbase.evidence !~ '(Weak)'"
         }
-    	def mtSql = "select mature.matid,count(distinct(gene)) from mature,mirtarbase where ("+mirList+") and mirtarbase.mature_id = mature.id ${weak} group by mature.matid;"
+    	def mtSql = "select mature.matid,count(distinct(mirtarbase.genes_id)) from mature,mirtarbase where ("+mirList+") and mirtarbase.mature_id = mature.id ${weak} group by mature.matid;"
         //print mtSql
         def mtRes = sql.rows(mtSql)
         def mtMap = [:]
@@ -179,8 +179,8 @@ class SearchController {
         	mtMap."${it.matid}" = it.count
         }
         
-        def tsSql = "select mature.matid,count(distinct(gene)) from mature,tscan where ("+mirList+") and tscan.mature_id = mature.id group by mature.matid;"
-        //print tsSql
+        def tsSql = "select mature.matid,count(distinct(tscan.genes_id)) from mature,tscan where ("+mirList+") and tscan.mature_id = mature.id group by mature.matid;"
+        print tsSql
         def tsRes = sql.rows(tsSql)
         def tsMap = [:]
         mirRes.each{
@@ -190,7 +190,7 @@ class SearchController {
         	tsMap."${it.matid}" = it.count
         }
         
-        def diSql = "select mature.matid,count(distinct(gene)) from mature,diana where ("+mirList+") and diana.mature_id = mature.id group by mature.matid;"
+        def diSql = "select mature.matid,count(distinct(diana.genes_id)) from mature,diana where ("+mirList+") and diana.mature_id = mature.id group by mature.matid;"
         //print diSql
         def diRes = sql.rows(diSql)
         def diMap = [:]
@@ -206,60 +206,77 @@ class SearchController {
     
     def genes(){
 	    def sql = new Sql(dataSource)
-		def miR = Mature.findMatid(params.matid)
+		def miR = Mature.findByMatid(params.matid)
+		def unionGeneMap = [:]
+		
 		def starEv = params.sEv
-		def starAllSql = "select distinct(gene) from mature,starbase where mature.matid = '"+params.matid+"' and starbase.mature_id = mature.id and starbase.pnum > ${starEv};"
+		def starAllSql = "select genes.* from mature,starbase,genes where mature.matid = '"+params.matid+"' and starbase.mature_id = mature.id and starbase.pnum > ${starEv} and starbase.genes_id = genes.id;"
 		print starAllSql
 		def starAll = sql.rows(starAllSql)
-		def unionGeneMap = [:]
-		def starGenes = ""
+		def starGenes = []
 		starAll.each{
-			unionGeneMap."${it.gene}"=""
-			starGenes <<= it.gene+","
+			unionGeneMap."${it.name}"=""
+			starGenes.add(it.name)
 		}
-		if (starGenes.size()>0){
-			starGenes = starGenes[0..-2]
-		}
+		def starCount = starGenes.unique()
+		starGenes = starCount.join(", ")
+		def cSql = "select genes.chr,count(name) from mature,starbase,genes where mature.matid = '"+params.matid+"' and starbase.mature_id = mature.id and starbase.genes_id = genes.id group by genes.chr order by chr;";
+		def c = sql.rows(cSql)
+		def cJSON = c as JSON
+        def starDecode = cJSON.decodeURL()
+    	print "starDecode = "+starDecode
 		
 		def weak = ""
         if (params.mEv == '1'){
         	weak = "and mirtarbase.evidence !~ '(Weak)'"
         }
-		def mtAllSql = "select distinct(gene) from mature,mirtarbase where mature.matid = '"+params.matid+"' and mirtarbase.mature_id = mature.id ${weak};"
+		def mtAllSql = "select genes.* from mature,mirtarbase,genes where mature.matid = '"+params.matid+"' and mirtarbase.mature_id = mature.id ${weak} and mirtarbase.genes_id = genes.id;"
 		print mtAllSql
 		def mtAll = sql.rows(mtAllSql)
-		def mtGenes = ""
+		def mtGenes = []
 		mtAll.each{
-			unionGeneMap."${it.gene}"=""
-			mtGenes <<= it.gene+","
+			unionGeneMap."${it.name}"=""
+			mtGenes.add(it.name)
 		}
-		if (mtGenes.size()>0){
-			mtGenes = mtGenes[0..-2]
-		}
+		def mtCount = mtGenes.unique()
+		mtGenes = mtCount.join(", ")
+		cSql = "select genes.chr,count(name) from mature,mirtarbase,genes where mature.matid = '"+params.matid+"' and mirtarbase.mature_id = mature.id and mirtarbase.genes_id = genes.id group by genes.chr order by chr;";
+		c = sql.rows(cSql)
+		cJSON = c as JSON
+        def mtDecode = cJSON.decodeURL()
+    	print "mtDecode = "+mtDecode
 		
-		def tsAllSql = "select distinct(gene) from mature,tscan where mature.matid = '"+params.matid+"' and tscan.mature_id = mature.id;"
+		def tsAllSql = "select genes.* from mature,tscan,genes where mature.matid = '"+params.matid+"' and tscan.mature_id = mature.id and tscan.genes_id = genes.id;"
 		print tsAllSql
 		def tsAll = sql.rows(tsAllSql)
-		def tsGenes = ""
+		def tsGenes = []
 		tsAll.each{
-			unionGeneMap."${it.gene}"=""
-			tsGenes <<= it.gene+","
+			unionGeneMap."${it.name}"=""
+			tsGenes.add(it.name)
 		}
-		if (tsGenes.size()>0){
-			tsGenes = tsGenes[0..-2]
-		}
+		def tsCount = tsGenes.unique()
+		tsGenes = tsCount.join(", ")
+		cSql = "select genes.chr,count(name) from mature,tscan,genes where mature.matid = '"+params.matid+"' and tscan.mature_id = mature.id and tscan.genes_id = genes.id group by genes.chr order by chr;";
+		c = sql.rows(cSql)
+		cJSON = c as JSON
+        def tsDecode = cJSON.decodeURL()
+    	print "tsDecode = "+tsDecode
 		
-		def diAllSql = "select distinct(gene) from mature,diana where mature.matid = '"+params.matid+"' and diana.mature_id = mature.id;"
+		def diAllSql = "select genes.* from mature,diana,genes where mature.matid = '"+params.matid+"' and diana.mature_id = mature.id and diana.genes_id = genes.id;"
 		print diAllSql
 		def diAll = sql.rows(diAllSql)
-		def diGenes = ""
+		def diGenes = []
 		diAll.each{
-			unionGeneMap."${it.gene}"=""
-			diGenes <<= it.gene+","
+			unionGeneMap."${it.name}"=""
+			diGenes.add(it.name)
 		}
-		if (diGenes.size()>0){
-			diGenes = diGenes[0..-2]
-		}
+		def diCount = diGenes.unique()
+		diGenes = diCount.join(", ")
+		cSql = "select genes.chr,count(name) from mature,diana,genes where mature.matid = '"+params.matid+"' and diana.mature_id = mature.id and diana.genes_id = genes.id group by genes.chr order by chr;";
+		c = sql.rows(cSql)
+		cJSON = c as JSON
+        def diDecode = cJSON.decodeURL()
+    	print "diDecode = "+diDecode
 		
 		def union = ""
 		unionGeneMap.each{
@@ -269,6 +286,6 @@ class SearchController {
 			union = union[0..-2]
 		}
 		
-		return [miR:miR, starAll:starAll, starGenes:starGenes, mtAll:mtAll, mtGenes:mtGenes, tsAll:tsAll, tsGenes:tsGenes, diAll:diAll, diGenes:diGenes, unionGenes:union, unionGeneMap: unionGeneMap]
+		return [miR:miR, starGenes:starGenes, starCount:starCount, mtGenes:mtGenes, mtCount:mtCount, tsGenes:tsGenes, tsCount:tsCount, diGenes:diGenes, diCount:diCount, unionGenes:union, unionGeneMap: unionGeneMap]
 	}
 }

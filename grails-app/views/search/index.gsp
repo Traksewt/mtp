@@ -119,8 +119,11 @@
 		</div>
 		<div id="page-body" role="main">
 			<h1>Search</h1>
+			Either enter a list into the box or upload a file.<br>
+			Data can be lists of mature miRNA IDs on separate lines or can also include a tab delimited score/rank.
+			
 
-				<div class="chart"></div>
+			<br><br><div class="chart"></div>
 			Example lists: <a href = "javascript:void(0)" onclick="demoMir('1')">Top down regulated</a> | <a href = "javascript:void(0)" onclick="demoMir('2')">Top synthetic lethals</a>
 			
 			<g:uploadForm name="search_mir" action="search_res" method="post">

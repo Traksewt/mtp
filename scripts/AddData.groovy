@@ -1,12 +1,13 @@
 package mtp
 
 //mirbase()
+//gene_loc()
 //starbase_full()
 //mirtarbase_full()
-//tscan_full()
-//diana_full()
-//cardiac_flag()
-gene_loc()
+tscan_full()
+diana_full()
+cardiac_flag()
+
 
 def cleanUpGorm() { 
     def sessionFactory = ctx.getBean("sessionFactory")
@@ -463,25 +464,31 @@ def starbase_full(){
 	def count = 0
 	print "Adding starbase data..."
 	def starMap = [:]
+	def gene
 	def star_file = new File("data/starBase_Human_Interactions2013-11-04_05-18.xls")
 	star_file.eachLine{ line ->
 		def s = line.split("\t")
 		//if (s[8].toInteger() > 2){
-			starMap.gene = s[1]
+			gene = s[1]
 			starMap.pnum = s[8]
 			//print starMap
+			//print gene
 			count++
 			Mature mat = Mature.findByMatid(s[0])
-			if (mat != null){
+			Genes g = Genes.findByName(gene)
+			if (mat != null && g !=null){
 				Starbase star = new Starbase(starMap)
 				mat.addToStarbase(star)
+				g.addToStarbase(star)
 				if ((count % 1000) == 0){
 					mat.save(flush:true)
+					g.save(flush:true)
 					println new Date()
 					cleanUpGorm()
 					print count
 				}else{
 					mat.save()
+					g.save()
 				}
 			}
 		//}
@@ -493,7 +500,7 @@ def mirtarbase_full(){
 	def count = 0
 	print "Adding mirtarbase data..."
 	def mtMap = [:]
-
+	def gene
 	def mt_file = new File("data/miRTarBase_hsa_MTI.txt")
 
 	mt_file.eachLine{ line ->
@@ -501,23 +508,27 @@ def mirtarbase_full(){
 			def s = line.split("\t")
 			if (s.size() == 9){
 				if ((matcher = s[1] =~ /^hsa.*/)){
-					mtMap.gene = s[3]
+					gene = s[3]
 					mtMap.mtid = s[0]
 					mtMap.reference = s[8]
 					mtMap.evidence = s[7]
 					//print mtMap
 					count++
 					Mature mat = Mature.findByMatid(s[1])
-					if (mat != null){
+					Genes g = Genes.findByName(gene)
+					if (mat != null && g !=null){
 						Mirtarbase mt = new Mirtarbase(mtMap)
 						mat.addToMirtarbase(mt)
+						g.addToMirtarbase(mt)
 						if ((count % 1000) == 0){
 							mat.save(flush:true)
+							g.save(flush:true)
 							println new Date()
 							cleanUpGorm()
 							print count
 						}else{
 							mat.save()
+							g.save()
 						}
 					}
 				}
@@ -533,29 +544,33 @@ def tscan_full(){
 	def count = 0
 	print "Adding targetscan data..."
 	def tsMap = [:]
-
+	def gene
 	def ts_file = new File("data/TCS_0.5_hsa.txt")
 
 	ts_file.eachLine{ line ->
 		if ((matcher = line =~ /^NM_.*/)){
 			def s = line.split("\t")
 			if ((matcher = s[12] =~ /^hsa.*/)){
-				tsMap.gene = s[1]
+				gene = s[1]
 				tsMap.mtid = s[12]
 				tsMap.tcs = s[13]
 				//print tsMap
 				count++
 				Mature mat = Mature.findByMatid(s[12])
-				if (mat != null){
+				Genes g = Genes.findByName(gene)
+				if (mat != null && g !=null){
 					Tscan ts = new Tscan(tsMap)
 					mat.addToTscan(ts)
+					g.addToTscan(ts)
 					if ((count % 10000) == 0){
 						mat.save(flush:true)
+						g.save(flush:true)
 						println new Date()
 						cleanUpGorm()
 						print count
 					}else{
 						mat.save()
+						g.save()
 					}
 				}
 			}
@@ -568,14 +583,14 @@ def diana_full(){
 	def count = 0
 	print "Adding DIANA-microT-CDS data..."
 	def diMap = [:]
-
+	def gene
 	def di_file = new File("data/microtcds_hsa_0.7_data.csv")
 
 	di_file.eachLine{ line ->
 		if ((matcher = line =~ /^ENST.*/)){
 			def s = line.split(",")
 			if ((matcher = s[1] =~ /.*?\((.*?)\)/)){
-				diMap.gene = matcher[0][1]
+				gene = matcher[0][1]
 			}
 			if ((matcher = s[2] =~ /(.*?)\(.*/)){
 				diMap.mtid = s[2] = matcher[0][1]
@@ -584,16 +599,20 @@ def diana_full(){
 			//print diMap
 			count++
 			Mature mat = Mature.findByMatid(s[2])
-			if (mat != null){
+			Genes g = Genes.findByName(gene)
+			if (mat != null && g !=null){
 				Diana di = new Diana(diMap)
 				mat.addToDiana(di)
+				g.addToDiana(di)
 				if ((count % 10000) == 0){
 					mat.save(flush:true)
+					g.save(flush:true)
 					println new Date()
 					cleanUpGorm()
 					print count
 				}else{
 					mat.save()
+					g.save()
 				}
 			}
 		}
@@ -659,7 +678,7 @@ def gene_loc(){
 				gMap.chr = s[0]
 				gMap.start = s[3]
 				gMap.stop = s[4]
-				if ((matcher = s[8] =~ /.*?transcipt_name\s+"(.*?)";.*/)){
+				if ((matcher = s[8] =~ /.*?transcript_name\s+"(.*?)";.*/)){
 					gMap.name = matcher[0][1]
 				}
 				gMap.strand = s[6]
@@ -667,7 +686,7 @@ def gene_loc(){
 				//print gMap
 				Genes g = new Genes(gMap)
 				if ((count % 1000) == 0){
-					print gMap
+					//print gMap
 					g.save(flush:true)
 					println new Date()
 					cleanUpGorm()

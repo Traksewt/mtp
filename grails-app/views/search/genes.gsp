@@ -18,7 +18,7 @@
 		<g:form name="starDownload" url="[controller:'Download', action:'gene_download']" style="display: inline" >
         	<g:hiddenField name="fileData" value="${starGenes}"/>
             <g:hiddenField name="fileName" value="${params.matid}.StarBase.txt"/>
-            <a href="#" onclick="document.starDownload.submit()">${starAll.size()}</a>
+            <a href="#" onclick="document.starDownload.submit()">${starCount.size()}</a>
     	</g:form>
     	</td></tr>
     	<tr><td>MiRTarBase</td>
@@ -26,7 +26,7 @@
     	<g:form name="mirDownload" url="[controller:'Download', action:'gene_download']" style="display: inline" >
         	<g:hiddenField name="fileData" value="${mtGenes}"/>
             <g:hiddenField name="fileName" value="${params.matid}.MirTarBase.txt"/>
-            <a href="#" onclick="document.mirDownload.submit()">${mtAll.size()}</a>
+            <a href="#" onclick="document.mirDownload.submit()">${mtCount.size()}</a>
     	</g:form>
     	</td>
     	<tr><td>TargetScan</td>
@@ -34,7 +34,7 @@
     	<g:form name="tsDownload" url="[controller:'Download', action:'gene_download']" style="display: inline" >
         	<g:hiddenField name="fileData" value="${tsGenes}"/>
             <g:hiddenField name="fileName" value="${params.matid}.TargetScan.txt"/>
-            <a href="#" onclick="document.tsDownload.submit()">${tsAll.size()}</a>
+            <a href="#" onclick="document.tsDownload.submit()">${tsCount.size()}</a>
     	</g:form>
     	</td></tr>
     	<tr><td>DIANA-microT-CDS</td>
@@ -42,7 +42,7 @@
     	<g:form name="diDownload" url="[controller:'Download', action:'gene_download']" style="display: inline" >
         	<g:hiddenField name="fileData" value="${diGenes}"/>
             <g:hiddenField name="fileName" value="${params.matid}.DIANA-microT-CDS.txt"/>
-            <a href="#" onclick="document.diDownload.submit()">${diAll.size()}</a>
+            <a href="#" onclick="document.diDownload.submit()">${diCount.size()}</a>
     	</g:form>
     	</td></tr>
     	<tr><td><b>Union of all</b></td>

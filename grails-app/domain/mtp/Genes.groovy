@@ -14,4 +14,5 @@ class Genes {
     	stop(blank:false)
     	strand(blank:false)
     }
+    static hasMany = [ starbase : Starbase, mirtarbase : Mirtarbase, tscan: Tscan, diana: Diana]
 }
