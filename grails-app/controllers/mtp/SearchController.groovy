@@ -153,6 +153,9 @@ class SearchController {
         def mirLocDecode = mirLocJSON.decodeURL()
     	print "mirLoc = "+mirLocDecode
 		
+		//new search
+		//select genes.*,score,source from genes,mature,mir2mrna where mature.matid ~ 'hsa' and mature.id = mir2mrna.mature_id and mir2mrna.genes_id = genes.id and ((mir2mrna.source = 's' and score > 2 ) or (mir2mrna.source = 'd' and score > 0.9));
+		
         def starSql = "select mature.matid,count(distinct(starbase.genes_id)) from mature,starbase where ("+mirList+") and starbase.mature_id = mature.id and starbase.pnum > ${starEv} group by mature.matid;"
         //print starSql
         def starRes = sql.rows(starSql)

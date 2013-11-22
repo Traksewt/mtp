@@ -2,12 +2,12 @@ package mtp
 
 class Mir2mrna {
 
-    String gene
     String source
+    Float score
     
     static constraints = {
-    	gene(blank:false)
     	source(blank:false)
+    	score(blank:false)
     }
-    static belongsTo = [mature: Mature]
+    static belongsTo = [mature: Mature,genes:Genes]
 }

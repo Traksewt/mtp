@@ -1,9 +1,9 @@
 package mtp
 
-//mirbase()
-//gene_loc()
-//starbase_full()
-//mirtarbase_full()
+mirbase()
+gene_loc()
+starbase_full()
+mirtarbase_full()
 tscan_full()
 diana_full()
 cardiac_flag()
@@ -398,88 +398,30 @@ def location(){
 	return locToMir
 }
 
-def starbase_basic(){
-	def count = 0
-	print "Adding starbase data..."
-	def starMap = [:]
-	def star_file = new File("data/starBase_Human_Interactions2013-11-04_05-18.xls")
-	star_file.eachLine{ line ->
-		def s = line.split("\t")
-		if (s[8].toInteger() > 2){
-			starMap.gene = s[1]
-			starMap.source = "s"
-			//print starMap
-			count++
-			Mature mat = Mature.findByMatid(s[0])
-			Mir2mrna star = new Mir2mrna(starMap)
-			mat.addToMir2mrna(star)
-			if ((count % 1000) == 0){
-				mat.save(flush:true)
-				println new Date()
-				cleanUpGorm()
-				print count
-			}else{
-				mat.save()
-			}
-		}
-	}
-	print count
-}
 
-def mirtarbase_basic(){
-	def count = 0
-	print "Adding mirtarbase data..."
-	def mtMap = [:]
-
-	def mt_file = new File("data/miRTarBase_hsa_MTI.txt")
-
-	mt_file.eachLine{ line ->
-		if ((matcher = line =~ /^MIR.*/)){
-			def s = line.split("\t")
-			if ((matcher = s[7] != /Weak/)){
-				if ((matcher = s[1] =~ /^hsa.*/)){
-					mtMap.gene = s[3]
-					mtMap.source = "m"
-					//print mtMap
-					count++
-					Mature mat = Mature.findByMatid(s[1])
-					Mir2mrna mt = new Mir2mrna(mtMap)
-					mat.addToMir2mrna(mt)
-					if ((count % 1000) == 0){
-						mat.save(flush:true)
-						println new Date()
-						cleanUpGorm()
-						print count
-					}else{
-						mat.save()
-					}
-				}
-			}
-		}
-	}
-	print count
-}
 
 def starbase_full(){
 	def count = 0
 	print "Adding starbase data..."
 	def starMap = [:]
 	def gene
-	def star_file = new File("data/starBase_Human_Interactions2013-11-04_05-18.xls")
+	//def star_file = new File("data/starBase_Human_Interactions2013-11-04_05-18.xls")
+	def star_file = new File("data/star_10000.xls")
 	star_file.eachLine{ line ->
 		def s = line.split("\t")
 		//if (s[8].toInteger() > 2){
 			gene = s[1]
-			starMap.pnum = s[8]
+			starMap.score = s[8]
+			starMap.source = 's'
 			//print starMap
 			//print gene
 			count++
 			Mature mat = Mature.findByMatid(s[0])
 			Genes g = Genes.findByName(gene)
 			if (mat != null && g !=null){
-				Starbase star = new Starbase(starMap)
-				mat.addToStarbase(star)
-				g.addToStarbase(star)
+				Mir2mrna star = new Mir2mrna(starMap)
+				mat.addToMir2mrna(star)
+				g.addToMir2mrna(star)
 				if ((count % 1000) == 0){
 					mat.save(flush:true)
 					g.save(flush:true)
@@ -501,7 +443,8 @@ def mirtarbase_full(){
 	print "Adding mirtarbase data..."
 	def mtMap = [:]
 	def gene
-	def mt_file = new File("data/miRTarBase_hsa_MTI.txt")
+	//def mt_file = new File("data/miRTarBase_hsa_MTI.txt")
+	def mt_file = new File("data/mirtarbase_10000.txt")
 
 	mt_file.eachLine{ line ->
 		if ((matcher = line =~ /^MIR.*/)){
@@ -509,17 +452,16 @@ def mirtarbase_full(){
 			if (s.size() == 9){
 				if ((matcher = s[1] =~ /^hsa.*/)){
 					gene = s[3]
-					mtMap.mtid = s[0]
-					mtMap.reference = s[8]
-					mtMap.evidence = s[7]
+					mtMap.source = "m"
+					mtMap.score = 0
 					//print mtMap
 					count++
 					Mature mat = Mature.findByMatid(s[1])
 					Genes g = Genes.findByName(gene)
 					if (mat != null && g !=null){
-						Mirtarbase mt = new Mirtarbase(mtMap)
-						mat.addToMirtarbase(mt)
-						g.addToMirtarbase(mt)
+						Mir2mrna mt = new Mir2mrna(mtMap)
+						mat.addToMir2mrna(mt)
+						g.addToMir2mrna(mt)
 						if ((count % 1000) == 0){
 							mat.save(flush:true)
 							g.save(flush:true)
@@ -545,24 +487,24 @@ def tscan_full(){
 	print "Adding targetscan data..."
 	def tsMap = [:]
 	def gene
-	def ts_file = new File("data/TCS_0.5_hsa.txt")
-
+	//def ts_file = new File("data/TCS_0.5_hsa.txt")
+	def ts_file = new File("data/tscan_10000.txt")
 	ts_file.eachLine{ line ->
 		if ((matcher = line =~ /^NM_.*/)){
 			def s = line.split("\t")
 			if ((matcher = s[12] =~ /^hsa.*/)){
 				gene = s[1]
-				tsMap.mtid = s[12]
-				tsMap.tcs = s[13]
+				tsMap.source = "t"
+				tsMap.score = s[13]
 				//print tsMap
 				count++
 				Mature mat = Mature.findByMatid(s[12])
 				Genes g = Genes.findByName(gene)
 				if (mat != null && g !=null){
-					Tscan ts = new Tscan(tsMap)
-					mat.addToTscan(ts)
-					g.addToTscan(ts)
-					if ((count % 10000) == 0){
+					Mir2mrna ts = new Mir2mrna(tsMap)
+					mat.addToMir2mrna(ts)
+					g.addToMir2mrna(ts)
+					if ((count % 1000) == 0){
 						mat.save(flush:true)
 						g.save(flush:true)
 						println new Date()
@@ -584,7 +526,8 @@ def diana_full(){
 	print "Adding DIANA-microT-CDS data..."
 	def diMap = [:]
 	def gene
-	def di_file = new File("data/microtcds_hsa_0.7_data.csv")
+	//def di_file = new File("data/microtcds_hsa_0.7_data.csv")
+	def di_file = new File("data/diana_10000.txt")
 
 	di_file.eachLine{ line ->
 		if ((matcher = line =~ /^ENST.*/)){
@@ -595,16 +538,17 @@ def diana_full(){
 			if ((matcher = s[2] =~ /(.*?)\(.*/)){
 				diMap.mtid = s[2] = matcher[0][1]
 			}
-			diMap.threshold = s[3]
+			diMap.score = s[3]
+			diMap.source = "d"
 			//print diMap
 			count++
 			Mature mat = Mature.findByMatid(s[2])
 			Genes g = Genes.findByName(gene)
 			if (mat != null && g !=null){
-				Diana di = new Diana(diMap)
-				mat.addToDiana(di)
-				g.addToDiana(di)
-				if ((count % 10000) == 0){
+				Mir2mrna di = new Mir2mrna(diMap)
+				mat.addToMir2mrna(di)
+				g.addToMir2mrna(di)
+				if ((count % 1000) == 0){
 					mat.save(flush:true)
 					g.save(flush:true)
 					println new Date()
