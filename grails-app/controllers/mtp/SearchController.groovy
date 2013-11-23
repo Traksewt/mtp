@@ -196,7 +196,10 @@ class SearchController {
     def genes(){
 	    def sql = new Sql(dataSource)
 	    def matcher
-		def miR = Mature.findByMatid(params.matid)
+		def miRsql = "select * from mature where id = "+(params.matid)+";";
+		def miR = sql.rows(miRsql)
+		def miRJSON = miR as JSON
+		def miRDecode = miRJSON.decodeURL()
 		def unionGeneMap = [:]
 		def chrList = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"]
 		
@@ -315,6 +318,6 @@ class SearchController {
 		print "Count = "+tCount
 		print "Decode = "+tDecode
 		print "List = "+tList
-		return [miR:miR, sCount:sCount, sDecode:sDecode, sList:sList, mCount:mCount, mDecode:mDecode, mList:mList, tCount:tCount, tDecode:tDecode, tList:tList, dCount:dCount, dDecode:dDecode, dList:dList, unionGenes:union, unionGeneMap: unionGeneMap]
+		return [miR:miRDecode, sCount:sCount, sDecode:sDecode, sList:sList, mCount:mCount, mDecode:mDecode, mList:mList, tCount:tCount, tDecode:tDecode, tList:tList, dCount:dCount, dDecode:dDecode, dList:dList, unionGenes:union, unionGeneMap: unionGeneMap]
 	}
 }

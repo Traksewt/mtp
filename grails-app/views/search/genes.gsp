@@ -29,6 +29,8 @@
 	</head>
 	<body>
 		<h2>Gene targets per chromosome</h2>
+		${miR}
+		${tDecode}
 		<svg id="gene_chart"></svg>
 	
 		<h3>Download gene interactions for ${params.matid}:</h3><br>
@@ -172,7 +174,7 @@
     .attr("transform", "rotate(-90)")
     .text("Relative frequency of miRNAs");
 	
-	//add the miR lines 
+	//add the gene lines 
 	for (var i=0;i<miRdata.length;i++){
 		var m = miRdata[i].chr
 		var c = m.match(/chr(.*)/)
@@ -187,6 +189,23 @@
     		.attr("y2", h - (yScale(miRdata[i].start) - moveUp))
     		.style("stroke", "rgb(6,120,155)");
 	} 
+	
+	//add the mir
+	var miRLoc = <%=miR%>
+	var mL = miRLoc[0].chr	
+	var cL = mL.match(/chr(.*)/)
+	var chrL = cL[1]
+	if (chrL.match(/X/)){ chrL = "23"}
+	if (chrL.match(/Y/)){ chrL = "24"}
+	
+	chart.append("svg:line")
+		.attr("x1", (parseInt(chrL)-1) * (w / chrSize.length) + moveRight)			
+    	.attr("y1", h - (yScale(miRLoc[0].start) - moveUp))
+    	.attr("x2", parseInt(chrL) * (w / chrSize.length) + moveRight - barPadding)
+    	.attr("y2", h - (yScale(miRLoc[0].start) - moveUp))
+    	.style({ 'stroke': 'red', 'fill': 'none', 'stroke-width': '10px'});
+	
+	
 	//add line - https://www.dashingd3js.com/svg-paths-and-d3js
 	var array = [10,20,30,40,50,60]
 	var line = d3.svg.line()
