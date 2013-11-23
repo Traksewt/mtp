@@ -87,7 +87,7 @@
 					<td><a href="http://www.targetscan.org/cgi-bin/targetscan/vert_61/targetscan.cgi?species=Human&gid=&mir_sc=&mir_c=&mir_nc=&mirg=${r.matid}" target="_blank"><%=tsMap."${r.matid}" %></a></td>
 					<td><a href="http://diana.imis.athena-innovation.gr/DianaTools/index.php?r=microT_CDS/results&keywords=${r.matid}&genes=&mirnas=${r.matid}%20&descr=&threshold=0.7" target="_blank"><%=diMap."${r.matid}" %></a></td>
 					<td><% if (flagMap."${r.matid}"){print flagMap."${r.matid}"}else{print "None"} %></td>
-					<td><g:link action="genes" params="[matid:r.matid, sEv:sEv, mEv:mEv]">Link</g:link></td>
+					<td><g:link action="genes" params="[matid:r.id, sEv:sEv, mEv:mEv]">Link</g:link></td>
 				</tr>
 				</g:each>
 			</tbody>

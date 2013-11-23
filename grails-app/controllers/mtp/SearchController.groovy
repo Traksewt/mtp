@@ -156,53 +156,38 @@ class SearchController {
 		//new search
 		//select genes.*,score,source from genes,mature,mir2mrna where mature.matid ~ 'hsa' and mature.id = mir2mrna.mature_id and mir2mrna.genes_id = genes.id and ((mir2mrna.source = 's' and score > 2 ) or (mir2mrna.source = 'd' and score > 0.9));
 		
-        def starSql = "select mature.matid,count(distinct(starbase.genes_id)) from mature,starbase where ("+mirList+") and starbase.mature_id = mature.id and starbase.pnum > ${starEv} group by mature.matid;"
-        //print starSql
-        def starRes = sql.rows(starSql)
-        def starMap = [:]
-        mirRes.each{
-        	starMap."${it.matid}" = 0
-        }
-        starRes.each{
-        	starMap."${it.matid}" = it.count
-        }
-        
-        def weak = ""
+		//get params
+		def starParam = ""
+		if (params.sEv > 0){
+			starParam = "and score > "+params.sEv
+		}
+		def mirParam = ""
         if (params.mEv == '1'){
-        	weak = "and mirtarbase.evidence !~ '(Weak)'"
+        	mirParam = "and mirtarbase.evidence !~ '(Weak)'"
         }
-    	def mtSql = "select mature.matid,count(distinct(mirtarbase.genes_id)) from mature,mirtarbase where ("+mirList+") and mirtarbase.mature_id = mature.id ${weak} group by mature.matid;"
-        //print mtSql
-        def mtRes = sql.rows(mtSql)
+		
+		def allSql = "select mature.matid,mature.id,source,count(distinct(mir2mrna.genes_id)) from mature,mir2mrna where ("+mirList+") and mir2mrna.mature_id = mature.id and ((mir2mrna.source = 's' ${starParam}) or (mir2mrna.source = 'd') or (mir2mrna.source = 'm' ${mirParam}) or (mir2mrna.source = 't')) group by matid,source,mature.id;";
+		def allRes = sql.rows(allSql) 
+		print allSql
+		
+        def starMap = [:]
         def mtMap = [:]
-        mirRes.each{
-        	mtMap."${it.matid}" = 0
-        }
-        mtRes.each{
-        	mtMap."${it.matid}" = it.count
-        }
-        
-        def tsSql = "select mature.matid,count(distinct(tscan.genes_id)) from mature,tscan where ("+mirList+") and tscan.mature_id = mature.id group by mature.matid;"
-        print tsSql
-        def tsRes = sql.rows(tsSql)
         def tsMap = [:]
-        mirRes.each{
-        	tsMap."${it.matid}" = 0
-        }
-        tsRes.each{
-        	tsMap."${it.matid}" = it.count
-        }
-        
-        def diSql = "select mature.matid,count(distinct(diana.genes_id)) from mature,diana where ("+mirList+") and diana.mature_id = mature.id group by mature.matid;"
-        //print diSql
-        def diRes = sql.rows(diSql)
         def diMap = [:]
         mirRes.each{
+        	starMap."${it.matid}" = 0
+        	mtMap."${it.matid}" = 0
+        	tsMap."${it.matid}" = 0
         	diMap."${it.matid}" = 0
         }
-        diRes.each{
-        	diMap."${it.matid}" = it.count
+        allRes.each{
+        	if (it.source == 's'){ starMap."${it.matid}" = it.count}
+        	if (it.source == 't'){ tsMap."${it.matid}" = it.count}
+        	if (it.source == 'm'){ mtMap."${it.matid}" = it.count}
+        	if (it.source == 'd'){ diMap."${it.matid}" = it.count}
+        	
         }
+        
         print miRLister
         print mirLoc
         return [miRLister:miRLister, mirLoc:mirLocDecode, flagMap:flagMap, rank:rank, famList:famListDecode, famCount:famCount, mirList: p, mirRes: mirRes, starMap: starMap, mtMap: mtMap, tsMap:tsMap, diMap: diMap, sEv:params.sEv, mEv: params.mEv]    
@@ -215,74 +200,108 @@ class SearchController {
 		def unionGeneMap = [:]
 		def chrList = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"]
 		
-		def starEv = params.sEv
-		def starAllSql = "select genes.* from mature,starbase,genes where mature.matid = '"+params.matid+"' and starbase.mature_id = mature.id and starbase.pnum > ${starEv} and starbase.genes_id = genes.id;"
-		print starAllSql
-		def starAll = sql.rows(starAllSql)
-		def starGenes = []
-		starAll.each{
-			unionGeneMap."${it.name}"=""
-			starGenes.add(it.name)
+		//get params
+		def starParam = ""
+		if (params.sEv > 0){
+			starParam = "and score > "+params.sEv
 		}
-		def starCount = starGenes.unique()
-		starGenes = starCount.join(", ")
-		def cSql = "select genes.chr,count(name) from mature,starbase,genes where mature.matid = '"+params.matid+"' and starbase.mature_id = mature.id and starbase.genes_id = genes.id group by genes.chr order by chr;";
-		def c = sql.rows(cSql)
-		def cJSON = c as JSON
-        def starDecode = cJSON.decodeURL()
-    	print "starDecode = "+starDecode
-		
-		def weak = ""
+		def mirParam = ""
         if (params.mEv == '1'){
-        	weak = "and mirtarbase.evidence !~ '(Weak)'"
+        	mirParam = "and mirtarbase.evidence !~ '(Weak)'"
         }
-		def mtAllSql = "select genes.* from mature,mirtarbase,genes where mature.matid = '"+params.matid+"' and mirtarbase.mature_id = mature.id ${weak} and mirtarbase.genes_id = genes.id;"
-		print mtAllSql
-		def mtAll = sql.rows(mtAllSql)
-		def mtGenes = []
-		mtAll.each{
+        
+        //get the gene data
+        //def allSql = "select mature.matid,source,count(distinct(mir2mrna.genes_id)) from mature,mir2mrna where ("+mirList+") and mir2mrna.mature_id = mature.id and ((mir2mrna.source = 's' ${starParam}) or (mir2mrna.source = 'd') or (mir2mrna.source = 'm' ${mirParam}) or (mir2mrna.source = 't')) group by matid,source;";
+		//select genes.*,score,source from genes,mature,mir2mrna where mature.matid ~ 'hsa' and mature.id = mir2mrna.mature_id and mir2mrna.genes_id = genes.id and ((mir2mrna.source = 's' and score > 2 ) or (mir2mrna.source = 'd' and score > 0.9));
+		def AllSql = "select genes.*,source,name from mir2mrna,genes where mir2mrna.mature_id = '"+params.matid+"' and mir2mrna.genes_id = genes.id and ((mir2mrna.source = 's' ${starParam}) or (mir2mrna.source = 'd') or (mir2mrna.source = 'm' ${mirParam}) or (mir2mrna.source = 't'));"
+		print AllSql
+		def All = sql.rows(AllSql)
+		def sGenes = []
+		def mGenes = []
+		def tGenes = []
+		def dGenes = []
+		def sJ = []
+		def tJ = []
+		def dJ = []
+		def mJ = []
+		def jMap = [:]
+		All.each{
+			jMap.chr = it.chr
+			jMap.start = it.start
+			jMap.source = it.source
 			unionGeneMap."${it.name}"=""
-			mtGenes.add(it.name)
+			if (it.source == 's'){ 
+				sGenes.add(it.name)
+				sJ.add(jMap)
+			}
+			if (it.source == 'm'){ 
+				mGenes.add(it.name)
+				mJ.add(jMap)	
+			}
+			if (it.source == 't'){ 
+				tGenes.add(it.name)
+				tJ.add(jMap)		
+			}
+			if (it.source == 'd'){ 
+				dGenes.add(it.name)
+				dJ.add(jMap)
+			}
+			jMap = [:]
 		}
-		def mtCount = mtGenes.unique()
-		mtGenes = mtCount.join(", ")
-		cSql = "select genes.chr,count(name) from mature,mirtarbase,genes where mature.matid = '"+params.matid+"' and mirtarbase.mature_id = mature.id and mirtarbase.genes_id = genes.id group by genes.chr order by chr;";
-		c = sql.rows(cSql)
-		cJSON = c as JSON
-        def mtDecode = cJSON.decodeURL()
-    	print "mtDecode = "+mtDecode
 		
-		def tsAllSql = "select genes.* from mature,tscan,genes where mature.matid = '"+params.matid+"' and tscan.mature_id = mature.id and tscan.genes_id = genes.id;"
-		print tsAllSql
-		def tsAll = sql.rows(tsAllSql)
-		def tsGenes = []
-		tsAll.each{
-			unionGeneMap."${it.name}"=""
-			tsGenes.add(it.name)
-		}
-		def tsCount = tsGenes.unique()
-		tsGenes = tsCount.join(", ")
-		cSql = "select genes.chr,count(name) from mature,tscan,genes where mature.matid = '"+params.matid+"' and tscan.mature_id = mature.id and tscan.genes_id = genes.id group by genes.chr order by chr;";
-		c = sql.rows(cSql)
-		cJSON = c as JSON
-        def tsDecode = cJSON.decodeURL()
-    	print "tsDecode = "+tsDecode
+		def sJSON = sJ as JSON
+        def sDecode = sJSON.decodeURL()
+        def tJSON = tJ as JSON
+        def tDecode = tJSON.decodeURL()
+        def mJSON = mJ as JSON
+        def mDecode = mJSON.decodeURL()
+        def dJSON = dJ as JSON
+        def dDecode = dJSON.decodeURL()
+        
+		def sCount = sGenes.unique()
+		sGenes = sCount.join(", ")
+		def mCount = mGenes.unique()
+		mGenes = mCount.join(", ")
+		def tCount = tGenes.unique()
+		tGenes = tCount.join(", ")
+		def dCount = dGenes.unique()
+		dGenes = dCount.join(", ")
 		
 		
-		cSql = "select genes.chr,genes.start,genes.name from mature,diana,genes where mature.matid = '"+params.matid+"' and diana.mature_id = mature.id and diana.genes_id = genes.id order by chr,start;";
-		c = sql.rows(cSql)
-		cJSON = c as JSON
-        def diDecode = cJSON.decodeURL()
-    	print "diDecode = "+diDecode
+		// get the count data
 		
-		def diGenes = []
+		def tM = [:]
+		def dM = [:]
+		def sM = [:]
+		def mM = [:]
+		def tList = []
+		def dList = []
+		def sList = []
+		def mList = []
+		chrList.each{
+    		tM."${it}" = 0
+    		dM."${it}" = 0
+    		sM."${it}" = 0
+    		mM."${it}" = 0
+    	}
+		def cSql = "select genes.chr,count(name),source from mir2mrna,genes where mir2mrna.mature_id = '"+params.matid+"' and mir2mrna.genes_id = genes.id and ((mir2mrna.source = 's' ${starParam}) or (mir2mrna.source = 'd') or (mir2mrna.source = 'm' ${mirParam}) or (mir2mrna.source = 't')) group by genes.chr,source order by chr;";
+		print cSql
+		def c = sql.rows(cSql)
 		c.each{
-			unionGeneMap."${it.name}"=""
-			diGenes.add(it.name)
-		}	
-		def diCount = diGenes.unique()
-		diGenes = diCount.join(", ")
+			if ((matcher = it.chr =~ /chr(.*)/)){ 
+				if (it.source == 's'){sM."${matcher[0][1]}"=it.count}
+				if (it.source == 't'){tM."${matcher[0][1]}"=it.count}
+				if (it.source == 'd'){dM."${matcher[0][1]}"=it.count}
+				if (it.source == 'm'){mM."${matcher[0][1]}"=it.count}
+			}
+		}
+		sM.each{sList.add(it.value)}
+		tM.each{tList.add(it.value)}
+		print "tM = "+tM
+		dM.each{dList.add(it.value)}
+		mM.each{mList.add(it.value)}
 		
+		//generate union data
 		def union = ""
 		unionGeneMap.each{
 			union <<= it.key+","
@@ -290,25 +309,12 @@ class SearchController {
 		if (union.size()>0){
 			union = union[0..-2]
 		}
-		def diGCountSql = "select genes.chr,count(name) from mature,diana,genes where mature.matid = '"+params.matid+"' and diana.mature_id = mature.id and diana.genes_id = genes.id group by genes.chr;";
-    	print diGCountSql
-    	def diGCount = sql.rows(diGCountSql)
-    	def diLister = []
-    	def diMap = [:]
-    	chrList.each{
-    		diMap."${it}" = 0
-    	}
-    	diGCount.each{
-    		if ((matcher = it.chr =~ /chr(.*)/)){ 
-    			diMap."${matcher[0][1]}"=it.count
-    		}
-    	}
-    	diMap.each{
-    		diLister.add(it.value)
-    	}
-		
-		print diLister
-		print diDecode
-		return [miR:miR, starGenes:starGenes, starCount:starCount, starDecode:starDecode, mtGenes:mtGenes, mtCount:mtCount, mtDecode:mtDecode, tsGenes:tsGenes, tsCount:tsCount, tsDecode:tsDecode, diGenes:diGenes, diCount:diCount, diDecode:diDecode, diLister:diLister, unionGenes:union, unionGeneMap: unionGeneMap]
+
+		//should be three variables for each gene set - Count, Decode and List
+		print "Genes = "+tGenes
+		print "Count = "+tCount
+		print "Decode = "+tDecode
+		print "List = "+tList
+		return [miR:miR, sCount:sCount, sDecode:sDecode, sList:sList, mCount:mCount, mDecode:mDecode, mList:mList, tCount:tCount, tDecode:tDecode, tList:tList, dCount:dCount, dDecode:dDecode, dList:dList, unionGenes:union, unionGeneMap: unionGeneMap]
 	}
 }

@@ -35,33 +35,33 @@
 		<table class="compact_left"><tr><td>StarBase</td>
 		<td>
 		<g:form name="starDownload" url="[controller:'Download', action:'gene_download']" style="display: inline" >
-        	<g:hiddenField name="fileData" value="${starGenes}"/>
+        	<g:hiddenField name="fileData" value="${sCount}"/>
             <g:hiddenField name="fileName" value="${params.matid}.StarBase.txt"/>
-            <a href="#" onclick="document.starDownload.submit()">${starCount.size()}</a>
+            <a href="#" onclick="document.starDownload.submit()">${sCount.size()}</a>
     	</g:form>
     	</td></tr>
     	<tr><td>MiRTarBase</td>
     	<td>
     	<g:form name="mirDownload" url="[controller:'Download', action:'gene_download']" style="display: inline" >
-        	<g:hiddenField name="fileData" value="${mtGenes}"/>
+        	<g:hiddenField name="fileData" value="${mCount}"/>
             <g:hiddenField name="fileName" value="${params.matid}.MirTarBase.txt"/>
-            <a href="#" onclick="document.mirDownload.submit()">${mtCount.size()}</a>
+            <a href="#" onclick="document.mirDownload.submit()">${mCount.size()}</a>
     	</g:form>
     	</td>
     	<tr><td>TargetScan</td>
     	<td>
     	<g:form name="tsDownload" url="[controller:'Download', action:'gene_download']" style="display: inline" >
-        	<g:hiddenField name="fileData" value="${tsGenes}"/>
+        	<g:hiddenField name="fileData" value="${tCount}"/>
             <g:hiddenField name="fileName" value="${params.matid}.TargetScan.txt"/>
-            <a href="#" onclick="document.tsDownload.submit()">${tsCount.size()}</a>
+            <a href="#" onclick="document.tsDownload.submit()">${tCount.size()}</a>
     	</g:form>
     	</td></tr>
     	<tr><td>DIANA-microT-CDS</td>
     	<td>
     	<g:form name="diDownload" url="[controller:'Download', action:'gene_download']" style="display: inline" >
-        	<g:hiddenField name="fileData" value="${diGenes}"/>
+        	<g:hiddenField name="fileData" value="${dCount}"/>
             <g:hiddenField name="fileName" value="${params.matid}.DIANA-microT-CDS.txt"/>
-            <a href="#" onclick="document.diDownload.submit()">${diCount.size()}</a>
+            <a href="#" onclick="document.diDownload.submit()">${dCount.size()}</a>
     	</g:form>
     	</td></tr>
     	<tr><td><b>Union of all</b></td>
@@ -78,8 +78,8 @@
 	//data
 	var chrNum = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"];
 	var chrSize = [249250621,243199373,198022430,191154276,180915260,171115067,159138663,146364022,141213431,135534747,135006516,133851895,115169878,107349540,102531392,90354753,81195210,78077248,59128983,63025520,48129895,51304566,155270560,59373566]
-	var miRCounts = <%=diLister%>
-	var miRdata = <%=diDecode%>
+	var miRCounts = <%=tList%>
+	var miRdata = <%=tDecode%>
 	
 	//Width and height
 	var w = $(document).width() * 0.80;

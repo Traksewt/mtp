@@ -1,7 +1,7 @@
 package mtp
 
-mirbase()
-gene_loc()
+//mirbase()
+//gene_loc()
 starbase_full()
 mirtarbase_full()
 tscan_full()
