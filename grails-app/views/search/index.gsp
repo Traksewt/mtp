@@ -85,9 +85,9 @@
 		<script>
   			function demoMir(a){
   				if (a == '1'){
-  					$("#mirList").val("hsa-miR-4314\t0.02\nhsa-miR-1294\t0.02\nhsa-miR-552\t0.02\nhsa-miR-4297\t0.04\nhsa-miR-550a-3p\t0.04\nhsa-miR-432-3p\t0.04\nhsa-miR-193b-3p\t0.04\nhsa-miR-342-5p\t0.04\nhsa-miR-541-3p\t0.04\nhsa-miR-193a-3p\t0.05\nhsa-miR-489\t0.05\nhsa-miR-3192\t0.05\nhsa-miR-892b\t0.05\nhsa-miR-148b-5p\t0.05\nhsa-miR-3140-3p\t0.05\nhsa-miR-654-5p\t0.06\nhsa-miR-876-3p\t0.06\nhsa-miR-3160-3p\t0.06\nhsa-miR-3189-3p\t0.06\nhsa-miR-1289\t0.06\nhsa-miR-19b-1-5p\t0.06\nhsa-miR-1293\t0.08\nhsa-miR-634\t0.08\nhsa-miR-3165\t0.1\nhsa-miR-323a-5p\t0.11\nhsa-miR-1285-3p\t0.13\nhsa-miR-197-3p\t0.15\nhsa-miR-1231\t0.15\nhsa-miR-3936\t0.16\nhsa-miR-744-5p\t0.17\nhsa-miR-4283\t0.18\nhsa-miR-3115\t0.18\nhsa-miR-644a\t0.19\nhsa-miR-330-5p\t0.2\nhsa-miR-3180\t0.2\nhsa-miR-3907\t0.2\nhsa-miR-638\t0.42\nhsa-miR-664a-3p\t0.44\nhsa-miR-27a-3p\t0.44\nhsa-miR-612\t0.44\nhsa-miR-1281\t0.49");
+  					$("#mirList").val("hsa-miR-4314 0.02\nhsa-miR-1294 0.02\nhsa-miR-552 0.02\nhsa-miR-4297 0.04\nhsa-miR-550a-3p 0.04\nhsa-miR-432-3p 0.04\nhsa-miR-193b-3p 0.04\nhsa-miR-342-5p 0.04\nhsa-miR-541-3p 0.04\nhsa-miR-193a-3p 0.05\nhsa-miR-489 0.05\nhsa-miR-3192 0.05\nhsa-miR-892b 0.05\nhsa-miR-148b-5p 0.05\nhsa-miR-3140-3p 0.05\nhsa-miR-654-5p 0.06\nhsa-miR-876-3p 0.06\nhsa-miR-3160-3p 0.06\nhsa-miR-3189-3p 0.06\nhsa-miR-1289 0.06\nhsa-miR-19b-1-5p 0.06\nhsa-miR-1293 0.08\nhsa-miR-634 0.08\nhsa-miR-3165 0.1\nhsa-miR-323a-5p 0.11\nhsa-miR-1285-3p 0.13\nhsa-miR-197-3p 0.15\nhsa-miR-1231 0.15\nhsa-miR-3936 0.16\nhsa-miR-744-5p 0.17\nhsa-miR-4283 0.18\nhsa-miR-3115 0.18\nhsa-miR-644a 0.19\nhsa-miR-330-5p 0.2\nhsa-miR-3180 0.2\nhsa-miR-3907 0.2\nhsa-miR-638 0.42\nhsa-miR-664a-3p 0.44\nhsa-miR-27a-3p 0.44\nhsa-miR-612 0.44\nhsa-miR-1281 0.49");
   				}if (a == '2'){
-  					$("#mirList").val("hsa-miR-380-3p\t0.2\nhsa-miR-3934-5p\t0.34\nhsa-miR-3181\t0.34\nhsa-miR-515-3p\t0.38\nhsa-miR-518c-5p\t0.4\nhsa-miR-3151\t0.4\nhsa-miR-652-3p\t0.41\nhsa-miR-513c-5p\t0.42\nhsa-miR-3162-5p\t0.44\nhsa-miR-125a-3p\t0.45\nhsa-miR-199b-5p\t0.48\nhsa-miR-4264\t0.5\nhsa-miR-411-3p\t0.52\nhsa-miR-299-3p\t0.52\nhsa-miR-3670\t0.52\nhsa-let-7a-3p\t0.53\nhsa-miR-190b\t0.53\nhsa-miR-4302\t0.53\nhsa-miR-4275\t0.54\nhsa-miR-320c\t0.54\nhsa-miR-10a-5p\t0.54");
+  					$("#mirList").val("hsa-miR-380-3p 0.2\nhsa-miR-3934-5p 0.34\nhsa-miR-3181 0.34\nhsa-miR-515-3p 0.38\nhsa-miR-518c-5p 0.4\nhsa-miR-3151 0.4\nhsa-miR-652-3p 0.41\nhsa-miR-513c-5p 0.42\nhsa-miR-3162-5p 0.44\nhsa-miR-125a-3p 0.45\nhsa-miR-199b-5p 0.48\nhsa-miR-4264 0.5\nhsa-miR-411-3p 0.52\nhsa-miR-299-3p 0.52\nhsa-miR-3670 0.52\nhsa-let-7a-3p 0.53\nhsa-miR-190b 0.53\nhsa-miR-4302 0.53\nhsa-miR-4275 0.54\nhsa-miR-320c 0.54\nhsa-miR-10a-5p 0.54");
   				}
   			}
   			
@@ -120,7 +120,7 @@
 		<div id="page-body" role="main">
 			<h1>Search</h1>
 			Either enter a list into the box or upload a file.<br>
-			Data can be lists of mature miRNA IDs on separate lines or can also include a tab delimited score/rank.
+			Data can be lists of mature miRNA IDs on separate lines or can also include a space delimited score/rank.
 			
 
 			<br><br><div class="chart"></div>

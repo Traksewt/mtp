@@ -8,7 +8,7 @@
 		<script src="${resource(dir: 'js', file: 'DataTables-1.9.4/media/js/jquery.js')}" type="text/javascript"></script>
 		<script src="${resource(dir: 'js', file: 'DataTables-1.9.4/media/js/jquery.dataTables.js')}" type="text/javascript"></script>
 		<script src="${resource(dir: 'js', file: 'Highcharts-3.0.7/js/highcharts.js')}" type="text/javascript"></script>
-		<script src="${resource(dir: 'js', file: 'Highcharts-3.0.7/js/modules/exporting.js')}" type="text/javascript"></script>
+        <script src="${resource(dir: 'js', file: 'Highcharts-3.0.7/js/modules/exporting.js')}" type="text/javascript"></script>
 		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 		<link rel="stylesheet" href="${resource(dir: 'js', file: 'DataTables-1.9.4/media/css/demo_table.css')}" type="text/css"></link>
 		<link rel="stylesheet" href="${resource(dir: 'js', file: 'DataTables-1.9.4/media/css/demo_page.css')}" type="text/css"></link>
@@ -33,7 +33,35 @@
   			
     			$('#search').dataTable({
     				"sPaginationType": "full_numbers",
+    				"aoColumns": [
+						 null,
+						 null,
+						 null,
+						 null,
+						 null,
+						 null,
+						 {"sType": "num-html"},
+						 {"sType": "num-html"},
+						 {"sType": "num-html"},
+						 {"sType": "num-html"},
+						 null,
+						 null,
+					],
     			});
+    			jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+					"num-html-pre": function ( a ) {
+						var x = a.replace( /<.*?>/g, "" );
+						return parseFloat( x );
+					},
+ 
+					"num-html-asc": function ( a, b ) {
+						return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+					},
+ 
+					"num-html-desc": function ( a, b ) {
+						return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+					}
+				} );
 			
 			});
 			
@@ -194,10 +222,10 @@
 	chart.append("text")
     .attr("text-anchor", "end")
     .attr("y", w+moveRight+30)
-    .attr("x", -moveRight-20)
+    .attr("x", -moveRight+40)
     .attr("dy", ".75em")
     .attr("transform", "rotate(-90)")
-    .text("Relative frequency of miRNAs");
+    .text("Relative frequency of miRNAs per chromosome");
 	
 	//add the miR lines 
 	for (var i=0;i<miRdata.length;i++){

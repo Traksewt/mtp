@@ -405,8 +405,8 @@ def starbase_full(){
 	print "Adding starbase data..."
 	def starMap = [:]
 	def gene
-	//def star_file = new File("data/starBase_Human_Interactions2013-11-04_05-18.xls")
-	def star_file = new File("data/star_10000.xls")
+	def star_file = new File("data/starBase_Human_Interactions2013-11-04_05-18.xls")
+	//def star_file = new File("data/star_50000.xls")
 	star_file.eachLine{ line ->
 		def s = line.split("\t")
 		//if (s[8].toInteger() > 2){

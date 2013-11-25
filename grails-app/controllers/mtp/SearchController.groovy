@@ -52,12 +52,52 @@ class SearchController {
     	//print miRMap
     	
     	def mirLocSql = "select chr,start from mature where (mature.matid = 'hsa-miR-4314' or mature.matid = 'hsa-miR-1294' or mature.matid = 'hsa-miR-552' or mature.matid = 'hsa-miR-4297' or mature.matid = 'hsa-miR-550a-3p' or mature.matid = 'hsa-miR-432-3p' or mature.matid = 'hsa-miR-193b-3p' or mature.matid = 'hsa-miR-342-5p' or mature.matid = 'hsa-miR-541-3p' or mature.matid = 'hsa-miR-193a-3p' or mature.matid = 'hsa-miR-489' or mature.matid = 'hsa-miR-3192' or mature.matid = 'hsa-miR-892b' or mature.matid = 'hsa-miR-148b-5p' or mature.matid = 'hsa-miR-3140-3p' or mature.matid = 'hsa-miR-654-5p' or mature.matid = 'hsa-miR-876-3p' or mature.matid = 'hsa-miR-3160-3p' or mature.matid = 'hsa-miR-3189-3p' or mature.matid = 'hsa-miR-1289' or mature.matid = 'hsa-miR-19b-1-5p' or mature.matid = 'hsa-miR-1293' or mature.matid = 'hsa-miR-634' or mature.matid = 'hsa-miR-3165' or mature.matid = 'hsa-miR-323a-5p' or mature.matid = 'hsa-miR-1285-3p') group by chr,start;";
+    	print mirLocSql
     	def mirLoc = sql.rows(mirLocSql)
     	def mirLocJSON = mirLoc as JSON
         def mirLocDecode = mirLocJSON.decodeURL()
     	//print "mirLoc = "+mirLocDecode
     	
-    	
+    	def heatsql = "select matid,score,genes.start,name,genes.id from mature,mir2mrna,genes where mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and (mature.matid = 'hsa-miR-551a' or mature.matid = '' or mature.matid = 'hsa-miR-34a-5p' or mature.matid = '' or mature.matid = 'hsa-miR-200a-5p' or mature.matid = '' or mature.matid = 'hsa-miR-200b-3p' or mature.matid = '' or mature.matid = 'hsa-miR-429' or mature.matid = '' or mature.matid = 'hsa-miR-200a-3p') and source = 'd' order by genes.id;";
+    	print heatsql
+    	def heat = sql.rows(heatsql)
+    	def dMap = [:]
+    	def mMap = [:]
+    	def mList = []
+    	heat.each{
+    		mMap."${it.matid}"=0
+    	}
+    	mMap.each{
+    		mList.add(it.key)
+    	}
+    	def mMapReset = mMap;
+    	def old_name = ""
+    	heat.each{
+    		if (old_name != "" && it.name != old_name){
+    			//print mMap
+    			dMap."${it.name}"=mMap
+    			//reset the map
+    			mMap = [:]
+    			mMapReset.each{
+    				mMap."${it.key}"=0
+    			}
+    		}
+    		mMap."${it.matid}"=it.score
+    		old_name = it.id
+    	}
+		//print dMap
+		def s = "gene\t"+mList.join("\t")
+		new File("tscan_counts.txt").withWriter { out ->
+			out.writeLine("${s}")
+			dMap.each{
+				//print 
+				def scores = it.value
+				def scoreList = mList.collect{scores[it]}
+				s = it.key+"\t"+scoreList.join("\t")
+				out.writeLine("${s}")
+			}
+		}
+		
     	return [miRList:miRList, miRListRel:miRListRel, mirLoc:mirLocDecode]
     }
     
@@ -77,13 +117,14 @@ class SearchController {
 					println "ContentType: ${upload.contentType}"
 					mirFile = upload.inputStream.text
 			}
-    	def p = mirFile.replaceAll("\r\n|\n\r|\n|\r"," ") 
-    	def a = p.split(" ")
+    	def p = mirFile.replaceAll("\r\n|\n\r|\n|\r",",") 
+    	def a = p.split(",")
     	def starEv = params.sEv
     	def rank = [:]
     	a.each{
+    		it = it.trim()
     		it = it.replaceAll("\n","")
-    		def s = it.split("\t")
+    		def s = it.split(" ")
     		mirList <<= "or mature.matid = '"+s[0]+"' "
     		if (s.size() == 2){
     			rank."${s[0]}"=s[1]
@@ -188,6 +229,54 @@ class SearchController {
         	
         }
         
+        //heatmap data
+        def heatsql = "select matid,score,genes.start,name,genes.id from mature,mir2mrna,genes where mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") and mir2mrna.mature_id = mature.id and ((mir2mrna.source = 's' ${starParam}) or (mir2mrna.source = 'd') or (mir2mrna.source = 'm' ${mirParam}) or (mir2mrna.source = 't')) and source = 't' order by genes.id;";
+    	print heatsql
+    	def heat = sql.rows(heatsql)
+    	def dMap = [:]
+    	def mMap = [:]
+    	def mList = []
+    	mirRes.each{
+    	//heat.each{
+    		mMap."${it.matid}"=0
+    	}
+    	print "mMap = "+mMap
+    	mMap.each{
+    		mList.add(it.key)
+    	}
+    	def mMapReset = mMap;
+    	def old_name = ""
+    	def new_name = ""
+    	heat.each{
+    		new_name = it.name
+    		if (old_name != "" && it.id != old_name){
+    			//print mMap
+    			dMap."${new_name}"=mMap
+    			//reset the map
+    			mMap = [:]
+    			mMapReset.each{
+    				mMap."${it.key}"=0
+    			}
+    		}
+    		mMap."${it.matid}"=it.score
+    		old_name = it.id
+    	}
+    	//catch the last one
+    	dMap."${new_name}"=mMap
+    	
+		//print dMap
+		def s = "gene\t"+mList.join("\t")
+		new File("heatmap_counts.txt").withWriter { out ->
+			out.writeLine("${s}")
+			dMap.each{
+				//print 
+				def scores = it.value
+				def scoreList = mList.collect{scores[it]}
+				s = it.key+"\t"+scoreList.join("\t")
+				out.writeLine("${s}")
+			}
+		}
+        
         print miRLister
         print mirLoc
         return [miRLister:miRLister, mirLoc:mirLocDecode, flagMap:flagMap, rank:rank, famList:famListDecode, famCount:famCount, mirList: p, mirRes: mirRes, starMap: starMap, mtMap: mtMap, tsMap:tsMap, diMap: diMap, sEv:params.sEv, mEv: params.mEv]    
@@ -216,7 +305,7 @@ class SearchController {
         //get the gene data
         //def allSql = "select mature.matid,source,count(distinct(mir2mrna.genes_id)) from mature,mir2mrna where ("+mirList+") and mir2mrna.mature_id = mature.id and ((mir2mrna.source = 's' ${starParam}) or (mir2mrna.source = 'd') or (mir2mrna.source = 'm' ${mirParam}) or (mir2mrna.source = 't')) group by matid,source;";
 		//select genes.*,score,source from genes,mature,mir2mrna where mature.matid ~ 'hsa' and mature.id = mir2mrna.mature_id and mir2mrna.genes_id = genes.id and ((mir2mrna.source = 's' and score > 2 ) or (mir2mrna.source = 'd' and score > 0.9));
-		def AllSql = "select genes.*,source,name from mir2mrna,genes where mir2mrna.mature_id = '"+params.matid+"' and mir2mrna.genes_id = genes.id and ((mir2mrna.source = 's' ${starParam}) or (mir2mrna.source = 'd') or (mir2mrna.source = 'm' ${mirParam}) or (mir2mrna.source = 't'));"
+		def AllSql = "select genes.*,source,name from mir2mrna,genes where mir2mrna.mature_id = '"+params.matid+"' and mir2mrna.genes_id = genes.id and ((mir2mrna.source = 's' ${starParam}) or (mir2mrna.source = 'd') or (mir2mrna.source = 'm' ${mirParam}) or (mir2mrna.source = 't')) order by genes.id;"
 		print AllSql
 		def All = sql.rows(AllSql)
 		def sGenes = []
@@ -228,29 +317,59 @@ class SearchController {
 		def dJ = []
 		def mJ = []
 		def jMap = [:]
+		def tMap = [:]
+		def tData = []
+		tMap.s = 0
+		tMap.m = 0
+		tMap.t = 0
+		tMap.d = 0
+		def old_id = ""
 		All.each{
+			//print "id = "+it.id
+			//print "old_id = "+old_id
+			if (it.id != old_id && old_id != ""){
+				tData.add(tMap)
+				//print "tMap = "+tMap 
+				tMap = [:]
+				tMap.s = 0
+				tMap.m = 0
+				tMap.t = 0
+				tMap.d = 0
+			}
+			tMap.chr = it.chr
+			tMap.name = it.name
+			tMap.start = it.start
+			tMap.stop = it.stop
 			jMap.chr = it.chr
 			jMap.start = it.start
 			jMap.source = it.source
 			unionGeneMap."${it.name}"=""
 			if (it.source == 's'){ 
+				tMap.s = 1
 				sGenes.add(it.name)
 				sJ.add(jMap)
 			}
 			if (it.source == 'm'){ 
+				tMap.m = 1
 				mGenes.add(it.name)
 				mJ.add(jMap)	
 			}
 			if (it.source == 't'){ 
+				tMap.t = 1
 				tGenes.add(it.name)
 				tJ.add(jMap)		
 			}
 			if (it.source == 'd'){ 
+				tMap.d = 1
 				dGenes.add(it.name)
 				dJ.add(jMap)
 			}
+			//print "tMap2 = "+tMap 
+			old_id = it.id
 			jMap = [:]
 		}
+		//catch the last one
+		tData.add(tMap)
 		
 		def sJSON = sJ as JSON
         def sDecode = sJSON.decodeURL()
@@ -304,6 +423,15 @@ class SearchController {
 		dM.each{dList.add(it.value)}
 		mM.each{mList.add(it.value)}
 		
+		//generate list of all count data for scaling
+		def allCounts = []
+		allCounts.add(sList)
+		allCounts.add(mList)
+		allCounts.add(dList)
+		allCounts.add(tList)
+		allCounts = allCounts.flatten()
+		print "allCounts = "+allCounts
+		
 		//generate union data
 		def union = ""
 		unionGeneMap.each{
@@ -313,11 +441,11 @@ class SearchController {
 			union = union[0..-2]
 		}
 
-		//should be three variables for each gene set - Count, Decode and List
+		//should be four variables for each gene set - Genes, Count, Decode and List
 		print "Genes = "+tGenes
 		print "Count = "+tCount
 		print "Decode = "+tDecode
 		print "List = "+tList
-		return [miR:miRDecode, sCount:sCount, sDecode:sDecode, sList:sList, mCount:mCount, mDecode:mDecode, mList:mList, tCount:tCount, tDecode:tDecode, tList:tList, dCount:dCount, dDecode:dDecode, dList:dList, unionGenes:union, unionGeneMap: unionGeneMap]
+		return [tData:tData, allCounts:allCounts, miR:miRDecode, sCount:sCount, sDecode:sDecode, sGenes:sGenes, sList:sList, mCount:mCount, mDecode:mDecode, mList:mList, mGenes:mGenes, tCount:tCount, tDecode:tDecode, tList:tList, tGenes:tGenes, dCount:dCount, dDecode:dDecode, dList:dList, dGenes:dGenes, unionGenes:union, unionGeneMap: unionGeneMap]
 	}
 }
