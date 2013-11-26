@@ -100,7 +100,7 @@
 		<h1>Results</h1>
 		<table id="search">
             <thead>
-				<tr><% if(rank.size()>0){%><th>Score</th><%}%><th>Mature</th><th>Family</th><th>Precursor</th><th>Sequence</th><th>Location</th><th><a href="#" title="StarBase">S</a></th><th><a href="#" title="MiRTarBase">M</a></th><th><a href="#" title="TargetScan">T</a></th><th><a href="#" title="DIANA MicroT-CDS">D</a></th><th>Flag</th><th>Data</th></tr>
+				<tr><% if(rank.size()>0){%><th>Score</th><%}%><th>Mature</th><th>Family</th><th>Precursor</th><th>Seed</th><th>Location</th><th><a href="#" title="StarBase">S</a></th><th><a href="#" title="MiRTarBase">M</a></th><th><a href="#" title="TargetScan">T</a></th><th><a href="#" title="DIANA MicroT-CDS">D</a></th><th>Flag</th><th>Data</th></tr>
 			</thead>
 			<tbody>
 				<g:each var="r" in="${mirRes}">
@@ -109,7 +109,9 @@
 					<td><a href="http://mirbase.org/cgi-bin/mirna_entry.pl?acc=${r.matacc}" target="_blank">${r.matid}</a></td>
 					<td><a href="http://mirbase.org/cgi-bin/mirna_summary.pl?fam=${r.famacc}" target="_blank">${r.famid}</a></td>
 					<td><a href="http://www.mirbase.org/cgi-bin/mirna_entry.pl?acc=${r.preacc}" target="_blank">${r.preid}</a></td>
-					<td>${r.matseq}</td><td><a href="http://asia.ensembl.org/Homo_sapiens/Location/View?db=core;r=${r.chr}:${r.start}-${r.stop}" target="_blank">${r.chr}: ${r.start}-${r.stop}</a></td>
+					<td><font face="courier new">${r.matseq.toUpperCase()[1..6]}</font></td>
+					<!--td><font face="courier new">${r.matseq.toUpperCase()[0]}<b>${r.matseq.toUpperCase()[1..6]}</b>${r.matseq.toUpperCase()[6..-1]}</font></td-->
+					<td><a href="http://asia.ensembl.org/Homo_sapiens/Location/View?db=core;r=${r.chr}:${r.start}-${r.stop}" target="_blank">${r.chr}: ${r.start}-${r.stop}</a></td>
 					<td><a href="http://starbase.sysu.edu.cn/viewMatureMirInfo.php?table=miRNAClipTargets&database=hg19&name=${r.matid}" target="_blank"><%=starMap."${r.matid}" %></a></td>
 					<td><a href="http://mirtarbase.mbc.nctu.edu.tw/index.php" target="_blank"><%=mtMap."${r.matid}" %></a></td>
 					<td><a href="http://www.targetscan.org/cgi-bin/targetscan/vert_61/targetscan.cgi?species=Human&gid=&mir_sc=&mir_c=&mir_nc=&mirg=${r.matid}" target="_blank"><%=tsMap."${r.matid}" %></a></td>
@@ -139,7 +141,7 @@
 	var w = $(document).width() * 0.80;
 	var h = 300;
 	var barPadding = 1;
-	var moveRight = 70;
+	var moveRight = 65;
 	var moveUp = 20;
 	var testD = [1000000, 110000000, 120000000]
 	
@@ -221,11 +223,11 @@
 	
 	chart.append("text")
     .attr("text-anchor", "end")
-    .attr("y", w+moveRight+30)
+    .attr("y", w+moveRight+38)
     .attr("x", -moveRight+40)
     .attr("dy", ".75em")
     .attr("transform", "rotate(-90)")
-    .text("Relative frequency of miRNAs per chromosome");
+    .text("Frequency of miRNAs per chromosome per Mb");
 	
 	//add the miR lines 
 	for (var i=0;i<miRdata.length;i++){

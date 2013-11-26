@@ -55,7 +55,7 @@
 				</g:each>
 			</tbody>
 		</table>
-		<h2>Gene targets per chromosome</h2>
+		<h2>       Gene Targets per chromosome</h2>
 		<svg id="gene_chart"></svg>
 	
 		<h3>Download gene interactions for ${params.matid}:</h3><br>
@@ -201,15 +201,15 @@
 	chart.append("text")
     .attr("text-anchor", "end")
     .attr("y", w+moveRight+30)
-    .attr("x", -moveRight-20)
+    .attr("x", -moveRight+40)
     .attr("dy", ".75em")
     .attr("transform", "rotate(-90)")
-    .text("Frequency of genes per chromosome");
+    .text("Frequency of genes per chromosome per Mb");
 	
 	//add the gene locations lines 
 	
 	var dataLists = [tdata,mdata,sdata,ddata]
-	var colours = ['green','pink','yellow','purple']
+	var colours = ['green','grey','orange','purple']
 	for (var l=0;l<dataLists.length;l++){
 		for (var i=0;i<dataLists[l].length;i++){
 			//console.log(dataLists[l][i].chr)
@@ -237,7 +237,7 @@
     	var addpath = chart.append('path')
 			.attr('d', line(lineLists[l]))
 			.attr("stroke", colours[l])
-        	.attr("stroke-width", 2)
+        	.attr("stroke-width", 4)
     		.attr("fill", "none");
     }
     	

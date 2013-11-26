@@ -177,9 +177,19 @@ class SearchController {
     	chrList.each{
     		miRMap."${it}" = 0
     	}
+    	
+    	def chrSize = [249250621,243199373,198022430,191154276,180915260,171115067,159138663,146364022,141213431,135534747,135006516,133851895,115169878,107349540,102531392,90354753,81195210,78077248,59128983,63025520,48129895,51304566,155270560,59373566];
+		def chrMap = [:]
+		def count=0
+		chrList.each{
+			chrMap."${it}"=chrSize[count]
+			count++
+		}
+    	
     	mirCount.each{
     		if ((matcher = it.chr =~ /chr(.*)/)){ 
-    			miRMap."${matcher[0][1]}"=it.count/freqMap."${matcher[0][1]}"*100
+    			//miRMap."${matcher[0][1]}"=it.count/freqMap."${matcher[0][1]}"*100
+    			miRMap."${matcher[0][1]}"=(it.count/chrMap."${matcher[0][1]}")*1000000
     		}
     	}
     	miRMap.each{
@@ -230,7 +240,7 @@ class SearchController {
         }
         
         //heatmap data
-        def heatsql = "select matid,score,genes.start,name,genes.id from mature,mir2mrna,genes where mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") and mir2mrna.mature_id = mature.id and ((mir2mrna.source = 's' ${starParam}) or (mir2mrna.source = 'd') or (mir2mrna.source = 'm' ${mirParam}) or (mir2mrna.source = 't')) and source = 't' order by genes.id;";
+        def heatsql = "select matid,score,genes.start,name,genes.id from mature,mir2mrna,genes where mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") and mir2mrna.mature_id = mature.id and ((mir2mrna.source = 's' ${starParam}) or (mir2mrna.source = 'd') or (mir2mrna.source = 'm' ${mirParam}) or (mir2mrna.source = 't')) and source = 's' order by genes.id;";
     	print heatsql
     	def heat = sql.rows(heatsql)
     	def dMap = [:]
@@ -255,10 +265,10 @@ class SearchController {
     			//reset the map
     			mMap = [:]
     			mMapReset.each{
-    				mMap."${it.key}"=0
+    				mMap."${it.key}"=1
     			}
     		}
-    		mMap."${it.matid}"=it.score
+    		mMap."${it.matid}"=it.score+1
     		old_name = it.id
     	}
     	//catch the last one
@@ -406,15 +416,41 @@ class SearchController {
     		sM."${it}" = 0
     		mM."${it}" = 0
     	}
+    	//generate chromosome length map
+    	def chrSize = [249250621,243199373,198022430,191154276,180915260,171115067,159138663,146364022,141213431,135534747,135006516,133851895,115169878,107349540,102531392,90354753,81195210,78077248,59128983,63025520,48129895,51304566,155270560,59373566];
+		def chrMap = [:]
+		def count=0
+		chrList.each{
+			chrMap."${it}"=chrSize[count]
+			count++
+		}
+		print "chrMap = "+chrMap
+		
+		//generate genes per chromosome map
+		def freqsql = "select count(name),chr from genes group by chr order by chr;";
+		def freq = sql.rows(freqsql)
+		def freqMap = [:]
+    	freq.each{
+    		if ((matcher = it.chr =~ /chr(.*)/)){ 
+    			freqMap."${matcher[0][1]}"=it.count
+    		}
+    	}
+		
 		def cSql = "select genes.chr,count(name),source from mir2mrna,genes where mir2mrna.mature_id = '"+params.matid+"' and mir2mrna.genes_id = genes.id and ((mir2mrna.source = 's' ${starParam}) or (mir2mrna.source = 'd') or (mir2mrna.source = 'm' ${mirParam}) or (mir2mrna.source = 't')) group by genes.chr,source order by chr;";
 		print cSql
 		def c = sql.rows(cSql)
 		c.each{
 			if ((matcher = it.chr =~ /chr(.*)/)){ 
-				if (it.source == 's'){sM."${matcher[0][1]}"=it.count}
-				if (it.source == 't'){tM."${matcher[0][1]}"=it.count}
-				if (it.source == 'd'){dM."${matcher[0][1]}"=it.count}
-				if (it.source == 'm'){mM."${matcher[0][1]}"=it.count}
+				/*
+				if (it.source == 's'){sM."${matcher[0][1]}"=(it.count/freqMap."${matcher[0][1]}")*100}
+				if (it.source == 't'){tM."${matcher[0][1]}"=(it.count/freqMap."${matcher[0][1]}")*100}
+				if (it.source == 'd'){dM."${matcher[0][1]}"=(it.count/freqMap."${matcher[0][1]}")*100}
+				if (it.source == 'm'){mM."${matcher[0][1]}"=(it.count/freqMap."${matcher[0][1]}")*100}
+				*/
+				if (it.source == 's'){sM."${matcher[0][1]}"=it.count / ((freqMap."${matcher[0][1]}" / chrMap."${matcher[0][1]}")*1000)}
+				if (it.source == 't'){tM."${matcher[0][1]}"=it.count / ((freqMap."${matcher[0][1]}" / chrMap."${matcher[0][1]}")*1000)}
+				if (it.source == 'd'){dM."${matcher[0][1]}"=it.count / ((freqMap."${matcher[0][1]}" / chrMap."${matcher[0][1]}")*1000)}
+				if (it.source == 'm'){mM."${matcher[0][1]}"=it.count / ((freqMap."${matcher[0][1]}" / chrMap."${matcher[0][1]}")*1000)}
 			}
 		}
 		sM.each{sList.add(it.value)}

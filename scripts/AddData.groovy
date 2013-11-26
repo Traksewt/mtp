@@ -2,11 +2,11 @@ package mtp
 
 //mirbase()
 //gene_loc()
-starbase_full()
-mirtarbase_full()
-tscan_full()
-diana_full()
 cardiac_flag()
+//starbase_full()
+//mirtarbase_full()
+//tscan_full()
+diana_full()
 
 
 def cleanUpGorm() { 
@@ -443,8 +443,8 @@ def mirtarbase_full(){
 	print "Adding mirtarbase data..."
 	def mtMap = [:]
 	def gene
-	//def mt_file = new File("data/miRTarBase_hsa_MTI.txt")
-	def mt_file = new File("data/mirtarbase_10000.txt")
+	def mt_file = new File("data/miRTarBase_hsa_MTI.txt")
+	//def mt_file = new File("data/mirtarbase_10000.txt")
 
 	mt_file.eachLine{ line ->
 		if ((matcher = line =~ /^MIR.*/)){
@@ -487,8 +487,8 @@ def tscan_full(){
 	print "Adding targetscan data..."
 	def tsMap = [:]
 	def gene
-	//def ts_file = new File("data/TCS_0.5_hsa.txt")
-	def ts_file = new File("data/tscan_10000.txt")
+	def ts_file = new File("data/TCS_0.5_hsa.txt")
+	//def ts_file = new File("data/tscan_10000.txt")
 	ts_file.eachLine{ line ->
 		if ((matcher = line =~ /^NM_.*/)){
 			def s = line.split("\t")
@@ -526,8 +526,8 @@ def diana_full(){
 	print "Adding DIANA-microT-CDS data..."
 	def diMap = [:]
 	def gene
-	//def di_file = new File("data/microtcds_hsa_0.7_data.csv")
-	def di_file = new File("data/diana_10000.txt")
+	def di_file = new File("data/microtcds_hsa_0.7_data.csv")
+	//def di_file = new File("data/diana_10000.txt")
 
 	di_file.eachLine{ line ->
 		if ((matcher = line =~ /^ENST.*/)){
