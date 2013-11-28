@@ -55,7 +55,7 @@
 				</g:each>
 			</tbody>
 		</table>
-		<h2>       Gene Targets per chromosome</h2>
+		<h2>Gene Targets per chromosome</h2>
 		<svg id="gene_chart"></svg>
 	
 		<h3>Download gene interactions for ${params.matid}:</h3><br>
