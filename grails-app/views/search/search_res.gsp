@@ -29,24 +29,16 @@
 			}
 		</style>
   		<script>
+  			var columns
+  			if (<%=rank.size()>0%>){
+  				columns = [null,null,null,null,null,null,{"sType": "num-html"},{"sType": "num-html"},{"sType": "num-html"},{"sType": "num-html"},null,null]
+  			}else{
+  				columns = [null,null,null,null,null,{"sType": "num-html"},{"sType": "num-html"},{"sType": "num-html"},{"sType": "num-html"},null,null]
+  			}
   			$(document).ready(function() {
-  			
-    			$('#search').dataTable({
-    				"sPaginationType": "full_numbers",
-    				"aoColumns": [
-						 null,
-						 null,
-						 null,
-						 null,
-						 null,
-						 null,
-						 {"sType": "num-html"},
-						 {"sType": "num-html"},
-						 {"sType": "num-html"},
-						 {"sType": "num-html"},
-						 null,
-						 null,
-					],
+				$('#search').dataTable({
+					"sPaginationType": "full_numbers",
+					"aoColumns": columns,
     			});
     			jQuery.extend( jQuery.fn.dataTableExt.oSort, {
 					"num-html-pre": function ( a ) {
@@ -126,8 +118,10 @@
 		<h2>miRNAs per chromosome</h2>
 		<svg id="mir_chart"></svg>
 		<br>
-		<h2>miRNAs per family</h2>
-		<div id="family" style="width:100%; height:400px;"></div>
+		<g:if test="${rank.size()>0}">
+			<h2>miRNAs per family</h2>
+			<div id="family" style="width:100%; height:400px;"></div>
+		</g:if>
 	
 	<script>
 	//data
@@ -227,7 +221,7 @@
     .attr("x", -moveRight+40)
     .attr("dy", ".75em")
     .attr("transform", "rotate(-90)")
-    .text("Frequency of miRNAs per chromosome per Mb");
+    .text("MiRNA count / freq of miRNAs per chrom per Mb");
 	
 	//add the miR lines 
 	for (var i=0;i<miRdata.length;i++){
@@ -242,7 +236,7 @@
     		.attr("y1", h - (yScale(miRdata[i].start) - moveUp))
     		.attr("x2", parseInt(chr) * (w / chrSize.length) + moveRight - barPadding)
     		.attr("y2", h - (yScale(miRdata[i].start) - moveUp))
-    		.style("stroke", "rgb(6,120,155)");
+    		.style("stroke", "white");
 	} 
 	//add line - https://www.dashingd3js.com/svg-paths-and-d3js
 	var array = [10,20,30,40,50,60]

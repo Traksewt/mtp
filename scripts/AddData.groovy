@@ -1,12 +1,12 @@
 package mtp
 
-//mirbase()
+mirbase()
 //gene_loc()
-cardiac_flag()
+//cardiac_flag()
 //starbase_full()
 //mirtarbase_full()
 //tscan_full()
-diana_full()
+//diana_full()
 
 
 def cleanUpGorm() { 

@@ -79,9 +79,18 @@
 				}
 			}
 		</style>
-
-		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
+		<script src="${resource(dir: 'js', file: 'jquery-ui-1.10.3/jquery-1.9.1.js')}" type="text/javascript"></script>
+		<script src="${resource(dir: 'js', file: 'jquery-ui-1.10.3/ui/jquery-ui.js')}" type="text/javascript"></script>
+		<g:javascript>
+            $(document).ready(function() {
+               $('#single_mir').autocomplete({
+                 source: '<g:createLink controller='search' action='ajaxMirFinder'/>'
+               }); 
+                
+            });        
+        </g:javascript>
+		
 		<script>
   			function demoMir(a){
   				if (a == '1'){
@@ -119,14 +128,22 @@
 		</div>
 		<div id="page-body" role="main">
 			<h1>Search</h1>
-			Either enter a list into the box or upload a file.<br>
-			Data can be lists of mature miRNA IDs on separate lines or can also include a space delimited score/rank.
-			
-
-			<br><br><div class="chart"></div>
-			Example lists: <a href = "javascript:void(0)" onclick="demoMir('1')">Top down regulated</a> | <a href = "javascript:void(0)" onclick="demoMir('2')">Top synthetic lethals</a>
+			Either enter a single mature miRBase ID into the small box, a list of IDs into the large box or upload a file of IDs.<br>
+			Lists should be IDs on separate lines or can also include a space delimited score/rank.
 			
 			<g:uploadForm name="search_mir" action="search_res" method="post">
+			
+			<h2>Single miRNA</h2>
+			<div class="demo">
+            <div class="ui-widget">
+                <input id="single_mir" name="single">
+            </div>
+			
+			<br><br><h2>List of miRNAs</h2>
+			<div class="chart"></div>
+			Example lists: <a href = "javascript:void(0)" onclick="demoMir('1')">Top essential miRNAs</a> | <a href = "javascript:void(0)" onclick="demoMir('2')">Top synthetic lethals</a>
+			
+			
 				<br>Upload a file <input type="file" name="myFile"/>
 				<g:textArea name="mirList" rows="5" cols="40" style="width: 60%;"/>
 				<br>StarBase evidence: 
@@ -137,11 +154,11 @@
 					<option value="3">4 or more</option>
 					<option value="4">5</option>
 				</select>
-				<br>MiRTarBase evidence: 
+				<!--br>MiRTarBase evidence: 
 				<select name="mEv">
 					<option value="0">All</option>
 					<option value="1">No weak evidence</option>
-				</select>
+				</select-->
 				<br><input class="smallbuttons" type="button" value="Search" id="process" onclick="submit()" >
 			</g:uploadForm>
 		</div>

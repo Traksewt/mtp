@@ -63,7 +63,7 @@
 		<td>
 		<g:form name="starDownload" url="[controller:'Download', action:'gene_download']" style="display: inline" >
         	<g:hiddenField name="fileData" value="${sGenes}"/>
-            <g:hiddenField name="fileName" value="${params.matid}.StarBase.txt"/>
+            <g:hiddenField name="fileName" value="${mirData.matid}.StarBase.txt"/>
             <a href="#" onclick="document.starDownload.submit()">${sCount.size()}</a>
     	</g:form>
     	</td></tr>
@@ -192,7 +192,7 @@
 
     chart.append("text")
     .attr("text-anchor", "end")
-    .attr("y", 10)
+    .attr("y", 20)
     .attr("x", -moveRight)
     .attr("dy", ".75em")
     .attr("transform", "rotate(-90)")
@@ -200,11 +200,11 @@
 	
 	chart.append("text")
     .attr("text-anchor", "end")
-    .attr("y", w+moveRight+30)
+    .attr("y", w+moveRight+35)
     .attr("x", -moveRight+40)
     .attr("dy", ".75em")
     .attr("transform", "rotate(-90)")
-    .text("Frequency of genes per chromosome per Mb");
+    .text("Gene count / genes per chromosome per Mb");
 	
 	//add the gene locations lines 
 	
