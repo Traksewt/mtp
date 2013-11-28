@@ -20,6 +20,52 @@ class SearchController {
 	} 
     
     def test() { 
+    	//heatmap data
+    	def sql = new Sql(dataSource)
+    	
+    	def mirList = "mature.matid = 'hsa-miR-380-3p' or mature.matid = 'hsa-miR-3934-5p' or mature.matid = 'hsa-miR-3181' or mature.matid = 'hsa-miR-515-3p' or mature.matid = 'hsa-miR-518c-5p' or mature.matid = 'hsa-miR-3151' or mature.matid = 'hsa-miR-652-3p' or mature.matid = 'hsa-miR-513c-5p' or mature.matid = 'hsa-miR-3162-5p' or mature.matid = 'hsa-miR-125a-3p' or mature.matid = 'hsa-miR-199b-5p' or mature.matid = 'hsa-miR-4264' or mature.matid = 'hsa-miR-411-3p' or mature.matid = 'hsa-miR-299-3p' or mature.matid = 'hsa-miR-3670' or mature.matid = 'hsa-let-7a-3p' or mature.matid = 'hsa-miR-190b' or mature.matid = 'hsa-miR-4302' or mature.matid = 'hsa-miR-4275' or mature.matid = 'hsa-miR-320c' or mature.matid = 'hsa-miR-10a-5p'"
+    	
+    	def searchSql = "select family.*,precursor.*,mature.* from family,precursor,mature where ("+mirList+") and family.id = precursor.family_id and precursor.id = mature.precursor_id;";
+        //println searchSql
+        def mirRes = sql.rows(searchSql)
+    	
+        def heatsql = "select matid,score,genes.start,name,genes.id from mature,mir2mrna,genes where mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") and source = 's' order by genes.id;";
+    	print heatsql
+    	def heat = sql.rows(heatsql)
+    	def dMap = [:]
+    	def mMap = [:]
+    	def mList = []
+    	mirRes.each{
+    	//heat.each{
+    		mMap."${it.matid}"=0
+    	}
+    	print "mMap = "+mMap
+    	mMap.each{
+    		mList.add(it.key)
+    	}
+    	def mMapReset = mMap;
+    	def old_id = ""
+    	def old_name = ""
+    	def new_id = ""
+    	heat.each{
+    		new_id = it.id
+    		if (old_id != "" && it.id != old_id){
+    			//print mMap
+    			dMap."${old_name}"=mMap
+    			//reset the map
+    			mMap = [:]
+    			mMapReset.each{
+    				mMap."${it.key}"=1
+    			}
+    		}
+    		mMap."${it.matid}"=it.score+1
+    		old_name = it.name
+    		old_id = it.id
+    	}
+    	//catch the last one
+    	dMap."${old_name}"=mMap
+    	
+		
     	
     }
     
