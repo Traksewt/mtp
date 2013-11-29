@@ -27,6 +27,12 @@
 
 			.x.axis path {
 			  display: none;
+			  
+			  #myCanvas
+			{
+    			display: block;
+    			margin: 0 auto;
+			}
 			}
 		</style>
   		<script>
@@ -56,11 +62,15 @@
 					}
 				} );
 				
-		console.log(<%=mList.size()%>)
-        console.log(<%=gList%>)
-        console.log(<%=fData%>)
+		//console.log(<%=mList%>)
+        //console.log(<%=gList%>)
+        //console.log(<%=fData%>)
         
         if (<%=mList.size()>2%>){
+        
+        	//set the width based on document size
+			//$("#canvas1").width($( document ).width() * 0.8);
+			
 			var cx2 = new CanvasXpress('canvas1',
 			  {
 				'z': {
@@ -82,7 +92,7 @@
 			  'heatmapType':'red',
 			  'indicatorCenter':'rainbow-green',
 			  'smpOverlays': ['Type'],
-			  'title': 'Gene target predictions for each miRNA',
+			  'title': 'StarBase gene target predictions for each miRNA',
 			  'varLabelRotate': 45,
 			  'varOverlays': ['Family']}
 			);
@@ -152,11 +162,14 @@
 		<br><br>
 		<g:if test="${mList.size()>2}">
 			<h2>Heatmap of gene counts</h2>
-			<canvas id='canvas1' width='1000' height='650'></canvas>
-			<br>
+			<div align="center" style="width:100%; height:650px;"=>
+				<canvas id='canvas1' width='1000' height='650'></canvas>
+			</div>
 		</g:if>
-		<h2>miRNAs per chromosome</h2>
-		<svg id="mir_chart"></svg>
+		<br><br><div>
+			<h2>miRNAs per chromosome</h2>
+			<svg id="mir_chart"></svg>
+		</div>
 		<br>
 		<g:if test="${rank.size()>0}">
 			<h2>miRNAs per family</h2>
