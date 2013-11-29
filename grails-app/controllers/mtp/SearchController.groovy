@@ -29,17 +29,30 @@ class SearchController {
         //println searchSql
         def mirRes = sql.rows(searchSql)
     	
-        def heatsql = "select matid,score,genes.start,name,genes.id from mature,mir2mrna,genes where mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") and source = 's' order by genes.id;";
+        def heatsql = "select matid,score,genes.start,name,genes.id,famid from family,precursor,mature,mir2mrna,genes where family.id = precursor.family_id and precursor.id = mature.precursor_id and mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") and source = 's' order by genes.id;";
+    	def top = 50
     	print heatsql
     	def heat = sql.rows(heatsql)
-    	def dMap = [:]
+    	def dMap = []
+    	def dList = [:]
     	def mMap = [:]
     	def mList = []
-    	mirRes.each{
-    	//heat.each{
+    	def famMap = [:]
+		def famList = []
+		
+		//to get miRs with no targets too use mirRes.each and for just those with targets use heat.each
+    	//mirRes.each{
+    	heat.each{
     		mMap."${it.matid}"=0
+    		famMap."${it.matid}"=it.famid
     	}
-    	print "mMap = "+mMap
+    	famMap.each{
+    		famList.add(it.value)
+    	}
+    	famList = famList as JSON
+    	famList = famList.decodeURL()
+    	print "famList = "+famList
+
     	mMap.each{
     		mList.add(it.key)
     	}
@@ -47,24 +60,91 @@ class SearchController {
     	def old_id = ""
     	def old_name = ""
     	def new_id = ""
+    	def data = []
+    	def sumData = [:]
     	heat.each{
     		new_id = it.id
     		if (old_id != "" && it.id != old_id){
     			//print mMap
-    			dMap."${old_name}"=mMap
+    			data = []
+    			mMap.each{
+    				data.add(it.value)
+    			}
+    			//find arrays with most entries or sum the scores
+    			def gr = 0
+    			data.each{
+    				if (it > 0){
+    					gr++
+    				}
+    			}
+    			sumData."${old_name}" = gr
+    			//sumData."${old_name}" = data.sum()
+    			dList."${old_name}" = data
     			//reset the map
     			mMap = [:]
     			mMapReset.each{
-    				mMap."${it.key}"=1
+    				mMap."${it.key}"=0
     			}
     		}
-    		mMap."${it.matid}"=it.score+1
+    		mMap."${it.matid}"=it.score
     		old_name = it.name
     		old_id = it.id
     	}
-    	//catch the last one
-    	dMap."${old_name}"=mMap
+    	//catch the last ones
+    	mMap.each{
+    		data.add(it.value)
+    	}
+    	dList."${old_name}" = data
     	
+    	//sort and generate lists
+    	def fData = []
+    	def gList = []
+    	def sortData = sumData.sort{it.value}.drop( sumData.size() - top )
+    	print "top = "+sortData
+		def count = 0
+    	
+    	sortData.each{
+    		print it.key + " - "+it.value + ": " +dList."${it.key}"
+    		gList.add(it.key)
+    		fData.add(dList."${it.key}")
+		}
+		//transorm the matrix into lists by column (miR)
+		def frData = []
+		def tmp = []
+		print "size = "+mList.size()	
+		for (int i = 0; i < mList.size(); i++) {
+			fData.each{
+				tmp.add(it[i])
+			}	
+			frData.add(tmp)
+			tmp = []
+		}
+		
+		print "heatmap data = "+frData
+		
+    	gList = gList as JSON
+    	gList = gList.decodeURL()
+    	print "heatmap y = "+gList
+    	
+    	mList = mList as JSON
+    	mList = mList.decodeURL()
+    	print "heatmap x = "+mList
+    	
+    	/*
+    	//print dMap
+		def s = "gene\t"+mList.join("\t")
+		new File("heatmap_counts.txt").withWriter { out ->
+			out.writeLine("${s}")
+			dMap.each{
+				//print 
+				def scores = it.value
+				def scoreList = mList.collect{scores[it]}
+				s = it.key+"\t"+scoreList.join("\t")
+				out.writeLine("${s}")
+			}
+		}
+		*/
+    	return [famList:famList, fData:frData, mList:mList, gList:gList]
 		
     	
     }
@@ -215,6 +295,116 @@ class SearchController {
         	
         }
         
+        def heatsql = "select matid,score,genes.start,name,genes.id,famid from family,precursor,mature,mir2mrna,genes where family.id = precursor.family_id and precursor.id = mature.precursor_id and mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") and ((mir2mrna.source = 's' ${starParam}) or (mir2mrna.source = 'd') or (mir2mrna.source = 'm') or (mir2mrna.source = 't')) and source = 's' order by genes.id;";
+    	print heatsql
+    	def heat = sql.rows(heatsql)
+    	
+    	def top = 50
+    	def dMap = []
+    	def dList = [:]
+    	def mMap = [:]
+    	def mList = []
+    	def famMap = [:]
+		def famHeatList = []
+		def fData = []
+		def gList = []
+		def frData = []
+			
+		//to get miRs with no targets too use mirRes.each and for just those with targets use heat.each
+    	//mirRes.each{
+    	heat.each{
+    		mMap."${it.matid}"=0
+    		famMap."${it.matid}"=it.famid
+    	}
+    	print "map size = "+mMap.size()+ " skipping heat map..."
+    	if (mMap.size()>1){
+			famMap.each{
+				famHeatList.add(it.value)
+			}
+			famHeatList = famHeatList as JSON
+			famHeatList = famHeatList.decodeURL()
+			print "famHeatList = "+famHeatList
+
+			mMap.each{
+				mList.add(it.key)
+			}
+			def mMapReset = mMap;
+			def old_id = ""
+			def old_name = ""
+			def new_id = ""
+			def data = []
+			def sumData = [:]
+			heat.each{
+				new_id = it.id
+				if (old_id != "" && it.id != old_id){
+					//print mMap
+					data = []
+					mMap.each{
+						data.add(it.value)
+					}
+					//find arrays with most entries or sum the scores
+					def gr = 0
+					data.each{
+						if (it > 0){
+							gr++
+						}
+					}
+					sumData."${old_name}" = gr
+					//sumData."${old_name}" = data.sum()
+					dList."${old_name}" = data
+					//reset the map
+					mMap = [:]
+					mMapReset.each{
+						mMap."${it.key}"=0
+					}
+				}
+				mMap."${it.matid}"=it.score
+				old_name = it.name
+				old_id = it.id
+			}
+			//catch the last ones
+			mMap.each{
+				data.add(it.value)
+			}
+			dList."${old_name}" = data
+		
+			//sort and generate lists
+			def sortData = sumData.sort{it.value}.drop( sumData.size() - top )
+			//print "top = "+sortData
+			count = 0
+		
+			sortData.each{
+				//print it.key + " - "+it.value + ": " +dList."${it.key}"
+				gList.add(it.key)
+				fData.add(dList."${it.key}")
+			}
+			//transorm the matrix into lists by column (miR)
+			def tmp = []
+			print "size = "+mList.size()	
+			for (int i = 0; i < mList.size(); i++) {
+				fData.each{
+					tmp.add(it[i])
+				}	
+				frData.add(tmp)
+				tmp = []
+			}
+		}
+		//print "heatmap data = "+frData
+		
+    	gList = gList as JSON
+    	gList = gList.decodeURL()
+    	//print "heatmap y = "+gList
+    	
+    	mList = mList as JSON
+    	mList = mList.decodeURL()
+    	//print "heatmap x = "+mList
+    	
+        
+        print miRLister
+        print mirLoc
+        return [famHeatList:famHeatList, fData:frData, mList:mList, gList:gList, miRLister:miRLister, mirLoc:mirLocDecode, flagMap:flagMap, rank:rank, famList:famListDecode, famCount:famCount, mirList: p, mirRes: mirRes, starMap: starMap, mtMap: mtMap, tsMap:tsMap, diMap: diMap, sEv:params.sEv, mEv: params.mEv]    
+    	
+    	 /*       
         //heatmap data
         def heatsql = "select matid,score,genes.start,name,genes.id from mature,mir2mrna,genes where mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") and mir2mrna.mature_id = mature.id and ((mir2mrna.source = 's' ${starParam}) or (mir2mrna.source = 'd') or (mir2mrna.source = 'm') or (mir2mrna.source = 't')) and source = 's' order by genes.id;";
     	print heatsql
@@ -264,10 +454,8 @@ class SearchController {
 				out.writeLine("${s}")
 			}
 		}
-        
-        print miRLister
-        print mirLoc
-        return [miRLister:miRLister, mirLoc:mirLocDecode, flagMap:flagMap, rank:rank, famList:famListDecode, famCount:famCount, mirList: p, mirRes: mirRes, starMap: starMap, mtMap: mtMap, tsMap:tsMap, diMap: diMap, sEv:params.sEv, mEv: params.mEv]    
+        */
+    
     }
     
     def genes(){

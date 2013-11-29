@@ -8,15 +8,20 @@
 
 		<script id='demoScript'>
 	 $(document).ready(function() {
-var cx2 = new CanvasXpress('canvas1',
+	 	console.log(<%=mList%>)
+        console.log(<%=gList%>)
+        console.log(<%=fData%>)
+		var cx2 = new CanvasXpress('canvas1',
           {
             'z': {
+            	'Family': <%=famList%>
               //'Description': ['uncharacterized LOC645722', 'DSCAM antisense RNA 1', 'heat shock 70kDa protein 1A', 'plastin 3', 'epithelial membrane protein 1', 'calponin 3, acidic', 'serglycin', 'transforming growth factor, beta receptor II (70/80kDa)', 'anterior gradient 2 homolog (Xenopus laevis)', 'tumor protein D52-like 1', 'collagen, type XIII, alpha 1', 'plasminogen activator, urokinase', 'olfactomedin 1', 'BTG family, member 3', 'tissue factor pathway inhibitor (lipoprotein-associated coagulation inhibitor)', 'v-ets erythroblastosis virus E26 oncogene homolog 1 (avian)', 'branched chain amino-acid transaminase 1, cytosolic', 'v-erb-b2 erythroblastic leukemia viral oncogene homolog 3 (avian)', 'thiosulfate sulfurtransferase (rhodanese)-like domain containing 1']
             },
             'x': {
               //'Type': ['control', 'control', 'control', 'estrogen receptor knockdown', 'estrogen receptor knockdown', 'estrogen receptor knockdown']
             },
             'y': {
+              /*
               'vars': ['1555216_a_at', '1562821_a_at', '200799_at', '201215_at', '201324_at', '201445_at', '201859_at', '208944_at', '209173_at', '210372_s_at', '211343_s_at', '211668_s_at', '213131_at', '213134_x_at', '213258_at', '224833_at', '225285_at', '226213_at', '226482_s_at'],
               'smps': ['GSM678802', 'GSM678803', 'GSM678804', 'GSM678805', 'GSM678806', 'GSM678807'],
               'data': [[13.4443, 13.4052, 13.4372, 4.55083, 4.83841, 4.5995],
@@ -38,17 +43,21 @@ var cx2 = new CanvasXpress('canvas1',
                        [11.5252, 11.4375, 11.4535, 4.65772, 4.60565, 4.75315],
                        [10.9772, 10.9839, 11.0658, 4.7015, 4.56169, 4.66754],
                        [4.71039, 4.7602, 4.89837, 11.2719, 10.9061, 10.8996]],
-              'desc': ['RMA']
+              */
+              'vars': <%=mList%>,
+              'smps': <%=gList%>,
+              'data': <%=fData%>,        
+              'desc': ['Score']
             },
        
           },
-          {'citation': 'PLoS One. 2011;6(6):e20610. doi: 10.1371/journal.pone.0020610. Epub 2011 Jun 21',
-          'citationFontStyle': 'italic',
-          'graphType': 'Heatmap',
+          {'graphType': 'Heatmap',
+          'heatmapType':'red',
+          'indicatorCenter':'rainbow-green',
           'smpOverlays': ['Type'],
-          'title': 'Estrogen receptor silencing induces epithelial\nto mesenchymal transition in human breast cancer cells.',
+          'title': 'Gene target predictions for each miRNA',
           'varLabelRotate': 45,
-          'varOverlays': ['Symbol']}
+          'varOverlays': ['Family']}
         );
         cx2.clusterSamples();
         cx2.clusterVariables();
@@ -60,7 +69,7 @@ var cx2 = new CanvasXpress('canvas1',
 	</head>
 	<body>
 
-	<canvas id='canvas1' width='540' height='540'></canvas>
+	<canvas id='canvas1' width='1000' height='650'></canvas>
 
 
 	</body>
