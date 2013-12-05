@@ -295,7 +295,7 @@ class SearchController {
         	
         }
         
-        def heatsql = "select matid,score,genes.start,name,genes.id,famid from family,precursor,mature,mir2mrna,genes where family.id = precursor.family_id and precursor.id = mature.precursor_id and mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") and ((mir2mrna.source = 's' ${starParam}) or (mir2mrna.source = 'd') or (mir2mrna.source = 'm') or (mir2mrna.source = 't')) and source = 's' order by genes.id;";
+        def heatsql = "select distinct on (genes.id,matid,name) matid,score,genes.start,name,fullname,genes.id,famid,genes.chr,genes.start,genes.stop from family,precursor,mature,mir2mrna,genes where family.id = precursor.family_id and precursor.id = mature.precursor_id and mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") and ((mir2mrna.source = 's' ${starParam}) or (mir2mrna.source = 'd') or (mir2mrna.source = 'm') or (mir2mrna.source = 't')) and source = 's' order by genes.id;";
     	print heatsql
     	def heat = sql.rows(heatsql)
     	
@@ -309,14 +309,35 @@ class SearchController {
 		def fData = []
 		def gList = []
 		def frData = []
-			
+		def countGenes = [:]
+		def commonGenes = [:]
+		def commonGeneList = []
+		def geneNames = [:]		
+		def geneLoc = [:]
 		//to get miRs with no targets too use mirRes.each and for just those with targets use heat.each
     	//mirRes.each{
+    
     	heat.each{
     		mMap."${it.matid}"=0
     		famMap."${it.matid}"=it.famid
+    		geneNames."${it.name}"=it.fullname
+    		geneLoc."${it.name}"=it.chr+":"+it.start+"-"+it.stop
+    		if (countGenes."${it.name}"){
+    			countGenes."${it.name}" = countGenes."${it.name}" + 1
+    		}else{
+    			countGenes."${it.name}" = 1
+    		}
     	}
-    	print "map size = "+mMap.size()+ " skipping heat map..."
+    	countGenes.each{
+    		commonGenes.name = it.key
+    		commonGenes.count = it.value
+    		commonGenes.fullname = geneNames."${it.key}"
+    		commonGenes.location = geneLoc."${it.key}"
+    		//print "commonGenes = "+commonGenes
+			commonGeneList.add(commonGenes)
+			commonGenes = [:]    		
+    	}
+    	
     	if (mMap.size()>1){
 			famMap.each{
 				famHeatList.add(it.value)
@@ -402,7 +423,7 @@ class SearchController {
         
         print miRLister
         print mirLoc
-        return [famHeatList:famHeatList, fData:frData, mList:mList, gList:gList, miRLister:miRLister, mirLoc:mirLocDecode, flagMap:flagMap, rank:rank, famList:famListDecode, famCount:famCount, mirList: p, mirRes: mirRes, starMap: starMap, mtMap: mtMap, tsMap:tsMap, diMap: diMap, sEv:params.sEv, mEv: params.mEv]    
+        return [commonGeneList:commonGeneList, famHeatList:famHeatList, fData:frData, mList:mList, gList:gList, miRLister:miRLister, mirLoc:mirLocDecode, flagMap:flagMap, rank:rank, famList:famListDecode, famCount:famCount, mirList: p, mirRes: mirRes, starMap: starMap, mtMap: mtMap, tsMap:tsMap, diMap: diMap, sEv:params.sEv, mEv: params.mEv]    
     	
     	 /*       
         //heatmap data

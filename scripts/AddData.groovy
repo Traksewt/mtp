@@ -1,12 +1,12 @@
 package mtp
 
-mirbase()
-//gene_loc()
-//cardiac_flag()
-//starbase_full()
-//mirtarbase_full()
-//tscan_full()
-//diana_full()
+//mirbase()
+//genes()
+cardiac_flag()
+starbase_full()
+mirtarbase_full()
+tscan_full()
+diana_full()
 
 
 def cleanUpGorm() { 
@@ -405,13 +405,13 @@ def starbase_full(){
 	print "Adding starbase data..."
 	def starMap = [:]
 	def gene
-	def star_file = new File("data/starBase_Human_Interactions2013-11-04_05-18.xls")
+	def star_file = new File("data/starBase_Human_Interactions2013-11-04_05-18.filter.txt")
 	//def star_file = new File("data/star_50000.xls")
 	star_file.eachLine{ line ->
 		def s = line.split("\t")
 		//if (s[8].toInteger() > 2){
 			gene = s[1]
-			starMap.score = s[8]
+			starMap.score = s[2]
 			starMap.source = 's'
 			//print starMap
 			//print gene
@@ -526,7 +526,7 @@ def diana_full(){
 	print "Adding DIANA-microT-CDS data..."
 	def diMap = [:]
 	def gene
-	def di_file = new File("data/microtcds_hsa_0.7_data.csv")
+	def di_file = new File("data/microtcds_hsa_0.9_data.csv")
 	//def di_file = new File("data/diana_10000.txt")
 
 	di_file.eachLine{ line ->
@@ -596,12 +596,32 @@ def cardiac_flag(){
 		}
 	}
 }
-def gene_loc(){
+def genes(){
 	def count=0
-	print "Adding gene location data..."
+	print "Adding gene data..."
+	
+	print "Downloading HUGO file"
+	def gFile = new File("data/protein-coding_gene.txt")
+	if (gFile.exists()){
+		print "Already done"
+	}else{ 
+		def wget =  "wget ftp://ftp.ebi.ac.uk/pub/databases/genenames/locus_groups/protein-coding_gene.txt.gz -P data/"
+		def proc = wget.execute()
+		proc.waitFor()
+		print "Unzipping..."
+		def gunzip = "gunzip data/protein-coding_gene.txt.gz"
+		proc = gunzip.execute()
+		proc.waitFor()
+	}
+	def nameMap = [:]
+	gFile.eachLine{ line ->
+		def s = line.split("\t")
+		nameMap."${s[1]}" = s[2]
+	}
+	
 	def gMap = [:]
 	print "Downloading gencode annotation file"
-	def gFile = new File("data/gencode.v18.annotation.gtf")
+	gFile = new File("data/gencode.v18.annotation.gtf")
 	if (gFile.exists()){
 		print "Already done"
 	}else{ 
@@ -618,25 +638,34 @@ def gene_loc(){
 		if ((matcher = line =~ /^chr.*/)){
 			def s = line.split("\t")
 			if ((matcher = s[2] =~ /gene/)){
-				count++
-				gMap.chr = s[0]
-				gMap.start = s[3]
-				gMap.stop = s[4]
-				if ((matcher = s[8] =~ /.*?transcript_name\s+"(.*?)";.*/)){
-					gMap.name = matcher[0][1]
-				}
-				gMap.strand = s[6]
+				if ((matcher = s[8] =~ /protein_coding/)){
+					count++
+					gMap.chr = s[0]
+					gMap.start = s[3]
+					gMap.stop = s[4]
+					def name
+					if ((matcher = s[8] =~ /.*?transcript_name\s+"(.*?)";.*/)){
+						name = matcher[0][1]
+						gMap.name = name
+					}
+					gMap.strand = s[6]
+					if (nameMap."${name}"){
+						gMap.fullname = nameMap."${name}"
+					}else{
+						gMap.fullname = "n/a"
+					}
 			
-				//print gMap
-				Genes g = new Genes(gMap)
-				if ((count % 1000) == 0){
 					//print gMap
-					g.save(flush:true)
-					println new Date()
-					cleanUpGorm()
-					print count
-				}else{
-					g.save()
+					Genes g = new Genes(gMap)
+					if ((count % 1000) == 0){
+						//print gMap
+						g.save(flush:true)
+						println new Date()
+						cleanUpGorm()
+						print count
+					}else{
+						g.save()
+					}
 				}
 			}
 		}

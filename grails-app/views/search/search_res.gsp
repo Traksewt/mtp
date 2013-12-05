@@ -62,6 +62,11 @@
 					}
 				} );
 				
+				$('#common').dataTable({
+					"sPaginationType": "full_numbers",
+					"aaSorting": [[ 3, "desc" ]]
+				});
+				
 		//console.log(<%=mList%>)
         //console.log(<%=gList%>)
         //console.log(<%=fData%>)
@@ -134,7 +139,7 @@
   		</script>
 	</head>
 	<body>
-		<h1>Results</h1>
+		<h1>MiRNA details</h1>
 		<table id="search">
             <thead>
 				<tr><% if(rank.size()>0){%><th>Score</th><%}%><th>Mature</th><th>Family</th><th>Precursor</th><th>Seed</th><th>Location</th><th><a href="#" title="StarBase">S</a></th><th><a href="#" title="MiRTarBase">M</a></th><th><a href="#" title="TargetScan">T</a></th><th><a href="#" title="DIANA MicroT-CDS">D</a></th><th>Flag</th><th>Data</th></tr>
@@ -159,6 +164,24 @@
 				</g:each>
 			</tbody>
 		</table>
+		<br>
+		<h1>StarBase gene counts</h1>
+		<table id="common">
+            <thead>
+				<tr><th>Gene symbol</th><th>Name</th><th width="30%">Location</th><th>Count</th></tr>
+			</thead>
+			<tbody>
+				<g:each var="r" in="${commonGeneList}">
+				<tr>
+					<td><a href = "http://www.genecards.org/cgi-bin/carddisp.pl?gene=${r.name}" target="_blank">${r.name}</a></td>
+					<td>${r.fullname}</td>
+					<td><a href="http://asia.ensembl.org/Homo_sapiens/Location/View?db=core;r=${r.location}" target="_blank">${r.location}</a></td>
+					<td>${r.count}</td>
+				</tr>
+				</g:each>
+			</tbody>
+		</table>
+		
 		<br><br>
 		<g:if test="${mList.size()>2}">
 			<h2>Heatmap of gene counts</h2>

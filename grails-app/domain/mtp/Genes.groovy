@@ -2,6 +2,7 @@ package mtp
 
 class Genes {
 	String name
+	String fullname
     String chr
     int start
     int stop
@@ -9,6 +10,7 @@ class Genes {
     
     static constraints = {
     	name(blank:false)
+    	fullname(blank:false)
     	chr(blank:false)
     	start(blank:false)
     	stop(blank:false)
