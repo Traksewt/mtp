@@ -7,9 +7,11 @@
 		
 		<script src="${resource(dir: 'js', file: 'DataTables-1.9.4/media/js/jquery.js')}" type="text/javascript"></script>
 		<script src="${resource(dir: 'js', file: 'DataTables-1.9.4/media/js/jquery.dataTables.js')}" type="text/javascript"></script>
+		<script src="${resource(dir: 'js', file: 'TableTools-2.1.5/media/js/TableTools.js')}" type="text/javascript"></script>
+        <script src="${resource(dir: 'js', file: 'TableTools-2.1.5/media/js/ZeroClipboard.js')}" type="text/javascript"></script>
 		<link rel="stylesheet" href="${resource(dir: 'js', file: 'DataTables-1.9.4/media/css/demo_table.css')}" type="text/css"></link>
 		<link rel="stylesheet" href="${resource(dir: 'js', file: 'DataTables-1.9.4/media/css/demo_page.css')}" type="text/css"></link>
-		
+		<link rel="stylesheet" href="${resource(dir: 'js', file: 'TableTools-2.1.5/media/css/TableTools.css')}" type="text/css"></link>
 		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 		<style>
 			.axis {
@@ -32,6 +34,15 @@
   			
     			$('#search').dataTable({
     				"sPaginationType": "full_numbers",
+					"iDisplayLength": 10,
+                	"oLanguage": {
+                        "sSearch": "Filter records:"
+                	},
+                	"aLengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+					"sDom": 'T<"clear">lfrtip',
+                	"oTableTools": {
+                        "sSwfPath": "${resource(dir: 'js', file: 'TableTools-2.1.5/media/swf/copy_csv_xls_pdf.swf')}",
+                	}
     			});
 			
 			});
