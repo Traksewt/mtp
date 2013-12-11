@@ -85,6 +85,7 @@
 					"sDom": 'T<"clear">lfrtip',
                 	"oTableTools": {
                         "sSwfPath": "${resource(dir: 'js', file: 'TableTools-2.1.5/media/swf/copy_csv_xls_pdf.swf')}",
+                        "sTitle": "My title"
                 	}
 				});
 				
@@ -157,6 +158,50 @@
         			}
 				});
 			});
+			
+			//enrichr data
+			var eList = <%=gList%>;
+			var eList_split = ""
+			for (var i=0;i<eList.length;i++){
+				eList_split += eList[i]+"\r"
+			} 
+
+			function enrich(options) {
+				var defaultOptions = {
+					description: "",
+					popup: false
+				};
+
+				if (typeof options.description == 'undefined')
+					options.description = defaultOptions.description;
+				if (typeof options.popup == 'undefined')
+					options.popup = defaultOptions.popup;
+				if (typeof options.list == 'undefined')
+					alert('No genes defined.');
+
+				var form = document.createElement('form');
+				form.setAttribute('method', 'post');
+				form.setAttribute('action', 'http://amp.pharm.mssm.edu/Enrichr/enrich');
+				if (options.popup)
+					form.setAttribute('target', '_blank');
+				form.setAttribute('enctype', 'multipart/form-data');
+
+				var listField = document.createElement('input');
+				listField.setAttribute('type', 'hidden');
+				listField.setAttribute('name', 'list');
+				listField.setAttribute('value', options.list);
+				form.appendChild(listField);
+
+				var descField = document.createElement('input');
+				descField.setAttribute('type', 'hidden');
+				descField.setAttribute('name', 'description');
+				descField.setAttribute('value', options.description);
+				form.appendChild(descField);
+
+				document.body.appendChild(form);
+				form.submit();
+				document.body.removeChild(form);
+			}		
   		</script>
 	</head>
 	<body>
@@ -186,7 +231,13 @@
 			</tbody>
 		</table>
 		<br><br>
-		<h1>StarBase gene counts</h1>
+		<h1>StarBase data analysis</h1>
+		<g:if test="${mList.size()>2}">
+			<h3>Enrichr</h3>
+			Click the <a onclick="enrich({list: eList_split, popup: true})" href="javascript:void(0);">link</a> to see Enrichr gene set enrichment analysis for the most common genes. 
+			<br><br>
+		</g:if>
+		<h3>Gene counts</h3>
 		<table id="common">
             <thead>
 				<tr><th>Gene symbol</th><th>Name</th><th width="30%">Location</th><th>Count</th></tr>
@@ -205,18 +256,18 @@
 		
 		<br><br>
 		<g:if test="${mList.size()>2}">
-			<h2>Heatmap of gene counts</h2>
-			<div align="center" style="width:100%; height:650px;"=>
+			<h3>Heatmap of gene counts</h3>
+			<div style="position:relative; margin-left:auto; margin-right:auto; width:1000px; height:650px;"=>
 				<canvas id='canvas1' width='1000' height='650'></canvas>
 			</div>
 		</g:if>
 		<br><br><div>
-			<h2>miRNAs per chromosome</h2>
+			<h3>miRNAs per chromosome</h3>
 			<svg id="mir_chart"></svg>
 		</div>
 		<br>
 		<g:if test="${rank.size()>0}">
-			<h2>miRNAs per family</h2>
+			<h3>miRNAs per family</h3>
 			<div id="family" style="width:100%; height:400px;"></div>
 		</g:if>
 	
