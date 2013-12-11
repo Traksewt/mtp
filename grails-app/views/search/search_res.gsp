@@ -234,7 +234,7 @@
 		<h1>StarBase data analysis</h1>
 		<g:if test="${mList.size()>2}">
 			<h3>Enrichr</h3>
-			Click the <a onclick="enrich({list: eList_split, popup: true})" href="javascript:void(0);">link</a> to see Enrichr gene set enrichment analysis for the most common genes. 
+			Click the <a onclick="enrich({list: eList_split, popup: true})" href="javascript:void(0); "><img src="${resource(dir: 'images', file: 'enrichr-icon.png')}"></a> to see Enrichr gene set enrichment analysis for the most common genes. 
 			<br><br>
 		</g:if>
 		<h3>Gene counts</h3>
