@@ -219,7 +219,7 @@
 					<td><a href="http://www.mirbase.org/cgi-bin/mirna_entry.pl?acc=${r.preacc}" target="_blank">${r.preid}</a></td>
 					<td><font face="courier new">${r.matseq.toUpperCase()[1..6]}</font></td>
 					<!--td><font face="courier new">${r.matseq.toUpperCase()[0]}<b>${r.matseq.toUpperCase()[1..6]}</b>${r.matseq.toUpperCase()[6..-1]}</font></td-->
-					<td><a href="http://asia.ensembl.org/Homo_sapiens/Location/View?db=core;r=${r.chr}:${r.start}-${r.stop}" target="_blank">${r.chr}: ${r.start}-${r.stop}</a></td>
+					<td><a href="http://asia.ensembl.org/Homo_sapiens/Location/View?db=core;r=<%="${r.chr}".replaceAll("chr","")%>:${r.start}-${r.stop}" target="_blank">${r.chr}: ${r.start}-${r.stop}</a></td>
 					<td><a href="http://starbase.sysu.edu.cn/viewMatureMirInfo.php?table=miRNAClipTargets&database=hg19&name=${r.matid}" target="_blank"><%=starMap."${r.matid}" %></a></td>
 					<td><a href="http://mirtarbase.mbc.nctu.edu.tw/index.php" target="_blank"><%=mtMap."${r.matid}" %></a></td>
 					<td><a href="http://www.targetscan.org/cgi-bin/targetscan/vert_61/targetscan.cgi?species=Human&gid=&mir_sc=&mir_c=&mir_nc=&mirg=${r.matid}" target="_blank"><%=tsMap."${r.matid}" %></a></td>
@@ -234,7 +234,7 @@
 		<h1>StarBase data analysis</h1>
 		<g:if test="${mList.size()>2}">
 			<h3>Enrichr</h3>
-			Click the <a onclick="enrich({list: eList_split, popup: true})" href="javascript:void(0); "><img src="${resource(dir: 'images', file: 'enrichr-icon.png')}"></a> to see Enrichr gene set enrichment analysis for the most common genes. 
+			Click the symbol <a onclick="enrich({list: eList_split, popup: true})" href="javascript:void(0); "><img src="${resource(dir: 'images', file: 'enrichr-icon.png')}"></a> to see Enrichr gene set enrichment analysis for the most common genes. 
 			<br><br>
 		</g:if>
 		<h3>Gene counts</h3>
