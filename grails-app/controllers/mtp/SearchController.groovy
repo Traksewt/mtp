@@ -12,11 +12,20 @@ class SearchController {
     }
     
     def ajaxMirFinder = {
-  	 	def mirsFound = Mature.withCriteria {
+    	def matcher
+    	def mirsFound
+  	 	if ((matcher = params.term =~ /^M/)){ 
+  	 		mirsFound = Mature.withCriteria {
+    		ilike 'matacc', params.term + '%'
+    		}
+ 		render (mirsFound?.'matacc' as JSON)
+       	}
+       	else{ 
+  	 		mirsFound = Mature.withCriteria {
     		ilike 'matid', params.term + '%'
-       	} 
-       	//print mirsFound.matid
+    		}
  		render (mirsFound?.'matid' as JSON)
+       	}  
 	} 
     
     def test() { 
@@ -156,9 +165,15 @@ class SearchController {
     	def mirList
     	def rank = [:]
     	def p
+    	def found = [:]
     	if (params.single){
     		print "single = "+params.single
-    		mirList = "matid = '"+params.single+"'"
+    		found."${params.single}"=""
+    		if ((matcher = params.single =~ /^MIMA/)){ 
+    			mirList = "matacc = '"+params.single+"'"
+    		}else{
+    			mirList = "matid = '"+params.single+"'"
+    		}
     	}else{
 			mirList = "("
 			def mirFile = params.mirList
@@ -179,14 +194,18 @@ class SearchController {
 				it = it.trim()
 				it = it.replaceAll("\n","")
 				def s = it.split(" ")
-				mirList <<= "or mature.matid = '"+s[0]+"' "
+				found."${s[0]}"=""
+				if ((matcher = s[0] =~ /^MIMA/)){
+					mirList <<= "or mature.matacc = '"+s[0]+"' "
+				}else{
+					mirList <<= "or mature.matid = '"+s[0]+"' "
+				}
 				if (s.size() == 2){
 					rank."${s[0]}"=s[1]
 				}
 			}
 			mirList = mirList[4..-2]
 		}
-		    	    	
         def searchSql = "select family.*,precursor.*,mature.* from family,precursor,mature where ("+mirList+") and family.id = precursor.family_id and precursor.id = mature.precursor_id;";
         //println searchSql
         def mirRes = sql.rows(searchSql)
@@ -286,6 +305,7 @@ class SearchController {
         	mtMap."${it.matid}" = 0
         	tsMap."${it.matid}" = 0
         	diMap."${it.matid}" = 0
+        	found."${it.matid}" = "yes"
         }
         allRes.each{
         	if (it.source == 's'){ starMap."${it.matid}" = it.count}
@@ -294,6 +314,15 @@ class SearchController {
         	if (it.source == 'd'){ diMap."${it.matid}" = it.count}
         	
         }
+        
+        def missing = []
+        found.each{
+        	if (it.value != "yes"){
+        		missing.add(it.key)
+        	}
+        }
+        print "found = "+found
+        print "missing = "+missing
         
         def heatsql = "select distinct on (genes.id,matid,name) matid,score,genes.start,name,fullname,genes.id,famid,genes.chr,genes.start,genes.stop from family,precursor,mature,mir2mrna,genes where family.id = precursor.family_id and precursor.id = mature.precursor_id and mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") and ((mir2mrna.source = 's' ${starParam}) or (mir2mrna.source = 'd') or (mir2mrna.source = 'm') or (mir2mrna.source = 't')) and source = 's' order by genes.id;";
     	print heatsql
@@ -423,7 +452,7 @@ class SearchController {
         
         print miRLister
         print mirLoc
-        return [commonGeneList:commonGeneList, famHeatList:famHeatList, fData:frData, mList:mList, gList:gList, miRLister:miRLister, mirLoc:mirLocDecode, flagMap:flagMap, rank:rank, famList:famListDecode, famCount:famCount, mirList: p, mirRes: mirRes, starMap: starMap, mtMap: mtMap, tsMap:tsMap, diMap: diMap, sEv:params.sEv, mEv: params.mEv]    
+        return [missing:missing, found:found,commonGeneList:commonGeneList, famHeatList:famHeatList, fData:frData, mList:mList, gList:gList, miRLister:miRLister, mirLoc:mirLocDecode, flagMap:flagMap, rank:rank, famList:famListDecode, famCount:famCount, mirList: p, mirRes: mirRes, starMap: starMap, mtMap: mtMap, tsMap:tsMap, diMap: diMap, sEv:params.sEv, mEv: params.mEv]    
     	
     	 /*       
         //heatmap data

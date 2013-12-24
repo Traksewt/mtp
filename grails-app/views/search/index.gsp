@@ -88,7 +88,7 @@
                  source: '<g:createLink controller='search' action='ajaxMirFinder'/>'
                }); 
                 
-            });        
+            });      
         </g:javascript>
 		
 		<script>
@@ -128,18 +128,18 @@
 		</div>
 		<div id="page-body" role="main">
 			<h1>Search</h1>
-			Either enter a single mature miRBase ID into the small box, a list of IDs into the large box or upload a file of IDs.<br>
-			Lists should be IDs on separate lines or can also include a space delimited score/rank.
+			Either enter a single mature miRBase ID or accession into the small box, a list of IDs or accessions into the large box or upload a file containing a list. Lists should be IDs or accessions on separate lines and can also include a space delimited score/rank.
 			
 			<g:uploadForm name="search_mir" action="search_res" method="post">
 			
-			<h2>Single miRNA</h2>
+			<h2>Single mature miRNA</h2>
+			Either a miRBase ID (e.g. hsa-miR-302b-5p) or miRBase accession (e.g. MIMAT0000714)
 			<div class="demo">
             <div class="ui-widget">
-                <input id="single_mir" name="single">
+                <input id="single_mir" name="single" >
             </div>
 			
-			<br><br><h2>List of miRNAs</h2>
+			<br><br><h2>List of mature miRNAs</h2>
 			<div class="chart"></div>
 			Example lists: <a href = "javascript:void(0)" onclick="demoMir('1')">Top essential miRNAs</a> | <a href = "javascript:void(0)" onclick="demoMir('2')">Top synthetic lethals</a>
 			

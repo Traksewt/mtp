@@ -206,6 +206,7 @@
 	</head>
 	<body>
 		<h1>MiRNA details</h1>
+		${found.size() - missing.size()} of the ${found.size()} miRNAs were found in the database. <g:if test="${missing.size() > 0}">The missing entries were ${missing}.</g:if>
 		<table id="search">
             <thead>
 				<tr><% if(rank.size()>0){%><th>Score</th><%}%><th>Mature</th><th>Family</th><th>Precursor</th><th>Seed</th><th>Location</th><th><a href="#" title="StarBase">S</a></th><th><a href="#" title="MiRTarBase">M</a></th><th><a href="#" title="TargetScan">T</a></th><th><a href="#" title="DIANA MicroT-CDS">D</a></th><th>Flag</th><th>Data</th></tr>
@@ -214,9 +215,9 @@
 				<g:each var="r" in="${mirRes}">
 				<tr>
 					<% if(rank.size()>0){%><td><%=rank."${r.matid}" %></td><%}%>
-					<td><a href="http://mirbase.org/cgi-bin/mirna_entry.pl?acc=${r.matacc}" target="_blank">${r.matid}</a></td>
-					<td><a href="http://mirbase.org/cgi-bin/mirna_summary.pl?fam=${r.famacc}" target="_blank">${r.famid}</a></td>
-					<td><a href="http://www.mirbase.org/cgi-bin/mirna_entry.pl?acc=${r.preacc}" target="_blank">${r.preid}</a></td>
+					<td><a href="http://mirbase.org/cgi-bin/mirna_entry.pl?acc=${r.matacc}" target="_blank">${r.matacc}</a><br>${r.matid}</td>
+					<td><a href="http://mirbase.org/cgi-bin/mirna_summary.pl?fam=${r.famacc}" target="_blank">${r.famacc}</a><br>${r.famid}</td>
+					<td><a href="http://www.mirbase.org/cgi-bin/mirna_entry.pl?acc=${r.preacc}" target="_blank">${r.preacc}</a><br>${r.preid}</td>
 					<td><font face="courier new">${r.matseq.toUpperCase()[1..6]}</font></td>
 					<!--td><font face="courier new">${r.matseq.toUpperCase()[0]}<b>${r.matseq.toUpperCase()[1..6]}</b>${r.matseq.toUpperCase()[6..-1]}</font></td-->
 					<td><a href="http://asia.ensembl.org/Homo_sapiens/Location/View?db=core;r=<%="${r.chr}".replaceAll("chr","")%>:${r.start}-${r.stop}" target="_blank">${r.chr}: ${r.start}-${r.stop}</a></td>

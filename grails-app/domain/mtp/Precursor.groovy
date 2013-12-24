@@ -20,6 +20,6 @@ class Precursor {
     static mapping = {
         preseq type: "text"
     }
-    static hasMany = [mature:Mature]
+    static hasMany = [mature:Mature,, chipmir: ChipbaseMir]
     static belongsTo = [family:Family]
 }

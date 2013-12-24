@@ -16,5 +16,5 @@ class Genes {
     	stop(blank:false)
     	strand(blank:false)
     }
-    static hasMany = [ mir2mrna : Mir2mrna]
+    static hasMany = [ mir2mrna : Mir2mrna, chipgene: ChipbaseGene]
 }

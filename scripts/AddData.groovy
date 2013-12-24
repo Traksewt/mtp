@@ -1,13 +1,16 @@
 package mtp
 
-//mirbase()
-//genes()
+/*
+mirbase()
+genes()
 cardiac_flag()
 starbase_full()
 mirtarbase_full()
 tscan_full()
 diana_full()
-
+chipbase_gene()
+*/
+chipbase_mir()
 
 def cleanUpGorm() { 
     def sessionFactory = ctx.getBean("sessionFactory")
@@ -666,6 +669,79 @@ def genes(){
 					}else{
 						g.save()
 					}
+				}
+			}
+		}
+	}
+	print count
+}
+
+def chipbase_gene(){
+	def count = 0
+	print "Adding chipbase gene data..."
+	def cMap = [:]
+	def gene
+	def chip_file = new File("data/chipBase_Human_proteinTFBSs2013-12-18_13-17.filter.csv")
+	chip_file.eachLine{ line ->
+		def s = line.split(",")
+		gene = s[1]
+		cMap.tfname = s[0]
+		//print cMap
+		//print gene
+		count++
+		Genes g = Genes.findByName(gene)
+		if (g !=null){
+			ChipbaseGene chip = new ChipbaseGene (cMap)
+			g.addToChipgene(chip)
+			if ((count % 1000) == 0){
+				g.save(flush:true)
+				println new Date()
+				cleanUpGorm()
+				print count
+			}else{
+				g.save()
+			}
+		}
+	}
+	print count
+}
+
+def chipbase_mir(){
+	def matcher
+	def count = 0
+	print "Adding chipbase miRNA data..."
+	def cMap = [:]
+	def mir
+	def chip_file = new File("data/chipBase_Human_MirnaTFBSs2013-12-18_13-36.xls")
+	chip_file.eachLine{ line ->
+		def s = line.split("\t")
+		mir = s[5]
+		cMap.tfname = s[1]
+		//print cMap
+		count++
+		def mirSplit 
+		if ((matcher = mir =~ /,/)){
+			mirSplit = mir.split(",")
+			mirSplit.each{
+				Precursor p = Precursor.findByPreid(it)
+				if (p !=null){
+					ChipbaseMir chip = new ChipbaseMir (cMap)
+					p.addToChipmir(chip)
+					p.save()
+				}
+			}
+		}else{
+			Precursor p = Precursor.findByPreid(mir)
+			if (p !=null){
+				ChipbaseMir chip = new ChipbaseMir (cMap)
+				p.addToChipmir(chip)
+				if ((count % 1000) == 0){
+					p.save(flush:true)
+					println new Date()
+					cleanUpGorm()
+					print count
+				}else{
+					p.save()
 				}
 			}
 		}
