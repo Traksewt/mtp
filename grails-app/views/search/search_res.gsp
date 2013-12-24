@@ -206,7 +206,24 @@
 	</head>
 	<body>
 		<h1>MiRNA details</h1>
-		${found.size() - missing.size()} of the ${found.size()} miRNAs were found in the database. <g:if test="${missing.size() > 0}">The missing entries were ${missing}.</g:if>
+		<table>
+		<tr>
+			<td><b>Search results</b></td>
+			<td>${found.size() - missing.size()} of the ${found.size()} miRNAs were found in the database. <g:if test="${missing.size() > 0}">The missing entries were ${missing}.</g:if></td>
+		</tr>
+		<tr>
+			<td><b>miRNA-TF-gene network data</b></td>
+			<td>
+				<g:if test="${mList.size()>2}">
+					<g:form name="network" url="[action:'network']">
+						<g:hiddenField name="mirs" value="${mList}"/>
+						<a href="javascript:void(0);" onclick="document.network.submit()">Available</a>
+					</g:form> 
+                </g:if>
+                <g:else>Not available</g:else>
+            </td>	
+		</tr>
+		</table>
 		<table id="search">
             <thead>
 				<tr><% if(rank.size()>0){%><th>Score</th><%}%><th>Mature</th><th>Family</th><th>Precursor</th><th>Seed</th><th>Location</th><th><a href="#" title="StarBase">S</a></th><th><a href="#" title="MiRTarBase">M</a></th><th><a href="#" title="TargetScan">T</a></th><th><a href="#" title="DIANA MicroT-CDS">D</a></th><th>Flag</th><th>Data</th></tr>

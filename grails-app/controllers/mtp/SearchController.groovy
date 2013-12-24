@@ -11,6 +11,35 @@ class SearchController {
     def index() { 
     }
     
+    def network = {
+    	def sql = new Sql(dataSource)
+    	print "Creating network..."
+    	def mirs = params.mirs
+    	mirs = mirs.replaceAll(/[\]\[]/,"");
+    	mirs = mirs.replaceAll(/"/,"");
+    	print "mirs = "+mirs.getClass()
+    	def mirs2 = mirs.split(",")
+    	def mirs3 = []
+    	mirs2.each{
+    		print "each = "+it
+    		mirs3.add(it)
+    	}
+    	print "mirs2 = "+mirs2.getClass()
+		print "mirs3 = "+mirs3.getClass()
+		print "mirs3 = "+mirs3
+		
+    	//example sql
+    	//def nsql = "select genes.name,matid,chipbase_gene.tfname as gene_tfname,chipbase_mir.tfname as mir_tfname from mature,mir2mrna,genes,chipbase_gene,chipbase_mir where ("+params.mirs+") and source = 's' and mir2mrna.genes_id = genes.id and mir2mrna.mature_id = mature.id and chipbase_gene.genes_id = genes.id and chipbase_mir.pre_id = mature.precursor_id order by name;";
+    	//def nres = Mature.findAllByMatidInList(["hsa-miR-518c-5p", "hsa-miR-320c", "hsa-miR-299-3p", "hsa-miR-10a-5p", "hsa-miR-125a-3p", "hsa-miR-190b", "hsa-miR-515-3p", "hsa-miR-199b-5p", "hsa-miR-380-3p"])
+    	def t = ["hsa-miR-518c-5p", "hsa-miR-320c", "hsa-miR-299-3p", "hsa-miR-10a-5p", "hsa-miR-125a-3p", "hsa-miR-190b", "hsa-miR-515-3p", "hsa-miR-199b-5p", "hsa-miR-380-3p"];
+    	print "t = "+t.getClass()
+    	print "t ="+t
+    	def nres = Mature.findAllByMatidInList(mirs3)
+    	//print nsql
+    	//def nres = sql.rows(nsql)
+    	return [nres:nres]
+    }
+    
     def ajaxMirFinder = {
     	def matcher
     	def mirsFound
@@ -452,7 +481,7 @@ class SearchController {
         
         print miRLister
         print mirLoc
-        return [missing:missing, found:found,commonGeneList:commonGeneList, famHeatList:famHeatList, fData:frData, mList:mList, gList:gList, miRLister:miRLister, mirLoc:mirLocDecode, flagMap:flagMap, rank:rank, famList:famListDecode, famCount:famCount, mirList: p, mirRes: mirRes, starMap: starMap, mtMap: mtMap, tsMap:tsMap, diMap: diMap, sEv:params.sEv, mEv: params.mEv]    
+        return [missing:missing, found:found,commonGeneList:commonGeneList, famHeatList:famHeatList, fData:frData, mList:mList, gList:gList, miRLister:miRLister, mirLoc:mirLocDecode, flagMap:flagMap, rank:rank, famList:famListDecode, famCount:famCount, mirRes: mirRes, starMap: starMap, mtMap: mtMap, tsMap:tsMap, diMap: diMap, sEv:params.sEv, mEv: params.mEv]    
     	
     	 /*       
         //heatmap data
