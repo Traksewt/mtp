@@ -30,10 +30,6 @@ class SearchController {
 		
     	//example sql
     	//def nsql = "select genes.name,matid,chipbase_gene.tfname as gene_tfname,chipbase_mir.tfname as mir_tfname from mature,mir2mrna,genes,chipbase_gene,chipbase_mir where ("+params.mirs+") and source = 's' and mir2mrna.genes_id = genes.id and mir2mrna.mature_id = mature.id and chipbase_gene.genes_id = genes.id and chipbase_mir.pre_id = mature.precursor_id order by name;";
-    	//def nres = Mature.findAllByMatidInList(["hsa-miR-518c-5p", "hsa-miR-320c", "hsa-miR-299-3p", "hsa-miR-10a-5p", "hsa-miR-125a-3p", "hsa-miR-190b", "hsa-miR-515-3p", "hsa-miR-199b-5p", "hsa-miR-380-3p"])
-    	def t = ["hsa-miR-518c-5p", "hsa-miR-320c", "hsa-miR-299-3p", "hsa-miR-10a-5p", "hsa-miR-125a-3p", "hsa-miR-190b", "hsa-miR-515-3p", "hsa-miR-199b-5p", "hsa-miR-380-3p"];
-    	print "t = "+t.getClass()
-    	print "t ="+t
     	def nres = Mature.findAllByMatidInList(mirs3)
     	//print nsql
     	//def nres = sql.rows(nsql)
@@ -334,7 +330,12 @@ class SearchController {
         	mtMap."${it.matid}" = 0
         	tsMap."${it.matid}" = 0
         	diMap."${it.matid}" = 0
-        	found."${it.matid}" = "yes"
+        	if (found."${it.matid}" == ""){
+        		found."${it.matid}" = "yes"
+        	}
+        	if (found."${it.matacc}" == ""){
+        		found."${it.matacc}" = "yes"
+        	}
         }
         allRes.each{
         	if (it.source == 's'){ starMap."${it.matid}" = it.count}
