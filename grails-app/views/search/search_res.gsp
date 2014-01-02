@@ -217,6 +217,8 @@
 				<g:if test="${mList.size()>2}">
 					<g:form name="network" url="[action:'network']">
 						<g:hiddenField name="mirs" value="${mList}"/>
+						<g:hiddenField name="common_genes" value="${gList}"/>
+						<g:hiddenField name="common_mirs" value="${mList}"/>
 						<a href="javascript:void(0);" onclick="document.network.submit()">Available</a>
 					</g:form> 
                 </g:if>

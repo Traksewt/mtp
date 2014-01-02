@@ -8,9 +8,10 @@ starbase_full()
 mirtarbase_full()
 tscan_full()
 diana_full()
-chipbase_gene()
 */
-chipbase_mir()
+chipbase_gene()
+
+//chipbase_mir()
 
 def cleanUpGorm() { 
     def sessionFactory = ctx.getBean("sessionFactory")

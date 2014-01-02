@@ -20,20 +20,70 @@ class SearchController {
     	print "mirs = "+mirs.getClass()
     	def mirs2 = mirs.split(",")
     	def mirs3 = []
+    	
+    	def mirString = ""
     	mirs2.each{
     		print "each = "+it
     		mirs3.add(it)
+    		mirString <<= " or mature.matid = '"+it+"'"
     	}
+    	mirString = mirString[4..-1]
+    	print "mirString = "+mirString
+    	
     	print "mirs2 = "+mirs2.getClass()
 		print "mirs3 = "+mirs3.getClass()
 		print "mirs3 = "+mirs3
 		
-    	//example sql
-    	//def nsql = "select genes.name,matid,chipbase_gene.tfname as gene_tfname,chipbase_mir.tfname as mir_tfname from mature,mir2mrna,genes,chipbase_gene,chipbase_mir where ("+params.mirs+") and source = 's' and mir2mrna.genes_id = genes.id and mir2mrna.mature_id = mature.id and chipbase_gene.genes_id = genes.id and chipbase_mir.pre_id = mature.precursor_id order by name;";
-    	def nres = Mature.findAllByMatidInList(mirs3)
+    	//one sql command - too much!
+    	//def nsql = "select genes.name,matid,chipbase_gene.tfname as gene_tfname,chipbase_mir.tfname as mir_tfname from mature,mir2mrna,genes,chipbase_gene,chipbase_mir where ("+mirString+") and source = 's' and mir2mrna.genes_id = genes.id and mir2mrna.mature_id = mature.id and chipbase_gene.genes_id = genes.id and chipbase_mir.pre_id = mature.precursor_id order by name;";
     	//print nsql
-    	//def nres = sql.rows(nsql)
-    	return [nres:nres]
+    	
+    	def ndata = []
+    	def nmap = [:]
+    	mirs2.each{
+    		//get the genes and tf-gene data
+    		print "Getting network data for "+it
+    		//def nsql = "select genes.name,matid,chipbase_gene.tfname as gene_tfname from mature,mir2mrna,genes,chipbase_gene where mature.matid = '"+it+"' and source = 's' and mir2mrna.genes_id = genes.id and mir2mrna.mature_id = mature.id and chipbase_gene.genes_id = genes.id order by name;";
+			def nsql = "select count(distinct(genes.name)) as gcount, count(distinct(chipbase_gene.tfname)) as tfg from mature,mir2mrna,genes,chipbase_gene where mature.matid = '"+it+"' and source = 's' and mir2mrna.genes_id = genes.id and mir2mrna.mature_id = mature.id and chipbase_gene.genes_id = genes.id group by matid;";
+			print nsql   
+			def nres = sql.rows(nsql)
+			nmap.mir = it
+			nmap.gcount = nres.gcount[0]
+			nmap.tfg = nres.tfg[0]
+			nsql = "select count(distinct(chipbase_mir.tfname)) as tfm from precursor,mature,chipbase_mir where mature.matid = '"+it+"' and mature.precursor_id = precursor.id and chipbase_mir.pre_id = precursor.id group by matid;";
+			nres = sql.rows(nsql)
+			nmap.tfm = nres.tfm[0]
+			print "nmap = "+nmap
+			ndata.add(nmap) 	
+			nmap = [:]
+    	}
+    	print "ndata = "+ndata
+    	// def nres = Mature.findAllByMatidInList(mirs3)
+//     	nres.each{mir->
+//     		print "mir = "+mir.matid			
+//  		   	def star = mir.mir2mrna.findAll{
+//  		   		mir.mir2mrna.source=="s"
+//  		   	}
+//  		    //def star = mir.mir2mrna.findAll({mir.mir2mrna.source=="s"}).genes.name.unique()
+// 			print "star = "+star.size()
+//     	}
+//     	//a.mir2mrna.findAllWhere(source:"s" )
+    	
+    	def com_genes = params.common_genes
+    	def com_genes_list = com_genes.replaceAll(/[\]\[]/,"").split(",")
+    	def com_genes_list2 = []
+    	com_genes_list.each{
+    		com_genes_list2.add(it)
+    	}
+		
+		def com_mirs = params.common_mirs
+    	def com_mirs_list = com_mirs.replaceAll(/[\]\[]/,"").split(",")
+    	def com_mirs_list2 = []
+    	com_mirs_list.each{
+    		com_mirs_list2.add(it)
+    	}
+    	
+    	return [ndata:ndata, com_genes:com_genes_list2, com_mirs:com_mirs_list2]
     }
     
     def ajaxMirFinder = {
@@ -319,7 +369,7 @@ class SearchController {
 		*/
 		def allSql = "select mature.matid,mature.id,source,count(distinct(mir2mrna.genes_id)) from mature,mir2mrna where ("+mirList+") and mir2mrna.mature_id = mature.id and ((mir2mrna.source = 's' ${starParam}) or (mir2mrna.source = 'd') or (mir2mrna.source = 'm') or (mir2mrna.source = 't')) group by matid,source,mature.id;";
 		def allRes = sql.rows(allSql) 
-		print allSql
+		print "allsql = "+allSql
 		
         def starMap = [:]
         def mtMap = [:]
@@ -354,7 +404,7 @@ class SearchController {
         print "found = "+found
         print "missing = "+missing
         
-        def heatsql = "select distinct on (genes.id,matid,name) matid,score,genes.start,name,fullname,genes.id,famid,genes.chr,genes.start,genes.stop from family,precursor,mature,mir2mrna,genes where family.id = precursor.family_id and precursor.id = mature.precursor_id and mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") and ((mir2mrna.source = 's' ${starParam}) or (mir2mrna.source = 'd') or (mir2mrna.source = 'm') or (mir2mrna.source = 't')) and source = 's' order by genes.id;";
+        def heatsql = "select distinct on (genes.id,matid,name) matid,score,genes.start,name,fullname,genes.id,famid,genes.chr,genes.start,genes.stop from family,precursor,mature,mir2mrna,genes where family.id = precursor.family_id and precursor.id = mature.precursor_id and mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") and (source = 's' ${starParam}) order by genes.id;";
     	print heatsql
     	def heat = sql.rows(heatsql)
     	
@@ -450,7 +500,7 @@ class SearchController {
 		
 			//sort and generate lists
 			def sortData = sumData.sort{it.value}.drop( sumData.size() - top )
-			//print "top = "+sortData
+			print "top = "+sortData
 			count = 0
 		
 			sortData.each{
@@ -478,7 +528,7 @@ class SearchController {
     	mList = mList as JSON
     	mList = mList.decodeURL()
     	//print "heatmap x = "+mList
-    	
+    	//print "commonGeneList = "+commonGeneList
         
         print miRLister
         print mirLoc
