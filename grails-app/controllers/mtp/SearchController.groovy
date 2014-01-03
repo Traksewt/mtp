@@ -25,9 +25,9 @@ class SearchController {
     	mirs2.each{
     		print "each = "+it
     		mirs3.add(it)
-    		mirString <<= " or mature.matid = '"+it+"'"
+    		mirString <<= "'"+it+"',"
     	}
-    	mirString = mirString[4..-1]
+    	mirString = mirString[0..-2]
     	print "mirString = "+mirString
     	
     	print "mirs2 = "+mirs2.getClass()
@@ -40,23 +40,23 @@ class SearchController {
     	
     	def ndata = []
     	def nmap = [:]
-    	mirs2.each{
-    		//get the genes and tf-gene data
-    		print "Getting network data for "+it
-    		//def nsql = "select genes.name,matid,chipbase_gene.tfname as gene_tfname from mature,mir2mrna,genes,chipbase_gene where mature.matid = '"+it+"' and source = 's' and mir2mrna.genes_id = genes.id and mir2mrna.mature_id = mature.id and chipbase_gene.genes_id = genes.id order by name;";
-			def nsql = "select count(distinct(genes.name)) as gcount, count(distinct(chipbase_gene.tfname)) as tfg from mature,mir2mrna,genes,chipbase_gene where mature.matid = '"+it+"' and source = 's' and mir2mrna.genes_id = genes.id and mir2mrna.mature_id = mature.id and chipbase_gene.genes_id = genes.id group by matid;";
-			print nsql   
-			def nres = sql.rows(nsql)
-			nmap.mir = it
-			nmap.gcount = nres.gcount[0]
-			nmap.tfg = nres.tfg[0]
-			nsql = "select count(distinct(chipbase_mir.tfname)) as tfm from precursor,mature,chipbase_mir where mature.matid = '"+it+"' and mature.precursor_id = precursor.id and chipbase_mir.pre_id = precursor.id group by matid;";
-			nres = sql.rows(nsql)
-			nmap.tfm = nres.tfm[0]
-			print "nmap = "+nmap
-			ndata.add(nmap) 	
-			nmap = [:]
-    	}
+//     	mirs2.each{
+//     		//get the genes and tf-gene data
+//     		print "Getting network data for "+it
+//     		//def nsql = "select genes.name,matid,chipbase_gene.tfname as gene_tfname from mature,mir2mrna,genes,chipbase_gene where mature.matid = '"+it+"' and source = 's' and mir2mrna.genes_id = genes.id and mir2mrna.mature_id = mature.id and chipbase_gene.genes_id = genes.id order by name;";
+// 			def nsql = "select count(distinct(genes.name)) as gcount, count(distinct(chipbase_gene.tfname)) as tfg from mature,mir2mrna,genes,chipbase_gene where mature.matid = '"+it+"' and source = 's' and mir2mrna.genes_id = genes.id and mir2mrna.mature_id = mature.id and chipbase_gene.genes_id = genes.id group by matid;";
+// 			print nsql   
+// 			def nres = sql.rows(nsql)
+// 			nmap.mir = it
+// 			nmap.gcount = nres.gcount[0]
+// 			nmap.tfg = nres.tfg[0]
+// 			nsql = "select count(distinct(chipbase_mir.tfname)) as tfm from precursor,mature,chipbase_mir where mature.matid = '"+it+"' and mature.precursor_id = precursor.id and chipbase_mir.pre_id = precursor.id group by matid;";
+// 			nres = sql.rows(nsql)
+// 			nmap.tfm = nres.tfm[0]
+// 			print "nmap = "+nmap
+// 			ndata.add(nmap) 	
+// 			nmap = [:]
+//     	}
     	print "ndata = "+ndata
     	// def nres = Mature.findAllByMatidInList(mirs3)
 //     	nres.each{mir->
@@ -70,20 +70,29 @@ class SearchController {
 //     	//a.mir2mrna.findAllWhere(source:"s" )
     	
     	def com_genes = params.common_genes
-    	def com_genes_list = com_genes.replaceAll(/[\]\[]/,"").split(",")
-    	def com_genes_list2 = []
-    	com_genes_list.each{
-    		com_genes_list2.add(it)
-    	}
+    	def com_genes_list = com_genes.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")
+    	print "com_genes_list = "+com_genes_list
 		
 		def com_mirs = params.common_mirs
-    	def com_mirs_list = com_mirs.replaceAll(/[\]\[]/,"").split(",")
-    	def com_mirs_list2 = []
-    	com_mirs_list.each{
-    		com_mirs_list2.add(it)
+    	def com_mirs_list = com_mirs.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")
+		print "com_mirs_list = "+com_mirs_list
+		
+		def comsql1 = "select matid,name,score from mature,mir2mrna,genes where matid in ("+com_mirs_list+") and name in ("+com_genes_list+") and mature.id = mir2mrna.mature_id and mir2mrna.genes_id = genes.id;"
+    	print comsql1
+    	def c1 = sql.rows(comsql1)
+    	print "c1 = "+c1
+    	new File("network.csv").withWriter { out ->
+    		out.writeLine("source,target,value")
+			c1.each{
+				out.writeLine("${it.matid},${it.name},${it.score}")
+    		}
     	}
     	
-    	return [ndata:ndata, com_genes:com_genes_list2, com_mirs:com_mirs_list2]
+    	def comsql2 = "select name,tfname from genes,chipbase_gene where name in ("+com_genes_list+") and genes.id = chipbase_gene.genes_id;";
+    	print comsql2
+    	def comsql3 = "select matid,tfname from precursor,mature,chipbase_mir where matid in ("+com_mirs_list+") and mature.precursor_id = precursor.id and precursor.id = chipbase_mir.pre_id;";
+    	print comsql3
+    	return [ndata:ndata, com_genes:com_genes_list, com_mirs:com_mirs_list]
     }
     
     def ajaxMirFinder = {
@@ -103,134 +112,7 @@ class SearchController {
        	}  
 	} 
     
-    def test() { 
-    	//heatmap data
-    	def sql = new Sql(dataSource)
-    	
-    	def mirList = "mature.matid = 'hsa-miR-380-3p' or mature.matid = 'hsa-miR-3934-5p' or mature.matid = 'hsa-miR-3181' or mature.matid = 'hsa-miR-515-3p' or mature.matid = 'hsa-miR-518c-5p' or mature.matid = 'hsa-miR-3151' or mature.matid = 'hsa-miR-652-3p' or mature.matid = 'hsa-miR-513c-5p' or mature.matid = 'hsa-miR-3162-5p' or mature.matid = 'hsa-miR-125a-3p' or mature.matid = 'hsa-miR-199b-5p' or mature.matid = 'hsa-miR-4264' or mature.matid = 'hsa-miR-411-3p' or mature.matid = 'hsa-miR-299-3p' or mature.matid = 'hsa-miR-3670' or mature.matid = 'hsa-let-7a-3p' or mature.matid = 'hsa-miR-190b' or mature.matid = 'hsa-miR-4302' or mature.matid = 'hsa-miR-4275' or mature.matid = 'hsa-miR-320c' or mature.matid = 'hsa-miR-10a-5p'"
-    	
-    	def searchSql = "select family.*,precursor.*,mature.* from family,precursor,mature where ("+mirList+") and family.id = precursor.family_id and precursor.id = mature.precursor_id;";
-        //println searchSql
-        def mirRes = sql.rows(searchSql)
-    	
-        def heatsql = "select matid,score,genes.start,name,genes.id,famid from family,precursor,mature,mir2mrna,genes where family.id = precursor.family_id and precursor.id = mature.precursor_id and mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") and source = 's' order by genes.id;";
-    	def top = 50
-    	print heatsql
-    	def heat = sql.rows(heatsql)
-    	def dMap = []
-    	def dList = [:]
-    	def mMap = [:]
-    	def mList = []
-    	def famMap = [:]
-		def famList = []
-		
-		//to get miRs with no targets too use mirRes.each and for just those with targets use heat.each
-    	//mirRes.each{
-    	heat.each{
-    		mMap."${it.matid}"=0
-    		famMap."${it.matid}"=it.famid
-    	}
-    	famMap.each{
-    		famList.add(it.value)
-    	}
-    	famList = famList as JSON
-    	famList = famList.decodeURL()
-    	print "famList = "+famList
-
-    	mMap.each{
-    		mList.add(it.key)
-    	}
-    	def mMapReset = mMap;
-    	def old_id = ""
-    	def old_name = ""
-    	def new_id = ""
-    	def data = []
-    	def sumData = [:]
-    	heat.each{
-    		new_id = it.id
-    		if (old_id != "" && it.id != old_id){
-    			//print mMap
-    			data = []
-    			mMap.each{
-    				data.add(it.value)
-    			}
-    			//find arrays with most entries or sum the scores
-    			def gr = 0
-    			data.each{
-    				if (it > 0){
-    					gr++
-    				}
-    			}
-    			sumData."${old_name}" = gr
-    			//sumData."${old_name}" = data.sum()
-    			dList."${old_name}" = data
-    			//reset the map
-    			mMap = [:]
-    			mMapReset.each{
-    				mMap."${it.key}"=0
-    			}
-    		}
-    		mMap."${it.matid}"=it.score
-    		old_name = it.name
-    		old_id = it.id
-    	}
-    	//catch the last ones
-    	mMap.each{
-    		data.add(it.value)
-    	}
-    	dList."${old_name}" = data
-    	
-    	//sort and generate lists
-    	def fData = []
-    	def gList = []
-    	def sortData = sumData.sort{it.value}.drop( sumData.size() - top )
-    	print "top = "+sortData
-		def count = 0
-    	
-    	sortData.each{
-    		print it.key + " - "+it.value + ": " +dList."${it.key}"
-    		gList.add(it.key)
-    		fData.add(dList."${it.key}")
-		}
-		//transorm the matrix into lists by column (miR)
-		def frData = []
-		def tmp = []
-		print "size = "+mList.size()	
-		for (int i = 0; i < mList.size(); i++) {
-			fData.each{
-				tmp.add(it[i])
-			}	
-			frData.add(tmp)
-			tmp = []
-		}
-		
-		print "heatmap data = "+frData
-		
-    	gList = gList as JSON
-    	gList = gList.decodeURL()
-    	print "heatmap y = "+gList
-    	
-    	mList = mList as JSON
-    	mList = mList.decodeURL()
-    	print "heatmap x = "+mList
-    	
-    	/*
-    	//print dMap
-		def s = "gene\t"+mList.join("\t")
-		new File("heatmap_counts.txt").withWriter { out ->
-			out.writeLine("${s}")
-			dMap.each{
-				//print 
-				def scores = it.value
-				def scoreList = mList.collect{scores[it]}
-				s = it.key+"\t"+scoreList.join("\t")
-				out.writeLine("${s}")
-			}
-		}
-		*/
-    	return [famList:famList, fData:frData, mList:mList, gList:gList]
-		
-    	
+    def test() {    	
     }
     
     def search_res(){
