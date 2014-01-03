@@ -7,24 +7,35 @@
 		
 		<style>
 		path.link {
-		fill: none;
-		stroke: #666; stroke-width: 1.5px;
+			fill: none;
+			/**stroke: #666;**/ 
+			stroke: #0000ff;
+			stroke-width: 1.5px;
 		}
-		path.link.twofive { opacity: 0.25;
+		path.link.twofive { 
+			opacity: 0.25;
 		}
-		path.link.fivezero { opacity: 0.50;
+		path.link.fivezero { 
+			opacity: 0.50;
 		}
-		path.link.sevenfive { opacity: 0.75;
+		path.link.sevenfive { 
+			opacity: 0.75;
 		}
-		path.link.onezerozero { opacity: 1.0;
+		path.link.onezerozero { 
+			opacity: 1.0;
+		}
+		path.link.TFmir{
+			stroke: #ff0000; 
+			opacity: 0.5;
+			stroke-width: 1.0px;
 		}
 		circle {
-		fill: #ccc;
-		stroke: #fff; stroke-width: 1.5px;
+			fill: #ccc;
+			stroke: #fff; stroke-width: 1.5px;
 		}
 		text {
-		fill: #000;
-		font: 10px sans-serif; pointer-events: none;
+			fill: #000;
+			font: 10px sans-serif; pointer-events: none;
 		}
 
 		</style>
@@ -44,16 +55,21 @@
 			link.value = +link.value;
 		});
 		
-		var width = 960,
+		var width = 1200,
 		height = 1000;
+		
+		var color = d3.scale.category20c();
 		
 		var force = d3.layout.force() 
 			.nodes(d3.values(nodes)) 
 			.links(links) 
 			.size([width, height]) 
 			.linkDistance(60) 
-			.charge(-5000) 
+			.charge(-2000) 
 			.on("tick", tick) 
+			.linkStrength(0.5)
+			.friction(0.5)
+			.gravity(0.5)
 			.start();
 			
 		var v = d3.scale.linear().range([0, 100]);
@@ -61,7 +77,9 @@
 		v.domain([0, d3.max(links, function(d) { return d.value; })]);
 		
 		links.forEach(function(link) {
-			if (v(link.value) <= 25) {
+			if (v(link.value) == 0) {
+				link.type = "TFmir";
+			}else if (v(link.value) <= 25) {
 				link.type = "twofive";
 			} else if (v(link.value) <= 50 && v(link.value) > 25) {
 				link.type = "fivezero";
@@ -96,26 +114,43 @@
   		 .enter().append("svg:path")
     		.attr("class", function(d) { return "link " + d.type; })
     		.attr("marker-end", "url(#end)");
+
     		
 		// define the nodes
 		var node = svg.selectAll(".node") 
 			.data(force.nodes())
 		  .enter().append("g")
 			.attr("class", "node")
-			.on("click", click) 
-			.on("dblclick", dblclick)
+			//.on("click", click) 
+			//.on("dblclick", dblclick)
 			.call(force.drag);
 			
-		// add the nodes
+		// add the nodes and change colour and sizes accordingly
 		node.append("circle")
-			.attr("r", 5);
+			.attr("r", function(d) { 
+				if (d.name.match(/^hsa/)){
+					return 5; 
+				}else{
+					return 5
+				}
+			})
+			.style("fill", function(d) { 
+				if (d.name.match(/^hsa/)){
+					return 'blue'; 
+				}else if(d.name.match(/^TF-/)){
+					return 'red';
+				}else{
+					return 'green';
+				}
+			})
 			
 		// add the text
 		node.append("text")
 			.attr("x", 12)
 			.attr("dy", ".35em") 
 			.text(function(d) { return d.name; });
-			
+	
+		
 		// add the curvy lines
 		function tick() { 
 			path.attr("d", function(d) {
@@ -131,30 +166,30 @@
 			.attr("transform", function(d) {
 				return "translate(" + d.x + "," + d.y + ")"; });
 		} 
-		function click() { 
-		  d3.select(this).select("text").transition()
-        	.duration(750)
-        	.attr("x", 22)
-        	.style("fill", "steelblue")
-        	.style("stroke", "lightsteelblue")
-        	.style("stroke-width", ".5px")
-        	.style("font", "20px sans-serif");
-		  d3.select(this).select("circle").transition() .duration(750)
-        	.attr("r", 16)
-        	.style("fill", "lightsteelblue");
-		}
-		function dblclick() { 
-		  d3.select(this).select("circle").transition()
-			.duration(750)
-			.attr("r", 6)
-			.style("fill", "#ccc");
-		  d3.select(this).select("text").transition() .duration(750)
-			.attr("x", 12)
-			.style("stroke", "none")
-			.style("fill", "black")
-			.style("stroke", "none")
-			.style("font", "10px sans-serif");
-		}
+// 		function click() { 
+// 		  d3.select(this).select("text").transition()
+//         	.duration(750)
+//         	.attr("x", 22)
+//         	.style("fill", "steelblue")
+//         	.style("stroke", "lightsteelblue")
+//         	.style("stroke-width", ".5px")
+//         	.style("font", "20px sans-serif");
+// 		  d3.select(this).select("circle").transition() .duration(750)
+//         	.attr("r", 16)
+//         	.style("fill", "lightsteelblue");
+// 		}
+// 		function dblclick() { 
+// 		  d3.select(this).select("circle").transition()
+// 			.duration(750)
+// 			.attr("r", 6)
+// 			.style("fill", "#ccc");
+// 		  d3.select(this).select("text").transition() .duration(750)
+// 			.attr("x", 12)
+// 			.style("stroke", "none")
+// 			.style("fill", "black")
+// 			.style("stroke", "none")
+// 			.style("font", "10px sans-serif");
+// 		}
 
 		});
 		</script>

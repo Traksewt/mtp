@@ -80,18 +80,28 @@ class SearchController {
 		def comsql1 = "select matid,name,score from mature,mir2mrna,genes where matid in ("+com_mirs_list+") and name in ("+com_genes_list+") and mature.id = mir2mrna.mature_id and mir2mrna.genes_id = genes.id;"
     	print comsql1
     	def c1 = sql.rows(comsql1)
-    	print "c1 = "+c1
     	new File("network.csv").withWriter { out ->
     		out.writeLine("source,target,value")
 			c1.each{
 				out.writeLine("${it.matid},${it.name},${it.score}")
     		}
-    	}
     	
-    	def comsql2 = "select name,tfname from genes,chipbase_gene where name in ("+com_genes_list+") and genes.id = chipbase_gene.genes_id;";
-    	print comsql2
-    	def comsql3 = "select matid,tfname from precursor,mature,chipbase_mir where matid in ("+com_mirs_list+") and mature.precursor_id = precursor.id and precursor.id = chipbase_mir.pre_id;";
-    	print comsql3
+			def comsql2 = "select name,tfname from genes,chipbase_gene where name in ("+com_genes_list+") and genes.id = chipbase_gene.genes_id;";
+			print comsql2
+			def c2 = sql.rows(comsql2)
+			c2.each{
+					//out.writeLine("TF-${it.tfname},${it.name},0.5")
+			}
+		
+			def comsql3 = "select matid,tfname from precursor,mature,chipbase_mir where matid in ("+com_mirs_list+") and mature.precursor_id = precursor.id and precursor.id = chipbase_mir.pre_id;";
+			print comsql3
+			def c3 = sql.rows(comsql3)
+			c3.each{
+					out.writeLine("TF-${it.tfname},${it.matid},0")
+			}
+		}
+    	
+    	
     	return [ndata:ndata, com_genes:com_genes_list, com_mirs:com_mirs_list]
     }
     
