@@ -209,18 +209,20 @@
 		<table>
 		<tr>
 			<td><b>Search results</b></td>
-			<td>${found.size() - missing.size()} of the ${found.size()} miRNAs were found in the database. <g:if test="${missing.size() > 0}">The missing entries were ${missing}.</g:if></td>
+			<td>Details for ${found.size() - missing.size()} of the ${found.size()} miRNAs were found in the database in ${duration}. <g:if test="${missing.size() > 0}">The missing entries were ${missing}.</g:if></td>
 		</tr>
 		<tr>
 			<td><b>miRNA-TF-gene network data</b></td>
 			<td>
 				<g:if test="${mList.size()>2}">
-					<g:form name="network" url="[action:'network']">
-						<g:hiddenField name="mirs" value="${mList}"/>
+					<g:link action="network">Available</g:link>
+					<!-- 
+						<g:form name="network" url="[action:'network']">
 						<g:hiddenField name="common_genes" value="${gList}"/>
 						<g:hiddenField name="common_mirs" value="${mList}"/>
 						<a href="javascript:void(0);" onclick="document.network.submit()">Available</a>
 					</g:form> 
+ 					-->
                 </g:if>
                 <g:else>Not available</g:else>
             </td>	

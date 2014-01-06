@@ -41,6 +41,7 @@
 		</style>
 	</head>
 	<body>
+		${d}
 		<script>
 		// get the data
 		d3.csv("${resource(dir: 'js', file: 'd3/network.csv')}", function(error, links) { 

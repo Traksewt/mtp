@@ -3,6 +3,7 @@ package mtp
 import groovy.sql.Sql
 import grails.converters.JSON
 import org.xml.sax.InputSource
+import groovy.time.*
 
 class SearchController {
 	
@@ -14,32 +15,33 @@ class SearchController {
     def network = {
     	def sql = new Sql(dataSource)
     	print "Creating network..."
-    	def mirs = params.mirs
-    	mirs = mirs.replaceAll(/[\]\[]/,"");
-    	mirs = mirs.replaceAll(/"/,"");
-    	print "mirs = "+mirs.getClass()
-    	def mirs2 = mirs.split(",")
-    	def mirs3 = []
     	
-    	def mirString = ""
-    	mirs2.each{
-    		print "each = "+it
-    		mirs3.add(it)
-    		mirString <<= "'"+it+"',"
-    	}
-    	mirString = mirString[0..-2]
-    	print "mirString = "+mirString
-    	
-    	print "mirs2 = "+mirs2.getClass()
-		print "mirs3 = "+mirs3.getClass()
-		print "mirs3 = "+mirs3
+    	// def mirs = params.mirs
+//     	mirs = mirs.replaceAll(/[\]\[]/,"");
+//     	mirs = mirs.replaceAll(/"/,"");
+//     	print "mirs = "+mirs.getClass()
+//     	def mirs2 = mirs.split(",")
+//     	def mirs3 = []
+//     	
+//     	def mirString = ""
+//     	mirs2.each{
+//     		print "each = "+it
+//     		mirs3.add(it)
+//     		mirString <<= "'"+it+"',"
+//     	}
+//     	mirString = mirString[0..-2]
+//     	print "mirString = "+mirString
+//     	
+//     	print "mirs2 = "+mirs2.getClass()
+// 		print "mirs3 = "+mirs3.getClass()
+// 		print "mirs3 = "+mirs3
 		
     	//one sql command - too much!
     	//def nsql = "select genes.name,matid,chipbase_gene.tfname as gene_tfname,chipbase_mir.tfname as mir_tfname from mature,mir2mrna,genes,chipbase_gene,chipbase_mir where ("+mirString+") and source = 's' and mir2mrna.genes_id = genes.id and mir2mrna.mature_id = mature.id and chipbase_gene.genes_id = genes.id and chipbase_mir.pre_id = mature.precursor_id order by name;";
     	//print nsql
     	
-    	def ndata = []
-    	def nmap = [:]
+//    	def ndata = []
+//    	def nmap = [:]
 //     	mirs2.each{
 //     		//get the genes and tf-gene data
 //     		print "Getting network data for "+it
@@ -57,7 +59,7 @@ class SearchController {
 // 			ndata.add(nmap) 	
 // 			nmap = [:]
 //     	}
-    	print "ndata = "+ndata
+//    	print "ndata = "+ndata
     	// def nres = Mature.findAllByMatidInList(mirs3)
 //     	nres.each{mir->
 //     		print "mir = "+mir.matid			
@@ -69,40 +71,88 @@ class SearchController {
 //     	}
 //     	//a.mir2mrna.findAllWhere(source:"s" )
     	
-    	def com_genes = params.common_genes
-    	def com_genes_list = com_genes.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")
-    	print "com_genes_list = "+com_genes_list
-		
-		def com_mirs = params.common_mirs
-    	def com_mirs_list = com_mirs.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")
-		print "com_mirs_list = "+com_mirs_list
-		
-		def comsql1 = "select matid,name,score from mature,mir2mrna,genes where matid in ("+com_mirs_list+") and name in ("+com_genes_list+") and mature.id = mir2mrna.mature_id and mir2mrna.genes_id = genes.id;"
+    	def ndata = [:]
+		def nodeMap = [:]
+		def nodeList = []
+		def linkMap = [:]
+		def linkList = []
+		def ndataDecode
+		def comsql1 = "select matid,name,score from mature,mir2mrna,genes where matid in ("+session.commonMList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and name in ("+session.commonGList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and mature.id = mir2mrna.mature_id and mir2mrna.genes_id = genes.id;"
     	print comsql1
     	def c1 = sql.rows(comsql1)
     	new File("network.csv").withWriter { out ->
     		out.writeLine("source,target,value")
 			c1.each{
-				out.writeLine("${it.matid},${it.name},${it.score}")
+				def source = it.matid
+				def target = it.name
+				def score = it.score
+				out.writeLine("${source},${target},${score}")
+				if (!nodeList.name.contains("${source}")){
+					nodeMap.name = "${source}"
+					nodeMap.type = "miRNA"
+					nodeList.add(nodeMap)
+					nodeMap = [:] 
+				}
+				if (!nodeList.name.contains("${target}")){
+					nodeMap.name = "${target}"
+					nodeMap.type = "gene"
+					nodeList.add(nodeMap)
+					nodeMap = [:] 
+				}
+				//do the links
+				def mir_index = nodeList.name.findIndexOf {it == "${source}" }
+				def gene_index = nodeList.name.findIndexOf {it == "${target}" }
+				linkMap.value = "${score}"
+				linkMap.source = mir_index
+				linkMap.target = gene_index
+				linkList.add(linkMap)
+				linkMap = [:]
     		}
-    	
-			def comsql2 = "select name,tfname from genes,chipbase_gene where name in ("+com_genes_list+") and genes.id = chipbase_gene.genes_id;";
+    		
+			def comsql2 = "select name,tfname from genes,chipbase_gene where name in ("+session.commonGList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and genes.id = chipbase_gene.genes_id;";
 			print comsql2
 			def c2 = sql.rows(comsql2)
 			c2.each{
 					//out.writeLine("TF-${it.tfname},${it.name},0.5")
 			}
 		
-			def comsql3 = "select matid,tfname from precursor,mature,chipbase_mir where matid in ("+com_mirs_list+") and mature.precursor_id = precursor.id and precursor.id = chipbase_mir.pre_id;";
+			def comsql3 = "select matid,tfname from precursor,mature,chipbase_mir where matid in ("+session.commonMList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and mature.precursor_id = precursor.id and precursor.id = chipbase_mir.pre_id;";
 			print comsql3
 			def c3 = sql.rows(comsql3)
 			c3.each{
-					out.writeLine("TF-${it.tfname},${it.matid},0")
+				def target = it.matid
+				def source = it.tfname
+				def score = 0
+				out.writeLine("TF-${source},${target},0")
+				if (!nodeList.name.contains("${source}")){
+					nodeMap.name = "${source}"
+					nodeMap.type = "TF-mir"
+					nodeList.add(nodeMap)
+					nodeMap = [:] 
+				}
+				if (!nodeList.name.contains("${target}")){
+					nodeMap.name = "${target}"
+					nodeMap.type = "miRNA"
+					nodeList.add(nodeMap)
+					nodeMap = [:] 
+				}
+				//do the links
+				def mir_index = nodeList.name.findIndexOf {it == "${source}" }
+				def gene_index = nodeList.name.findIndexOf {it == "${target}" }
+				linkMap.value = "${score}"
+				linkMap.source = mir_index
+				linkMap.target = gene_index
+				linkList.add(linkMap)
+				linkMap = [:]
 			}
+    		ndata.nodes = nodeList
+    		ndata.links = linkList
+    		def ndataJSON = ndata as JSON
+        	ndataDecode = ndataJSON.decodeURL()
+    		//print ndataDecode
 		}
     	
-    	
-    	return [ndata:ndata, com_genes:com_genes_list, com_mirs:com_mirs_list]
+    	return [ndata:ndataDecode]
     }
     
     def ajaxMirFinder = {
@@ -123,9 +173,18 @@ class SearchController {
 	} 
     
     def test() {    	
+    	def d = Flag.findAll()
+    	//print "d = "+d
+    	session.test = d
+    }
+    
+ 	def test2() {  
+ 		print "test2"
+ 		print "d = "+session.test  	
     }
     
     def search_res(){
+    	def t1 = new Date()
     	def sql = new Sql(dataSource)
     	def matcher
     	//generate the list of miRs to search
@@ -424,7 +483,16 @@ class SearchController {
         
         print miRLister
         print mirLoc
-        return [missing:missing, found:found,commonGeneList:commonGeneList, famHeatList:famHeatList, fData:frData, mList:mList, gList:gList, miRLister:miRLister, mirLoc:mirLocDecode, flagMap:flagMap, rank:rank, famList:famListDecode, famCount:famCount, mirRes: mirRes, starMap: starMap, mtMap: mtMap, tsMap:tsMap, diMap: diMap, sEv:params.sEv, mEv: params.mEv]    
+        
+        def t2 = new Date()
+        def TimeDuration duration = TimeCategory.minus(t2, t1)
+        
+        //add things to the session
+        session.commonGenes = commonGeneList.sort{it.count}.drop( commonGeneList.size() - top )
+        session.commonMList = mList
+        session.commonGList = gList
+        
+        return [duration:duration,missing:missing, found:found,commonGeneList:commonGeneList, famHeatList:famHeatList, fData:frData, mList:mList, gList:gList, miRLister:miRLister, mirLoc:mirLocDecode, flagMap:flagMap, rank:rank, famList:famListDecode, famCount:famCount, mirRes: mirRes, starMap: starMap, mtMap: mtMap, tsMap:tsMap, diMap: diMap, sEv:params.sEv, mEv: params.mEv]    
     	
     	 /*       
         //heatmap data
