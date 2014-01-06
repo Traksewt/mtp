@@ -105,21 +105,15 @@ class SearchController {
 				linkMap.value = "${score}"
 				linkMap.source = mir_index
 				linkMap.target = gene_index
+				linkMap.name = "mir-gene"
 				linkList.add(linkMap)
 				linkMap = [:]
     		}
-    		
-			def comsql2 = "select name,tfname from genes,chipbase_gene where name in ("+session.commonGList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and genes.id = chipbase_gene.genes_id;";
+		
+			def comsql2 = "select matid,tfname from precursor,mature,chipbase_mir where matid in ("+session.commonMList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and mature.precursor_id = precursor.id and precursor.id = chipbase_mir.pre_id;";
 			print comsql2
 			def c2 = sql.rows(comsql2)
 			c2.each{
-					//out.writeLine("TF-${it.tfname},${it.name},0.5")
-			}
-		
-			def comsql3 = "select matid,tfname from precursor,mature,chipbase_mir where matid in ("+session.commonMList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and mature.precursor_id = precursor.id and precursor.id = chipbase_mir.pre_id;";
-			print comsql3
-			def c3 = sql.rows(comsql3)
-			c3.each{
 				def target = it.matid
 				def source = it.tfname
 				def score = 0
@@ -137,14 +131,39 @@ class SearchController {
 					nodeMap = [:] 
 				}
 				//do the links
-				def mir_index = nodeList.name.findIndexOf {it == "${source}" }
+				def tf_index = nodeList.name.findIndexOf {it == "${source}" }
 				def gene_index = nodeList.name.findIndexOf {it == "${target}" }
 				linkMap.value = "${score}"
-				linkMap.source = mir_index
+				linkMap.source = tf_index
 				linkMap.target = gene_index
+				linkMap.name = "tf-mir"
 				linkList.add(linkMap)
 				linkMap = [:]
 			}
+			
+			def comsql3 = "select name,tfname from genes,chipbase_gene where name in ("+session.commonGList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and genes.id = chipbase_gene.genes_id;";
+			print comsql3
+			def c3 = sql.rows(comsql3)
+			c3.each{
+				def target = it.name
+				def source = it.tfname
+				def score = 0
+				out.writeLine("TF-${it.tfname},${it.name},0")
+				//only get the tf-gene interactions that are already present in the node list, i.e. TFs that target miRNAs
+				if (nodeList.name.contains("${source}")){
+					if (nodeList.name.contains("${target}")){
+						def tf_index = nodeList.name.findIndexOf {it == "${source}" }
+						def gene_index = nodeList.name.findIndexOf {it == "${target}" }
+						linkMap.value = 0
+						linkMap.source = tf_index
+						linkMap.target = gene_index
+						linkMap.name = "tf-gene"
+						//linkList.add(linkMap)
+						linkMap = [:]
+					}
+				}
+			}
+			
     		ndata.nodes = nodeList
     		ndata.links = linkList
     		def ndataJSON = ndata as JSON
@@ -184,6 +203,7 @@ class SearchController {
     }
     
     def search_res(){
+    	def top = 10
     	def t1 = new Date()
     	def sql = new Sql(dataSource)
     	def matcher
@@ -359,7 +379,6 @@ class SearchController {
     	print heatsql
     	def heat = sql.rows(heatsql)
     	
-    	def top = 50
     	def dMap = []
     	def dList = [:]
     	def mMap = [:]
