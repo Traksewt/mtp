@@ -72,7 +72,11 @@
 			<td><g:textField name="d2Value"/></td>
 		</tr>
 	</table>
-			<br><input class="smallbuttons" type="button" value="Search" id="process" onclick="submit()" >
+		<select name="library">					
+			<option value="mim">Mimics</option>
+			<option value="in">Inhibitors</option>
+			<br><br>
+			<input class="smallbuttons" type="button" value="Search" id="process" onclick="submit()" >
 	</g:form>
 	</body>
 </html>

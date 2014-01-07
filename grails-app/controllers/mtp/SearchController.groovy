@@ -22,9 +22,29 @@ class SearchController {
     	def sql = new Sql(dataSource)
 		print "selected data"
 		def screen = ""
+		def mirList = []
+		def mirListSearch = ""
 		if (params.funCheck instanceof String){
 			screen = "("+params.funCheck+")"
 		}else{
+			//get the mirs found in all data types
+			def allCheckSql = "select matacc, count(matacc) from screen_data,screen_meta,mature where screen_meta.id in (1798400,1800801) and screen_data.sm_id = screen_meta.id and veh>1.1  and screen_data.mature_id = mature.id group by matacc;";
+			def allCheck = sql.rows(allCheckSql)
+			allCheck.each{
+				if (it.count == params.funCheck.size()){
+					mirList.add(it.matacc)
+				}
+			}
+			print "mirList = "+mirList.size()
+			if (mirList.size()>0){
+				mirListSearch = mirList.collect { "'" + it+ "'" }.join(',')
+				mirListSearch = "matacc in ("+mirListSearch+") and "
+			}else{
+				//do something here as if no common mirs are found this fails!!!!
+				//fix this!!!!
+			}
+			print "mirListSearch = "+mirListSearch
+			
 			screen = "("
 			params.funCheck.each{
 				screen <<= it+","
@@ -56,7 +76,8 @@ class SearchController {
 			d2 = "and d2"+signMap."${params.d2Select}"+params.d2Value+" "
 			print "d2: "+d2
 		}
-		def sSql = "select screen_meta.id as meta_id, cell, type, mature.*, screen_data.* from screen_data,screen_meta,mature where screen_meta.id in "+screen+" and screen_data.sm_id = screen_meta.id "+v+d1+d2+" and screen_data.mature_id = mature.id;";
+
+		def sSql = "select screen_meta.id as meta_id, cell, type, mature.*, screen_data.* from screen_data,screen_meta,mature where "+mirListSearch+" screen_meta.id in "+screen+" and screen_data.sm_id = screen_meta.id "+v+d1+d2+" and screen_data.mature_id = mature.id;";
 		print sSql
 		def s = sql.rows(sSql)
 		def all = [:]
