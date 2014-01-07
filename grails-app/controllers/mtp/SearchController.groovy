@@ -21,10 +21,14 @@ class SearchController {
     def screen_res(){
     	def sql = new Sql(dataSource)
 		print "selected data"
-		def screen = "("
-		params.funCheck.each{
-			print "each "+it
-			screen <<= it+","
+		def screen = ""
+		if (params.funCheck instanceof String){
+			screen = "("+params.funCheck+")"
+		}else{
+			screen = "("
+			params.funCheck.each{
+				screen <<= it+","
+			}
 		}
 		screen = screen[0..-2]
 		screen <<= ")"
@@ -52,8 +56,15 @@ class SearchController {
 			d2 = "and d2"+signMap."${params.d2Select}"+params.d2Value+" "
 			print "d2: "+d2
 		}
-		def sSql = "select * from screen_data,screen_meta,mature where screen_meta.id in "+screen+" and screen_data.sm_id = screen_meta.id "+v+d1+d2+" and screen_data.mature_id = mature.id;";
+		def sSql = "select screen_meta.id as meta_id, cell, type, mature.*, screen_data.* from screen_data,screen_meta,mature where screen_meta.id in "+screen+" and screen_data.sm_id = screen_meta.id "+v+d1+d2+" and screen_data.mature_id = mature.id;";
 		print sSql
+		def s = sql.rows(sSql)
+		def all = [:]
+		s.each{
+			all."${it.meta_id}"
+		}
+		print all
+		return [s:s]
 	}
     
  	def test2() {  

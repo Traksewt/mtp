@@ -11,13 +11,15 @@
 		<script>
 		$(document).ready(function() {
 			$('#meta').dataTable({
-					"sPaginationType": "full_numbers",
-					"aaSorting": [[ 1, "desc" ]],
+					"bPaginate": false,  
+      				"bFilter": false,     
+					"aaSorting": [[ 1, "asc" ]],
 					"iDisplayLength": 10,
                 	"oLanguage": {
                         "sSearch": "Filter records:"
                 	},
                 	"aLengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+                	"sDom": 'rt<"bottom"flp>'
 					
 				});
 		});
@@ -28,7 +30,7 @@
 	<g:form action="screen_res">
 	<table id="meta">
 	<thead>
-	<tr><th></th><th>Type</th><th>Cell</th><th>Drug 1</th><th>Drug 2</th><th>Mimics</th><th>Inhibitors</th></tr>
+	<tr><th>Select</th><th>Type</th><th>Cell</th><th>Drug 1</th><th>Drug 2</th><th>Mimics</th><th>Inhibitors</th></tr>
 	</thead>
 	<tbody>
 	<g:each var="r" in="${meta}">
@@ -36,38 +38,40 @@
 	</g:each>
 	</tbody>
 	</table>
-		<table>
-			<tr>
-				<td>Vehicle</td>
-				<td>
-					<select name="vSelect">					
-					<option value="lt"><</option>
-					<option value="gt">></option>
-					<option value="eq">=</option>
-				</td>	
-				<td><g:textField name="vValue" value="0.8" /></td>
-			</tr>
-			<tr>
-				<td>Drug 1</td>
-				<td>
-					<select name="d1Select">					
-					<option value="lt"><</option>
-					<option value="gt">></option>
-					<option value="eq">=</option>
-				</td>	
-				<td><g:textField name="d1Value" value="0.8" /></td>
-			</tr>
-			<tr>
-				<td>Drug 2</td>
-				<td>
-					<select name="d2Select">					
-					<option value="lt"><</option>
-					<option value="gt">></option>
-					<option value="eq">=</option>
-				</td>	
-				<td><g:textField name="d2Value" value="0.8" /></td>
-			</tr>
-			</table>
+	<br>
+	<h1>Set some paramaters (leave blank to ignore)</h1>
+	<table>
+		<tr>
+			<td>Vehicle</td>
+			<td>
+				<select name="vSelect">					
+				<option value="lt"><</option>
+				<option value="gt">></option>
+				<option value="eq">=</option>
+			</td>	
+			<td><g:textField name="vValue" value="0.5" /></td>
+		</tr>
+		<tr>
+			<td>Drug 1</td>
+			<td>
+				<select name="d1Select">					
+				<option value="lt"><</option>
+				<option value="gt">></option>
+				<option value="eq">=</option>
+			</td>	
+			<td><g:textField name="d1Value"/></td>
+		</tr>
+		<tr>
+			<td>Drug 2</td>
+			<td>
+				<select name="d2Select">					
+				<option value="lt"><</option>
+				<option value="gt">></option>
+				<option value="eq">=</option>
+			</td>	
+			<td><g:textField name="d2Value"/></td>
+		</tr>
+	</table>
 			<br><input class="smallbuttons" type="button" value="Search" id="process" onclick="submit()" >
 	</g:form>
 	</body>
