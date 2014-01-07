@@ -18,6 +18,44 @@ class SearchController {
     	return [meta:m]
     }
     
+    def screen_res(){
+    	def sql = new Sql(dataSource)
+		print "selected data"
+		def screen = "("
+		params.funCheck.each{
+			print "each "+it
+			screen <<= it+","
+		}
+		screen = screen[0..-2]
+		screen <<= ")"
+		print "screen = "+screen
+		
+		
+		def v=""
+		def d1=""
+		def d2=""
+		
+		def signMap = [:]
+		signMap.eq = "="
+		signMap.lt = "<"
+		signMap.gt = ">"
+		
+		if (params.vValue){
+			v = "and veh"+signMap."${params.vSelect}"+params.vValue+" "
+			print "v: "+v
+		}
+		if (params.d1Value){
+			d1 = "and d1"+signMap."${params.d1Select}"+params.d1Value+" "
+			print "d1: "+d1
+		}
+		if (params.d2Value){
+			d2 = "and d2"+signMap."${params.d2Select}"+params.d2Value+" "
+			print "d2: "+d2
+		}
+		def sSql = "select * from screen_data,screen_meta,mature where screen_meta.id in "+screen+" and screen_data.sm_id = screen_meta.id "+v+d1+d2+" and screen_data.mature_id = mature.id;";
+		print sSql
+	}
+    
  	def test2() {  
  		print "test2"
  		print "d = "+session.test  	

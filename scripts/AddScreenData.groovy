@@ -1,29 +1,52 @@
 package mtp
 
+n1()
+n2()
+p1()
+p2()
 
-s1()
-s2()
-
-def s1(){
+def n1(){
 	def metaMap = [:]
 	metaMap.type = "Neuroblastoma"
 	metaMap.cell = "Shep"
-	metaMap.d1 = "Dox"
-	metaMap.d2 = "Vin"
+	metaMap.d1name = "Dox"
+	metaMap.d2name = "Vin"
 	ScreenMeta smeta = new ScreenMeta(metaMap)
 	smeta.save(flush:true)
 	addFunData("20130930_SHEP_both_drugs_summary_data.csv",smeta)
 }
 
-def s2(){
+def n2(){
 	def metaMap = [:]
 	metaMap.type = "Neuroblastoma"
 	metaMap.cell = "Kelly"
-	metaMap.d1 = "Dox"
-	metaMap.d2 = "Vin"
+	metaMap.d1name = "Dox"
+	metaMap.d2name = "Vin"
 	ScreenMeta smeta = new ScreenMeta(metaMap)
 	smeta.save(flush:true)
 	addFunData("20131003_Kelly_both_drugs_summary_data.csv",smeta)
+}
+
+def p1(){
+	def metaMap = [:]
+	metaMap.type = "Prostate"
+	metaMap.cell = "DU145"
+	metaMap.d1name = "Dox"
+	metaMap.d2name = "Cab"
+	ScreenMeta smeta = new ScreenMeta(metaMap)
+	smeta.save(flush:true)
+	addFunData("20131029_DU145_both_drugs_summary_data.csv",smeta)
+}
+
+def p2(){
+	def metaMap = [:]
+	metaMap.type = "Prostate"
+	metaMap.cell = "PC3"
+	metaMap.d1name = "Dox"
+	metaMap.d2name = "Cab"
+	ScreenMeta smeta = new ScreenMeta(metaMap)
+	smeta.save(flush:true)
+	addFunData("20131031_PC3_both_drugs_summary_data.csv",smeta)
 }
 
 def addFunData(fileName,smeta){
