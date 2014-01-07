@@ -12,6 +12,17 @@ class SearchController {
     def index() { 
     }
     
+    def test() {    	
+    	def m = ScreenMeta.findAll()
+    	
+    	return [meta:m]
+    }
+    
+ 	def test2() {  
+ 		print "test2"
+ 		print "d = "+session.test  	
+    }
+    
     def network = {
     	def sql = new Sql(dataSource)
     	print "Creating network..."
@@ -191,19 +202,8 @@ class SearchController {
        	}  
 	} 
     
-    def test() {    	
-    	def d = Flag.findAll()
-    	//print "d = "+d
-    	session.test = d
-    }
-    
- 	def test2() {  
- 		print "test2"
- 		print "d = "+session.test  	
-    }
-    
     def search_res(){
-    	def top = 10
+    	def top = 50
     	def t1 = new Date()
     	def sql = new Sql(dataSource)
     	def matcher

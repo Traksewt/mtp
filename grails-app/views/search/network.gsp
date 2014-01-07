@@ -120,11 +120,11 @@
 			.links(data.links)
 			.size([width, height]) 
 			.linkDistance(60) 
-			.charge(-1200) dsds
+			.charge(-2000) 
 			.on("tick", tick) 
 			.linkStrength(0.5)
 			.friction(0.5)
-			.gravity(0.05)
+			.gravity(0.5)
 			.start();
 			
 		var v = d3.scale.linear().range([0, 100]);

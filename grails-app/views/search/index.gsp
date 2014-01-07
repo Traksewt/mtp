@@ -105,7 +105,10 @@
   		
 	</head>
 	<body>
-		<a href="#page-body" class="skip"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
+		<h1>The website is down for development :)</h1>
+		
+		<!-- 
+<a href="#page-body" class="skip"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
 		<div id="status" role="complementary">
 			<h1>Application Status</h1>
 			<ul>
@@ -154,13 +157,14 @@
 					<option value="3">4 or more</option>
 					<option value="4">5</option>
 				</select>
-				<!--br>MiRTarBase evidence: 
+				<!~~br>MiRTarBase evidence: 
 				<select name="mEv">
 					<option value="0">All</option>
 					<option value="1">No weak evidence</option>
-				</select-->
+				</select~~>
 				<br><input class="smallbuttons" type="button" value="Search" id="process" onclick="submit()" >
 			</g:uploadForm>
 		</div>
+ -->
 	</body>
 </html>
