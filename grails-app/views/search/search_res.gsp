@@ -288,7 +288,7 @@
 			<svg id="mir_chart"></svg>
 		</div>
 		<br>
-		<g:if test="${rank.size()>0}">
+		<g:if test="${mList.size()>0}">
 			<h3>miRNAs per family</h3>
 			<div id="family" style="width:100%; height:400px;"></div>
 		</g:if>

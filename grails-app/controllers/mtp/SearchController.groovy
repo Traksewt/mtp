@@ -10,50 +10,28 @@ class SearchController {
 	javax.sql.DataSource dataSource
 	
     def index() { 
-    }
-    
-    def test() {    	
     	def m = ScreenMeta.findAll()
-    	
     	return [meta:m]
     }
     
+    def test() {    	
+    }
+    
+    
     def screen_res(){
     	def sql = new Sql(dataSource)
-		print "selected data"
+		print "Searching screen data..."
 		def screen = ""
 		def mirList = []
 		def mirListSearch = ""
-		if (params.funCheck instanceof String){
-			screen = "("+params.funCheck+")"
-		}else{
-			//get the mirs found in all data types
-			def allCheckSql = "select matacc, count(matacc) from screen_data,screen_meta,mature where screen_meta.id in (1798400,1800801) and screen_data.sm_id = screen_meta.id and veh>1.1  and screen_data.mature_id = mature.id group by matacc;";
-			def allCheck = sql.rows(allCheckSql)
-			allCheck.each{
-				if (it.count == params.funCheck.size()){
-					mirList.add(it.matacc)
-				}
-			}
-			print "mirList = "+mirList.size()
-			if (mirList.size()>0){
-				mirListSearch = mirList.collect { "'" + it+ "'" }.join(',')
-				mirListSearch = "matacc in ("+mirListSearch+") and "
-			}else{
-				//do something here as if no common mirs are found this fails!!!!
-				//fix this!!!!
-			}
-			print "mirListSearch = "+mirListSearch
-			
-			screen = "("
-			params.funCheck.each{
-				screen <<= it+","
-			}
-		}
-		screen = screen[0..-2]
-		screen <<= ")"
-		print "screen = "+screen
+		def data = params.funCheck
+		print "data = "+data
 		
+		//set the library search
+		def lib = ""
+		if (params.library != "Either"){
+			lib = "and library = '"+params.library+"'"
+		}
 		
 		def v=""
 		def d1=""
@@ -63,6 +41,8 @@ class SearchController {
 		signMap.eq = "="
 		signMap.lt = "<"
 		signMap.gt = ">"
+		
+		def noMatch = false
 		
 		if (params.vValue){
 			v = "and veh"+signMap."${params.vSelect}"+params.vValue+" "
@@ -76,16 +56,59 @@ class SearchController {
 			d2 = "and d2"+signMap."${params.d2Select}"+params.d2Value+" "
 			print "d2: "+d2
 		}
-
-		def sSql = "select screen_meta.id as meta_id, cell, type, mature.*, screen_data.* from screen_data,screen_meta,mature where "+mirListSearch+" screen_meta.id in "+screen+" and screen_data.sm_id = screen_meta.id "+v+d1+d2+" and screen_data.mature_id = mature.id;";
-		print sSql
-		def s = sql.rows(sSql)
-		def all = [:]
-		s.each{
-			all."${it.meta_id}"
+		
+		if (data instanceof String){
+			screen = "("+data+")"
+		}else if (data != null){
+			//get the mirs found in all data types
+			screen = "("
+			data.each{
+				screen <<= it+","
+			}
+			screen = screen[0..-2]
+			screen <<= ")"
+			print "screen = "+screen
+			
+			def allCheckSql = "select matacc, count(matacc) from screen_data,screen_meta,mature where screen_meta.id in "+screen+" and screen_data.sm_id = screen_meta.id "+v+d1+d2+" and screen_data.mature_id = mature.id "+lib+" group by matacc;";
+			print allCheckSql
+			def allCheck = sql.rows(allCheckSql)
+			print "all size = "+allCheck.size()
+			print "fun size = "+data.size()
+			if (allCheck.size()>0){
+				allCheck.each{
+					if (it.count == data.size()){
+						mirList.add(it.matacc)
+					}
+				}
+			}
+			print "mirList = "+mirList.size()
+			if (mirList.size()>0){
+				mirListSearch = mirList.collect { "'" + it+ "'" }.join(',')
+				mirListSearch = "matacc in ("+mirListSearch+") and "
+			}else{
+				noMatch = true
+			}
+			print "mirListSearch = "+mirListSearch
+		}else{
+			noMatch = true
 		}
-		print all
-		return [s:s]
+		
+		def s
+		def mList = []
+		if (noMatch == false){
+			def sSql = "select screen_meta.id as meta_id, cell, type, mature.*, screen_data.* from screen_data,screen_meta,mature where "+mirListSearch+" screen_meta.id in "+screen+" and screen_data.sm_id = screen_meta.id "+v+d1+d2+" and screen_data.mature_id = mature.id "+lib+"";
+			print sSql
+			s = sql.rows(sSql)
+			s.each{
+				mList.add("${it.matacc}")
+			}
+			mList = mList.unique()
+			session.screenMirs = mList
+			
+		}else{
+			s = "noMatch"
+		}
+		return [s:s, mList:mList]
 	}
     
  	def test2() {  
@@ -278,7 +301,7 @@ class SearchController {
     	def sql = new Sql(dataSource)
     	def matcher
     	//generate the list of miRs to search
-    	def mirList
+    	def mirList = ""
     	def rank = [:]
     	def p
     	def found = [:]
@@ -290,8 +313,17 @@ class SearchController {
     		}else{
     			mirList = "matid = '"+params.single+"'"
     		}
+    	}else if (params.screen == "true"){
+    		print "Using list from screen search"
+    		//print session.screenMirs
+    		session.screenMirs.each{
+    			mirList <<= "or mature.matacc = '"+it+"' "
+    			found."${it}"=""
+    		}
+    		mirList = mirList[3..-2]
+    		//print "mirList = "+mirList
+    		
     	}else{
-			mirList = "("
 			def mirFile = params.mirList
 			def upload = request.getFile('myFile')
 				if (!upload.empty) {
@@ -320,10 +352,10 @@ class SearchController {
 					rank."${s[0]}"=s[1]
 				}
 			}
-			mirList = mirList[4..-2]
+			mirList = mirList[3..-2]
 		}
         def searchSql = "select family.*,precursor.*,mature.* from family,precursor,mature where ("+mirList+") and family.id = precursor.family_id and precursor.id = mature.precursor_id;";
-        //println searchSql
+        println searchSql
         def mirRes = sql.rows(searchSql)
         
         def flagsql = "select flag.*,mature.* from flag,mature where ("+mirList+") and flag.mature_id = mature.id;";

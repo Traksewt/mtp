@@ -15,7 +15,7 @@
 			$(document).ready(function() {
 			$('#res').dataTable({
 					"sPaginationType": "full_numbers",
-					"aaSorting": [[ 3, "asc" ]],
+					"aaSorting": [[ 1, "asc" ]],
 					"iDisplayLength": 10,
                 	"oLanguage": {
                         "sSearch": "Filter records:"
@@ -31,23 +31,36 @@
     	</script>
 	</head>
 	<body>
-		<table id="res">
-            <thead>
-				<tr><th>Source</th><th>MiRBase IDs</th><th>Seed</th><th>Location</th><th>Vehicle</th><th>Drug 1</th><th>Drug 2</th></tr>
-			</thead>
-			<tbody>
-				<g:each var="r" in="${s}">
-				<tr>
-					<td>${r.type} : ${r.cell}</td>
-					<td><a href="http://mirbase.org/cgi-bin/mirna_entry.pl?acc=${r.matacc}" target="_blank">${r.matacc}</a><br>${r.matid}</td>
-					<td><font face="courier new">${r.matseq.toUpperCase()[1..6]}</font></td>
-					<!--td><font face="courier new">${r.matseq.toUpperCase()[0]}<b>${r.matseq.toUpperCase()[1..6]}</b>${r.matseq.toUpperCase()[6..-1]}</font></td-->
-					<td><a href="http://asia.ensembl.org/Homo_sapiens/Location/View?db=core;r=<%="${r.chr}".replaceAll("chr","")%>:${r.start}-${r.stop}" target="_blank">${r.chr}: ${r.start}-${r.stop}</a></td>
-					<td>${r.veh}</td><td>${r.d1}</td><td>${r.d2}</td>
-				</tr>
-				</g:each>
-			</tbody>
-		</table>
-
+		<h1>Results</h1>
+		<g:if test="${s == 'noMatch'}">
+			<br><h3>No match was found, please go <a href="previous.html" onClick="history.back();return false;">back</a> and try again</h3>
+		</g:if>
+		<g:else>	
+			${mList.size()} miRNAs matched. 
+				<g:if test="${mList.size() > 0}">
+					Click <a href="search_res?screen=true"><b>here</b></a> to explore these further or go <a href="previous.html" onClick="history.back();return false;"><b>back</b></a> and try again
+					<table id="res">
+				<thead>
+					<tr><th>Source</th><th>MiRBase IDs</th><th>Seed</th><th>Location</th><th>Vehicle</th><th>Drug 1</th><th>Drug 2</th></tr>
+				</thead>
+				<tbody>
+					<g:each var="r" in="${s}">
+					<tr>
+						<td>${r.type} : ${r.cell} : ${r.library}</td>
+						<td><a href="http://mirbase.org/cgi-bin/mirna_entry.pl?acc=${r.matacc}" target="_blank">${r.matacc}</a><br>${r.matid}</td>
+						<td><font face="courier new">${r.matseq.toUpperCase()[1..6]}</font></td>
+						<!--td><font face="courier new">${r.matseq.toUpperCase()[0]}<b>${r.matseq.toUpperCase()[1..6]}</b>${r.matseq.toUpperCase()[6..-1]}</font></td-->
+						<td><a href="http://asia.ensembl.org/Homo_sapiens/Location/View?db=core;r=<%="${r.chr}".replaceAll("chr","")%>:${r.start}-${r.stop}" target="_blank">${r.chr}: ${r.start}-${r.stop}</a></td>
+						<td>${r.veh}</td><td>${r.d1}</td><td>${r.d2}</td>
+					</tr>
+					</g:each>
+				</tbody>
+			</table>
+				</g:if>
+				<g:else>
+					Go <a href="previous.html" onClick="history.back();return false;">back</a> and try again
+				</g:else>
+		</g:else>
+		
 	</body>
 </html>
