@@ -684,7 +684,8 @@ class SearchController {
 		
 		//get params
 		def starParam = ""
-		if (params.sEv > 0){
+		print "sEv = "+params.sEv
+		if (params.sEv){
 			starParam = "and score > "+params.sEv
 		}
 		/*

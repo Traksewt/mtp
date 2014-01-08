@@ -13,11 +13,13 @@ b5()
 b6()
 b7()
 b8()
-**/
 b9()
 b10()
 b11()
 b12()
+**/
+
+b4()
 
 def n1(){
 	def metaMap = [:]
@@ -71,7 +73,7 @@ def b1(){
 	metaMap.d2name = "Epi"
 	ScreenMeta smeta = new ScreenMeta(metaMap)
 	smeta.save(flush:true)
-	addFunData("screen/231.csv",smeta)
+	addFunData("screen/Breast_Screen_1_231.csv",smeta)
 }
 
 def b2(){
@@ -82,7 +84,7 @@ def b2(){
 	metaMap.d2name = "Epi"
 	ScreenMeta smeta = new ScreenMeta(metaMap)
 	smeta.save(flush:true)
-	addFunData("screen/468.csv",smeta)
+	addFunData("screen/Breast_Screen_1_468.csv",smeta)
 }
 
 def b3(){
@@ -93,7 +95,7 @@ def b3(){
 	metaMap.d2name = "Epi"
 	ScreenMeta smeta = new ScreenMeta(metaMap)
 	smeta.save(flush:true)
-	addFunData("screen/BT474.csv",smeta)
+	addFunData("screen/Breast_Screen_1_BT474.csv",smeta)
 }
 
 def b4(){
@@ -104,7 +106,7 @@ def b4(){
 	metaMap.d2name = "Epi"
 	ScreenMeta smeta = new ScreenMeta(metaMap)
 	smeta.save(flush:true)
-	addFunData("screen/Skbr3.csv",smeta)
+	addFunData("screen/Breast_Screen_1_SkBr3.csv",smeta)
 }
 
 def b5(){
