@@ -36,17 +36,25 @@
 			stroke: #0000ff;
 			stroke-width: 1.5px;
 		}
-		path.link.twofive { 
-			opacity: 0.25;
+		path.link.s1 { 
+			opacity: 0.1;
+			stroke-width: 1.5px;
 		}
-		path.link.fivezero { 
-			opacity: 0.50;
+		path.link.s2 { 
+			opacity: 0.3;
+			stroke-width: 2.0px;
 		}
-		path.link.sevenfive { 
-			opacity: 0.75;
+		path.link.s3 { 
+			opacity: 0.5;
+			stroke-width: 2.5px;
 		}
-		path.link.onezerozero { 
-			opacity: 1.0;
+		path.link.s4 { 
+			opacity: 0.7;
+			stroke-width: 3.0px;
+		}
+		path.link.s5 { 
+			opacity: 0.9;
+			stroke-width: 3.5px;
 		}
 		path.link.TFmir{
 			stroke: #ff0000; 
@@ -150,15 +158,22 @@
 		data.links.forEach(function(link) {
 			if (v(link.value) == 0) {
 				link.type = "TFmir";
-			}else if (v(link.value) <= 25) {
-				link.type = "twofive";
-			}else if (v(link.value) <= 50 && v(link.value) > 25) {
-				link.type = "fivezero";
-			}else if (v(link.value) <= 75 && v(link.value) > 50) {
-				link.type = "sevenfive";
-			}else if (v(link.value) <= 100 && v(link.value) > 75) {
-				link.type = "onezerozero";
+			//}else if (v(link.value) <= 25) {
+			}else if ((link.value) == 1) {
+				link.type = "s1";
+			//}else if (v(link.value) <= 50 && v(link.value) > 25) {
+				}else if ((link.value) == 2) {
+				link.type = "s2";
+			//}else if (v(link.value) <= 75 && v(link.value) > 50) {
+			}else if ((link.value) == 3) {
+				link.type = "s3";
+			//}else if (v(link.value) <= 100 && v(link.value) > 75) {
+			}else if ((link.value) == 4) {
+				link.type = "s4";
+			}else if ((link.value) == 5) {
+				link.type = "s5";
 			}
+			
 			if(link.name == "tf-gene"){
 				console.log(link.name)
 				link.type = "tf-gene";
@@ -249,23 +264,6 @@
 			.attr("transform", function(d) {
 				return "translate(" + d.x + "," + d.y + ")"; });
 		} 
-		
-		function fade(opacity) {
-        return function(d, i) {
-            //fade all elements
-            svg.selectAll("circle, line").style("opacity", opacity);
-
-            var associated_links = svg.selectAll("line").filter(function(d) {
-                return d.source.index == i || d.target.index == i;
-            }).each(function(dLink, iLink) {
-                //unfade links and nodes connected to the current node
-                d3.select(this).style("opacity", 1);
-                //THE FOLLOWING CAUSES: Uncaught TypeError: Cannot call method 'setProperty' of undefined
-                d3.select(dLink.source).style("opacity", 1);
-                d3.select(dLink.target).style("opacity", 1);
-            });
-        };
-    }
 		
 		});
 		</script>

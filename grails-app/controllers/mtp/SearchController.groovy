@@ -183,7 +183,7 @@ class SearchController {
 		def linkMap = [:]
 		def linkList = []
 		def ndataDecode
-		def comsql1 = "select matid,name,score from mature,mir2mrna,genes where matid in ("+session.commonMList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and name in ("+session.commonGList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and mature.id = mir2mrna.mature_id and mir2mrna.genes_id = genes.id;"
+		def comsql1 = "select matid,name,score from mature,mir2mrna,genes where matid in ("+session.commonMList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and name in ("+session.commonGList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and mature.id = mir2mrna.mature_id and mir2mrna.genes_id = genes.id and (mir2mrna.source = 's' ${session.starParam});"
     	print comsql1
     	def c1 = sql.rows(comsql1)
     	new File("network.csv").withWriter { out ->
@@ -436,6 +436,7 @@ class SearchController {
 		def starParam = ""
 		if (params.sEv > 0){
 			starParam = "and score > "+params.sEv
+			session.starParam = starParam
 		}
 		/*
 		def mirParam = ""
