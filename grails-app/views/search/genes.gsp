@@ -49,6 +49,7 @@
   		</script>
 	</head>
 	<body>
+	<h1>Gene target data for ${mirData.matid}</h1>
 		<table id="search">
             <thead>
 				<tr><th>Gene</th><th>Location</th><th><a href="#" title="StarBase">S</a></th><th><a href="#" title="MiRTarBase">M</a></th><th><a href="#" title="TargetScan">T</a></th><th><a href="#" title="DIANA MicroT-CDS">D</a></th></tr>
@@ -69,7 +70,7 @@
 		<h2>Gene Targets per chromosome</h2>
 		<svg id="gene_chart"></svg>
 	
-		<h3>Download gene interactions for ${params.matid}:</h3><br>
+		<h3>Download gene interactions for ${mirData.matid}:</h3><br>
 		<table class="compact_left"><tr><td>StarBase</td>
 		<td>
 		<g:form name="starDownload" url="[controller:'Download', action:'gene_download']" style="display: inline" >
@@ -217,8 +218,7 @@
     .attr("transform", "rotate(-90)")
     .text("Gene count / genes per chromosome per Mb");
 	
-	//add the gene locations lines 
-	
+	//add the gene locations lines 	
 	var dataLists = [tdata,mdata,sdata,ddata]
 	var colours = ['green','grey','orange','purple']
 	for (var l=0;l<dataLists.length;l++){
@@ -237,6 +237,35 @@
 				.style("stroke", colours[l]);
 		} 
 	}
+	//add the legend
+	var legend = ['TargetScan','MiRTarBase','StarBase','DIANA']
+	for (var l=0;l<legend.length;l++){
+		chart.append("svg:line")
+			.attr("x1", w  - (moveRight +200))
+			.attr("y1", h - 250 +(l*25))
+			.attr("x2", w - (moveRight + 100))
+			.attr("y2", h - 250 +(l*25))
+			.style({ 'stroke': colours[l], 'fill': 'none', 'stroke-width': '4px'});
+		chart.append("text")
+    		.attr("text-anchor", "end")
+			.attr("y", h - 258 +(l*25))
+			.attr("x", w  - (moveRight +205))
+			.attr("dy", ".75em")
+			.text(legend[l]); 
+	}
+	//and the miRNA
+	chart.append("svg:line")
+			.attr("x1", w  - (moveRight +200))
+			.attr("y1", h - 275)
+			.attr("x2", w - (moveRight + 100))
+			.attr("y2", h - 275)
+			.style({ 'stroke': 'red', 'fill': 'none', 'stroke-width': '10px'});
+		chart.append("text")
+    		.attr("text-anchor", "end")
+			.attr("y", h - 280)
+			.attr("x", w  - (moveRight +205))
+			.attr("dy", ".75em")
+			.text("${mirData.matid}"); 
 	
 	//add lines - https://www.dashingd3js.com/svg-paths-and-d3js
 	var line = d3.svg.line()

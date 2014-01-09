@@ -875,6 +875,7 @@ class SearchController {
 		print "Count = "+tCount
 		print "Decode = "+tDecode
 		print "List = "+tList
+		
 		return [mirData:mirData, tData:tData, allCounts:allCounts, miR:miRDecode, sCount:sCount, sDecode:sDecode, sGenes:sGenes, sList:sList, mCount:mCount, mDecode:mDecode, mList:mList, mGenes:mGenes, tCount:tCount, tDecode:tDecode, tList:tList, tGenes:tGenes, dCount:dCount, dDecode:dDecode, dList:dList, dGenes:dGenes, unionGenes:union, unionGeneMap: unionGeneMap]
 	}
 }
