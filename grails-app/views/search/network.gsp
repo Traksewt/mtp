@@ -68,8 +68,8 @@
 		</style>
 	</head>
 	<body>
-	<h1>Network data</h1>
-	<h3>Most common 50 genes</h2>
+	<h1>Network of miRNAs, gene targets and transcription factors</h1>
+	Each node is sticky and can be moved and placed anywhere. To unstick just double click on the node. The image is also zoomable.
 	<svg id="network_svg"></svg>
 	<table id="common">
             <thead>
@@ -111,7 +111,19 @@
 		
 		var svg = d3.select("#network_svg")
 			.attr("width", width) 
-			.attr("height", height);
+			.attr("height", height)
+			.attr("viewBox", "0 0 " + width + " " + height )
+      		.attr("preserveAspectRatio", "xMidYMid meet")
+      		.attr("pointer-events", "all")
+      		//.append('svg:g')
+    		//.call(d3.behavior.zoom().on("zoom", redraw));
+		/**
+		function redraw() {
+  			svg.attr("transform",
+      		"translate(" + d3.event.translate + ")"
+      		+ " scale(" + d3.event.scale + ")");
+		}	
+		**/
 		
 		var force = d3.layout.force() 
 			//.nodes(d3.values(nodes)) 
@@ -181,7 +193,7 @@
 		  .enter().append("g")
 			.attr("class", "node")
 			//.on("click", click) 
-			//.on("dblclick", dblclick)
+			.on("dblclick", dblclick)
 			.call(force.drag)
 			//.on("mouseover", fade(.1)).on("mouseout", fade(1));;
 			
@@ -210,7 +222,13 @@
 			.attr("x", 12)
 			.attr("dy", ".35em") 
 			.text(function(d) { return d.name; });
-	
+		
+		//make nodes sticky when moved
+		node.on("mousedown", function(d) { d.fixed = true; });
+		
+		function dblclick(d) {
+  			d3.select(this).classed("fixed", d.fixed = false);
+		}
 		
 		// add the curvy lines
 		function tick() { 

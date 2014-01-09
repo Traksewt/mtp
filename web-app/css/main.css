@@ -479,14 +479,6 @@ th.desc a {
 	background-image: url(../images/skin/sorted_desc.gif);
 }
 
-.odd {
-	background: #f7f7f7;
-}
-
-.even {
-	background: #ffffff;
-}
-
 th:hover, tr:hover {
 	background: #E1F2B6;
 }

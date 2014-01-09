@@ -254,12 +254,8 @@
 		</table>
 		<br><br>
 		<h1>StarBase data analysis</h1>
-		<g:if test="${mList.size()>2}">
-			<h3>Enrichr</h3>
-			Click the symbol <a onclick="enrich({list: eList_split, popup: true})" href="javascript:void(0); "><img src="${resource(dir: 'images', file: 'enrichr-icon.png')}"></a> to see Enrichr gene set enrichment analysis for the most common genes. 
-			<br><br>
-		</g:if>
 		<h3>Gene counts</h3>
+		The table below lists the genes that are most commonly found in the miRNA StarBase predictions.
 		<table id="common">
             <thead>
 				<tr><th>Gene symbol</th><th>Name</th><th width="30%">Location</th><th>Count</th></tr>
@@ -275,21 +271,30 @@
 				</g:each>
 			</tbody>
 		</table>
-		
 		<br><br>
+		
+		<g:if test="${mList.size()>2}">
+			<h3>Enrichr</h3>
+			Click the symbol <a onclick="enrich({list: eList_split, popup: true})" href="javascript:void(0); "><img src="${resource(dir: 'images', file: 'enrichr-icon.png')}"></a> to see Enrichr gene set enrichment analysis for the most common genes. 
+			<br><br>
+		</g:if>
+		
 		<g:if test="${mList.size()>2}">
 			<h3>Heatmap of gene counts</h3>
+			The 50 most common StarBase gene targets are represented below and clustered according to StarBase score. This score represents the number of computational predictions (1-5) that agree with the HITS-CLIP prediction. 
 			<div style="position:relative; margin-left:auto; margin-right:auto; width:1000px; height:650px;"=>
 				<canvas id='canvas1' width='1000' height='650'></canvas>
 			</div>
 		</g:if>
 		<br><br><div>
 			<h3>miRNAs per chromosome</h3>
+			Each bar represents a chromosome with size as height. The white lines are the locations of each miRNA and the red line is the relative frequency per chromosome based on the size of chromosome and number of miRNAs per chromosome. 
 			<svg id="mir_chart"></svg>
 		</div>
 		<br>
 		<g:if test="${mList.size()>0}">
 			<h3>miRNAs per family</h3>
+			To identify any over represented miRNA families, each miRNA has been assigned to its family and plotted below.
 			<div id="family" style="width:100%; height:400px;"></div>
 		</g:if>
 	

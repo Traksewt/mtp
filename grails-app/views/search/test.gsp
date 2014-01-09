@@ -5,23 +5,22 @@
 		<title>MTP | Test</title>
 		<script src="${resource(dir: 'js', file: 'DataTables-1.9.4/media/js/jquery.js')}" type="text/javascript"></script>
 		<script src="${resource(dir: 'js', file: 'DataTables-1.9.4/media/js/jquery.dataTables.js')}" type="text/javascript"></script>		
-		<link rel="stylesheet" href="${resource(dir: 'js', file: 'DataTables-1.9.4/media/css/demo_table.css')}" type="text/css"></link>
 		<link rel="stylesheet" href="${resource(dir: 'js', file: 'DataTables-1.9.4/media/css/demo_page.css')}" type="text/css"></link>
+		<link rel="stylesheet" href="${resource(dir: 'js', file: 'DataTables-1.9.4/media/css/demo_table.css')}" type="text/css"></link>
 		
 		<script>
 		$(document).ready(function() {
-			$('#meta').dataTable({
-					"bPaginate": false,  
-      				"bFilter": false,     
-					"aaSorting": [[ 1, "asc" ]],
-					"iDisplayLength": 10,
-                	"oLanguage": {
-                        "sSearch": "Filter records:"
-                	},
-                	"aLengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
-                	"sDom": 'rt<"bottom"flp>'
-					
-				});
+			$('#meta tr').click( function() {
+        		$(this).toggleClass('row_selected');
+        		//alert($(this).attr('class'))
+    		} );
+			var oTable = $('#meta').dataTable( );
+			
+			function fnGetSelected( oTableLocal ){
+    			return oTableLocal.$('tr.row_selected');
+    			alert(oTableLocal)
+    		}
+
 		});
     	</script>
 	</head>
@@ -30,11 +29,11 @@
 	<g:form action="screen_res">
 	<table id="meta">
 	<thead>
-	<tr><th>Select</th><th>Type</th><th>Cell</th><th>Drug 1</th><th>Drug 2</th><th>Mimics</th><th>Inhibitors</th></tr>
+	<tr><th>Type</th><th>Cell</th><th>Drug 1</th><th>Drug 2</th><th>Mimics</th><th>Inhibitors</th></tr>
 	</thead>
 	<tbody>
 	<g:each var="r" in="${meta}">
-		<tr><td><g:checkBox name="funCheck" value="${r.id}" checked="false"/></td><td>${r.type}</td><td>${r.cell}</td><td>${r.d1name}</td><td>${r.d2name}</td><td>${r.sd.findAll({it.library == 'mimics'}).size()}</td><td>${r.sd.findAll({it.library == 'inhibitors'}).size()}</td></tr>
+		<tr><!--td><g:checkBox name="funCheck" value="${r.id}" checked="false"/></td--><td>${r.type}</td><td>${r.cell}</td><td>${r.d1name}</td><td>${r.d2name}</td><td>${r.sd.findAll({it.library == 'mimics'}).size()}</td><td>${r.sd.findAll({it.library == 'inhibitors'}).size()}</td></tr>
 	</g:each>
 	</tbody>
 	</table>

@@ -253,7 +253,13 @@ tr.even {
 	background-color: white;
 }
 
+tr.odd.row_selected td {
+	background-color: #9FAFD1;
+}
 
+tr.even.row_selected td {
+	background-color: #B0BED9;
+}
 
 
 

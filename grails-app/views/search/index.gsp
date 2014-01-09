@@ -31,7 +31,7 @@
   			$('#single_mir').autocomplete({
                  source: '<g:createLink controller='search' action='ajaxMirFinder'/>'
                }); 
-  		
+  			
 			$('#meta').dataTable({
 					"bPaginate": false,  
       				"bFilter": false,     
@@ -107,7 +107,7 @@
 				<g:form action="screen_res">
 				<table id="meta">
 				<thead>
-				<tr><th>Select</th><th>Type</th><th>Cell</th><th>Drug 1</th><th>Drug 2</th><th>Mimics</th><th>Inhibitors</th></tr>
+				<tr><th width="3%">Select</th><th>Type</th><th>Cell</th><th>Drug 1</th><th>Drug 2</th><th>Mimics</th><th>Inhibitors</th></tr>
 				</thead>
 				<tbody>
 				<g:each var="r" in="${meta}">

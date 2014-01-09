@@ -14,13 +14,15 @@ class SearchController {
     	return [meta:m]
     }
     
-    def test() {    	
+    def test() {  
+    	def m = ScreenMeta.findAll()
+    	return [meta:m]  	
     }
     
     
     def screen_res(){
     	def sql = new Sql(dataSource)
-		print "Searching screen data..."
+		print "Searching screen data... "+new Date()
 		def screen = ""
 		def mirList = []
 		def mirListSearch = ""
@@ -118,7 +120,7 @@ class SearchController {
     
     def network = {
     	def sql = new Sql(dataSource)
-    	print "Creating network..."
+    	print "Creating network... "+new Date()
     	
     	// def mirs = params.mirs
 //     	mirs = mirs.replaceAll(/[\]\[]/,"");
@@ -298,6 +300,7 @@ class SearchController {
     def search_res(){
     	def top = 50
     	def t1 = new Date()
+    	print t1
     	def sql = new Sql(dataSource)
     	def matcher
     	//generate the list of miRs to search
