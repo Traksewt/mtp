@@ -77,10 +77,10 @@
 	</head>
 	<body>
 	<h1>Network of miRNAs, gene targets and transcription factors</h1>
-	<p>- Each miRNA is a blue circle, and blue lines connect them to target genes (green nodes). 
+	<p>- Each miRNA is a blue circle, and blue lines connect them to target genes (green circles). 
 	<p>- The colour of the blue lines represents the strength of the StarBase prediction (thicker darker line = more computational evidence)
-	<p>- Red nodes are TFs and red lines show cases where they target miRNAs.
-	<p>- Each node is sticky and can be moved and placed anywhere. To unstick just double click on the node. 
+	<p>- Red circle are TFs and red lines show cases where they target miRNAs.
+	<p>- Each circle is sticky and can be moved and placed anywhere. To unstick just double click on the node. 
 	- 
 	<svg id="network_svg"></svg>
 	<table id="common">

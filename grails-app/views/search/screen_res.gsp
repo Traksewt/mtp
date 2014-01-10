@@ -41,10 +41,10 @@
 					<td><b>Search results</b></td>
 					<td>${mList.size()} miRNAs were found in ${duration}.</td>
 				</tr>
-				<tr>
-					<td><b>Explore the gene target data</b></td>
-					<td>
-						<g:if test="${mList.size() > 0}">
+				<g:if test="${mList.size() > 0}">
+					<tr>
+						<td><b>Explore the gene target data</b></td>
+						<td>
 							<g:form name="screen" url="[action:'search_res']">
 							<g:hiddenField name="screen" value="true"/>
 								Select the level of StarBase evidence  
@@ -58,22 +58,22 @@
 								and then search:
 								<input class="smallbuttons" type="button" value="Search" id="process" onclick="submit()" >
 							</g:form> 
-						</g:if>
-
-					</td>	
-				</tr>
+						</td>	
+					</tr>
+				</g:if>
 				</table>
 			
 				<g:if test="${mList.size() > 0}">					
 				<table id="res">
 				<thead>
-					<tr><th>Source</th><th>MiRBase IDs</th><th>Seed</th><th>Location</th><th>Vehicle</th><th>Drug 1</th><th>Drug 2</th></tr>
+					<tr><th>Source</th><th>MiRBase ID</th><th>MiRBase Accession</th><th>Seed</th><th>Location</th><th>Vehicle</th><th>Drug 1</th><th>Drug 2</th></tr>
 				</thead>
 				<tbody>
 					<g:each var="r" in="${s}">
 					<tr>
 						<td>${r.type} : ${r.cell} : ${r.library}</td>
-						<td><a href="http://mirbase.org/cgi-bin/mirna_entry.pl?acc=${r.matacc}" target="_blank">${r.matacc}</a><br>${r.matid}</td>
+						<td>${r.matid}</td>
+						<td><a href="http://mirbase.org/cgi-bin/mirna_entry.pl?acc=${r.matacc}" target="_blank">${r.matacc}</a></td>
 						<td><font face="courier new">${r.matseq.toUpperCase()[1..6]}</font></td>
 						<!--td><font face="courier new">${r.matseq.toUpperCase()[0]}<b>${r.matseq.toUpperCase()[1..6]}</b>${r.matseq.toUpperCase()[6..-1]}</font></td-->
 						<td><a href="http://asia.ensembl.org/Homo_sapiens/Location/View?db=core;r=<%="${r.chr}".replaceAll("chr","")%>:${r.start}-${r.stop}" target="_blank">${r.chr}: ${r.start}-${r.stop}</a></td>
