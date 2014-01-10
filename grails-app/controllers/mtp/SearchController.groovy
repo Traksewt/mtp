@@ -21,6 +21,7 @@ class SearchController {
     
     
     def screen_res(){
+    	def t1 = new Date()
     	def sql = new Sql(dataSource)
 		print "Searching screen data... "+new Date()
 		def screen = ""
@@ -110,7 +111,9 @@ class SearchController {
 		}else{
 			s = "noMatch"
 		}
-		return [s:s, mList:mList]
+		def t2 = new Date()
+        def TimeDuration duration = TimeCategory.minus(t2, t1)
+		return [duration:duration, s:s, mList:mList]
 	}
     
  	def test2() {  

@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta name="layout" content="main"/>
-		<title>MTP | Test</title>
+		<title>MTP | Search Results</title>
 		<script src="${resource(dir: 'js', file: 'DataTables-1.9.4/media/js/jquery.js')}" type="text/javascript"></script>
 		<script src="${resource(dir: 'js', file: 'DataTables-1.9.4/media/js/jquery.dataTables.js')}" type="text/javascript"></script>
 		<script src="${resource(dir: 'js', file: 'TableTools-2.1.5/media/js/TableTools.js')}" type="text/javascript"></script>
@@ -36,10 +36,36 @@
 			<br><h3>No match was found, please go <a href="previous.html" onClick="history.back();return false;">back</a> and try again</h3>
 		</g:if>
 		<g:else>	
-			${mList.size()} miRNAs matched. 
-				<g:if test="${mList.size() > 0}">
-					Click <a href="search_res?screen=true"><b>here</b></a> to explore these further or go <a href="previous.html" onClick="history.back();return false;"><b>back</b></a> and try again
-					<table id="res">
+			<table>
+				<tr>
+					<td><b>Search results</b></td>
+					<td>${mList.size()} miRNAs were found in ${duration}.</td>
+				</tr>
+				<tr>
+					<td><b>Explore the gene target data</b></td>
+					<td>
+						<g:if test="${mList.size() > 0}">
+							<g:form name="screen" url="[action:'search_res']">
+							<g:hiddenField name="screen" value="true"/>
+								Select the level of StarBase evidence  
+								<select name="sEv">
+									<option value="0">1 or more</option>
+									<option value="1">2 or more</option>
+									<option value="2">3 or more</option>
+									<option value="3">4 or more</option>
+									<option value="4">5</option>
+								</select>
+								and then search:
+								<input class="smallbuttons" type="button" value="Search" id="process" onclick="submit()" >
+							</g:form> 
+						</g:if>
+
+					</td>	
+				</tr>
+				</table>
+			
+				<g:if test="${mList.size() > 0}">					
+				<table id="res">
 				<thead>
 					<tr><th>Source</th><th>MiRBase IDs</th><th>Seed</th><th>Location</th><th>Vehicle</th><th>Drug 1</th><th>Drug 2</th></tr>
 				</thead>

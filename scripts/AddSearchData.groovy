@@ -605,22 +605,21 @@ def genes(){
 	print "Adding gene data..."
 	
 	print "Downloading HUGO file"
-	def gFile = new File("data/protein-coding_gene.txt")
+	def gFile = new File("data/hugo_genes_names.txt")
 	if (gFile.exists()){
 		print "Already done"
 	}else{ 
-		def wget =  "wget ftp://ftp.ebi.ac.uk/pub/databases/genenames/locus_groups/protein-coding_gene.txt.gz -P data/"
+		//def wget =  "wget ftp://ftp.ebi.ac.uk/pub/databases/genenames/locus_groups/protein-coding_gene.txt.gz -P data/"
+		def wget = "wget http://www.genenames.org/cgi-bin/download?col=gd_hgnc_id&col=gd_app_sym&col=gd_app_name&col=gd_status&col=gd_prev_sym&col=gd_aliases&col=gd_pub_chrom_map&col=gd_pub_acc_ids&col=gd_pub_ensembl_id&col=gd_pub_refseq_ids&status=Approved&status=Entry+Withdrawn&status_opt=2&where=&order_by=gd_hgnc_id&format=text&limit=&hgnc_dbtag=on&submit=submit -P data/ -O hugo_gene_names.txt"
 		def proc = wget.execute()
-		proc.waitFor()
-		print "Unzipping..."
-		def gunzip = "gunzip data/protein-coding_gene.txt.gz"
-		proc = gunzip.execute()
 		proc.waitFor()
 	}
 	def nameMap = [:]
+	def ensMap = [:]
 	gFile.eachLine{ line ->
 		def s = line.split("\t")
 		nameMap."${s[1]}" = s[2]
+		ensMap."${s[1]}" = s[8]
 	}
 	
 	def gMap = [:]
@@ -651,6 +650,7 @@ def genes(){
 					if ((matcher = s[8] =~ /.*?transcript_name\s+"(.*?)";.*/)){
 						name = matcher[0][1]
 						gMap.name = name
+						gMap.ensembl = ensMap."${name}"
 					}
 					gMap.strand = s[6]
 					if (nameMap."${name}"){
