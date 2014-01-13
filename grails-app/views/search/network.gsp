@@ -15,7 +15,7 @@
 		$(document).ready(function() {
 				$('#common').dataTable({
 					"sPaginationType": "full_numbers",
-					"aaSorting": [[ 3, "desc" ]],
+					"aaSorting": [[ 4, "desc" ]],
 					"iDisplayLength": 10,
                 	"oLanguage": {
                         "sSearch": "Filter records:"
@@ -77,23 +77,24 @@
 	</head>
 	<body>
 	<h1>Network of miRNAs, gene targets and transcription factors</h1>
-	<p>- Each miRNA is a blue circle, and blue lines connect them to target genes (green circles). 
-	<p>- The colour of the blue lines represents the strength of the StarBase prediction (thicker darker line = more computational evidence)
-	<p>- Red circle are TFs and red lines show cases where they target miRNAs.
+	<p>- Each miRNA is represented by a blue circle, and blue lines connect them to target genes (green circles). 
+	<p>- The colour and thickness of the blue lines represents the strength of the StarBase prediction (thicker darker line = more computational evidence)
+	<p>- Red circles are transcription factors and red lines show cases where they target miRNAs.
 	<p>- Each circle is sticky and can be moved and placed anywhere. To unstick just double click on the node. 
 	- 
 	<svg id="network_svg"></svg>
 	<table id="common">
             <thead>
-				<tr><th>Gene symbol</th><th>Name</th><th width="30%">Location</th><th>Count</th></tr>
+				<tr><th>Gene symbol</th><th>Name</th><th width="30%">Location</th><th>Count</th><th>Combined score</th></tr>
 			</thead>
 			<tbody>
 				<g:each var="r" in="${session.commonGenes}">
 				<tr>
 					<td><a href = "http://www.genecards.org/cgi-bin/carddisp.pl?gene=${r.name}" target="_blank">${r.name}</a></td>
-					<td><a href="javascript:void(0);" onclick="click()">${r.fullname}</a></td>
+					<td>${r.fullname}</td>
 					<td><a href="http://asia.ensembl.org/Homo_sapiens/Location/View?db=core;r=${r.location}" target="_blank">${r.location}</a></td>
 					<td>${r.count}</td>
+					<td>${r.countScore}</td>
 				</tr>
 				</g:each>
 			</tbody>
@@ -154,6 +155,7 @@
 		var v = d3.scale.linear().range([0, 100]);
 		
 		v.domain([0, d3.max(data.links, function(d) { return d.value; })]);
+		//console.log(d3.max(data.links, function(d) { return d.value; }))
 		
 		data.links.forEach(function(link) {
 			if (v(link.value) == 0) {

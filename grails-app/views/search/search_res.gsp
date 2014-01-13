@@ -76,7 +76,7 @@
 				
 				$('#common').dataTable({
 					"sPaginationType": "full_numbers",
-					"aaSorting": [[ 3, "desc" ]],
+					"aaSorting": [[ 4, "desc" ]],
 					"iDisplayLength": 10,
                 	"oLanguage": {
                         "sSearch": "Filter records:"
@@ -258,7 +258,7 @@
 		The table below lists the genes that are most commonly found in the miRNA StarBase predictions.
 		<table id="common">
             <thead>
-				<tr><th>Gene symbol</th><th>Name</th><th width="30%">Location</th><th>Count</th></tr>
+				<tr><th>Gene symbol</th><th>Name</th><th width="30%">Location</th><th>Count</th><th>Combined score</th></tr>
 			</thead>
 			<tbody>
 				<g:each var="r" in="${commonGeneList}">
@@ -267,6 +267,7 @@
 					<td>${r.fullname}</td>
 					<td><a href="http://asia.ensembl.org/Homo_sapiens/Location/View?db=core;r=${r.location}" target="_blank">${r.location}</a></td>
 					<td>${r.count}</td>
+					<td>${r.countScore}</td>
 				</tr>
 				</g:each>
 			</tbody>

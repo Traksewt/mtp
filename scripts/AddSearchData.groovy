@@ -1,6 +1,6 @@
 package mtp
 
-/*
+
 mirbase()
 genes()
 cardiac_flag()
@@ -8,10 +8,8 @@ starbase_full()
 mirtarbase_full()
 tscan_full()
 diana_full()
-*/
 chipbase_gene()
-
-//chipbase_mir()
+chipbase_mir()
 
 def cleanUpGorm() { 
     def sessionFactory = ctx.getBean("sessionFactory")
@@ -713,11 +711,11 @@ def chipbase_mir(){
 	print "Adding chipbase miRNA data..."
 	def cMap = [:]
 	def mir
-	def chip_file = new File("data/chipBase_Human_MirnaTFBSs2013-12-18_13-36.xls")
+	def chip_file = new File("data/chipBase_Human_MirnaTFBSs2013-12-18_13-36.filter.xls")
 	chip_file.eachLine{ line ->
 		def s = line.split("\t")
-		mir = s[5]
-		cMap.tfname = s[1]
+		mir = s[1]
+		cMap.tfname = s[0]
 		//print cMap
 		count++
 		def mirSplit 

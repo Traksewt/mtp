@@ -15,8 +15,35 @@ class SearchController {
     }
     
     def test() {  
-    	def m = ScreenMeta.findAll()
-    	return [meta:m]  	
+    	def sql = new Sql(dataSource)
+    	def mirList = "'hsa-miR-518c-5p','hsa-miR-299-3p','hsa-miR-10a-5p','hsa-miR-125a-3p','hsa-miR-190b','hsa-miR-515-3p','hsa-miR-199b-5p','hsa-miR-380-3p'"
+    	def ndata = [:]
+		def nodeMap = [:]
+		def nodeList = []
+		def linkMap = [:]
+		def linkList = []
+		def ndataDecode
+		def nsql1 = "select mature.*,description from mature left outer join flag on (mature.id = flag.mature_id) where matid in ("+mirList+");";
+		print nsql1
+		def n1 = sql.rows(nsql1)
+		
+		n1.each{
+			def source = it.matid
+			if (!nodeList.name.contains("${source}")){
+				nodeMap.name = "${source}"
+				nodeMap.type = "miRNA"
+				nodeMap.flag = "${it.description}"
+				nodeList.add(nodeMap)
+				nodeMap = [:] 
+			}
+		}
+		ndata.nodes = nodeList
+    	ndata.links = linkList
+    	def ndataJSON = ndata as JSON
+        ndataDecode = ndataJSON.decodeURL()
+		
+		print ndataDecode	
+    	return [n1:n1, ndata:ndataDecode]
     }
     
     
@@ -498,6 +525,7 @@ class SearchController {
 		def gList = []
 		def frData = []
 		def countGenes = [:]
+		def countGeneScore = [:]
 		def commonGenes = [:]
 		def commonGeneList = []
 		def geneNames = [:]		
@@ -512,8 +540,10 @@ class SearchController {
     		geneLoc."${it.name}"=it.chr+":"+it.start+"-"+it.stop
     		if (countGenes."${it.name}"){
     			countGenes."${it.name}" = countGenes."${it.name}" + 1
+    			countGeneScore."${it.name}" = countGeneScore."${it.name}" + it.score
     		}else{
     			countGenes."${it.name}" = 1
+    			countGeneScore."${it.name}" = it.score
     		}
     	}
     	countGenes.each{
@@ -521,6 +551,7 @@ class SearchController {
     		commonGenes.count = it.value
     		commonGenes.fullname = geneNames."${it.key}"
     		commonGenes.location = geneLoc."${it.key}"
+    		commonGenes.countScore = countGeneScore."${it.key}"
     		//print "commonGenes = "+commonGenes
 			commonGeneList.add(commonGenes)
 			commonGenes = [:]    		
@@ -616,7 +647,7 @@ class SearchController {
         def TimeDuration duration = TimeCategory.minus(t2, t1)
         
         //add things to the session
-        session.commonGenes = commonGeneList.sort{it.count}.drop( commonGeneList.size() - top )
+        session.commonGenes = commonGeneList.sort{it.countScore}.drop( commonGeneList.size() - top )
         session.commonMList = mList
         session.commonGList = gList
         

@@ -67,6 +67,18 @@
     		// 		return false;
     		// 	}
  			//});
+ 			 $('#meta tr')
+				.filter(':has(:checkbox:checked)')
+				.addClass('row_selected')
+				.end()
+			  .click(function(event) {
+				$(this).toggleClass('row_selected');
+				if (event.target.type !== 'checkbox') {
+				  $(':checkbox', this).attr('checked', function() {
+					return !this.checked;
+				  });
+				}
+			  });
 		});
   		</script>
 
@@ -121,10 +133,11 @@
          	<input type="button" class="tabbuttons" value="Screen Search" style="color:#BFBFBF"/>
          		<div style="border:2px solid; border-color:#BFBFBF">
          		<h1>Choose screen data</h1>
+         		<p>Click anywhere on the two to select the screen data
 				<g:form action="screen_res">
 				<table id="meta">
 				<thead>
-				<tr><th width="3%">Select</th><th>Type</th><th>Cell</th><th>Drug 1</th><th>Drug 2</th><th>Mimics</th><th>Inhibitors</th></tr>
+				<tr><th width="3%"></th><th>Type</th><th>Cell</th><th>Drug 1</th><th>Drug 2</th><th>Mimics</th><th>Inhibitors</th></tr>
 				</thead>
 				<tbody>
 				<g:each var="r" in="${meta}">
