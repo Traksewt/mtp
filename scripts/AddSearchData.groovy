@@ -603,7 +603,7 @@ def genes(){
 	print "Adding gene data..."
 	
 	print "Downloading HUGO file"
-	def gFile = new File("data/hugo_genes_names.txt")
+	def gFile = new File("data/hugo_gene_names.txt")
 	if (gFile.exists()){
 		print "Already done"
 	}else{ 
@@ -614,10 +614,14 @@ def genes(){
 	}
 	def nameMap = [:]
 	def ensMap = [:]
+	def uniMap = [:]
 	gFile.eachLine{ line ->
 		def s = line.split("\t")
-		nameMap."${s[1]}" = s[2]
-		ensMap."${s[1]}" = s[8]
+		if (s.size() == 10){
+			nameMap."${s[1]}" = s[2]
+			ensMap."${s[1]}" = s[8]
+			uniMap."${s[1]}" = s[7]
+		}
 	}
 	
 	def gMap = [:]
@@ -649,12 +653,23 @@ def genes(){
 						name = matcher[0][1]
 						gMap.name = name
 						gMap.ensembl = ensMap."${name}"
+						gMap.uniprot = uniMap."${name}"
 					}
 					gMap.strand = s[6]
 					if (nameMap."${name}"){
 						gMap.fullname = nameMap."${name}"
 					}else{
 						gMap.fullname = "n/a"
+					}
+					if (ensMap."${name}"){
+						gMap.ensembl = ensMap."${name}"
+					}else{
+						gMap.ensembl = "n/a"
+					}
+					if (uniMap."${name}"){
+						gMap.uniprot = uniMap."${name}"
+					}else{
+						gMap.uniprot = "n/a"
 					}
 			
 					//print gMap
@@ -711,11 +726,11 @@ def chipbase_mir(){
 	print "Adding chipbase miRNA data..."
 	def cMap = [:]
 	def mir
-	def chip_file = new File("data/chipBase_Human_MirnaTFBSs2013-12-18_13-36.filter.xls")
+	def chip_file = new File("data/chipBase_Human_MirnaTFBSs2013-12-18_13-36.xls")
 	chip_file.eachLine{ line ->
 		def s = line.split("\t")
-		mir = s[1]
-		cMap.tfname = s[0]
+		mir = s[5]
+		cMap.tfname = s[1]
 		//print cMap
 		count++
 		def mirSplit 
