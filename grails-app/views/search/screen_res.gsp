@@ -35,7 +35,7 @@
 		<g:if test="${s == 'noMatch'}">
 			<br><h3>No match was found, please go <a href="previous.html" onClick="history.back();return false;">back</a> and try again</h3>
 		</g:if>
-		<g:else>	
+		<g:else>
 			<table>
 				<tr>
 					<td><b>Search results</b></td>
