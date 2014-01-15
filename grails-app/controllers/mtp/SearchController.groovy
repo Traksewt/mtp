@@ -329,7 +329,6 @@ class SearchController {
 	} 
     
     def search_res(){
-    	def top = 50
     	def t1 = new Date()
     	print t1
     	def sql = new Sql(dataSource)
@@ -388,6 +387,7 @@ class SearchController {
 			}
 			mirList = mirList[3..-2]
 		}
+		session.mirList = mirList
         def searchSql = "select family.*,precursor.*,mature.* from family,precursor,mature where ("+mirList+") and family.id = precursor.family_id and precursor.id = mature.precursor_id;";
         println searchSql
         def mirRes = sql.rows(searchSql)
@@ -519,8 +519,14 @@ class SearchController {
     }
     
 	def targets(){
+		def top = 50
+		def sql = new Sql(dataSource)
+		def mirList = session.mirList
+		def starParam = session.starParam
+		def count = 0
+		
 		//heatmap
-		def heatsql = "select distinct on (genes.id,matid,name) matid,score,genes.start,name,fullname,genes.id,famid,genes.chr,genes.start,genes.stop from family,precursor,mature,mir2mrna,genes where family.id = precursor.family_id and precursor.id = mature.precursor_id and mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") and (source = 's' ${starParam}) order by genes.id;";
+		def heatsql = "select distinct on (genes.id,matid,name) ensembl,uniprot,matid,score,genes.start,name,fullname,genes.id,famid,genes.chr,genes.start,genes.stop from family,precursor,mature,mir2mrna,genes where family.id = precursor.family_id and precursor.id = mature.precursor_id and mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") and (source = 's' ${starParam}) order by genes.id;";
 		print heatsql
 		def heat = sql.rows(heatsql)
 		
@@ -545,7 +551,7 @@ class SearchController {
 		heat.each{
 			mMap."${it.matid}"=0
 			famMap."${it.matid}"=it.famid
-			geneNames."${it.name}"=it.fullname
+			geneNames."${it.name}"=[it.fullname,it.ensembl,it.uniprot]
 			geneLoc."${it.name}"=it.chr+":"+it.start+"-"+it.stop
 			if (countGenes."${it.name}"){
 				countGenes."${it.name}" = countGenes."${it.name}" + 1
@@ -558,7 +564,9 @@ class SearchController {
 		countGenes.each{
 			commonGenes.name = it.key
 			commonGenes.count = it.value
-			commonGenes.fullname = geneNames."${it.key}"
+			commonGenes.fullname = geneNames."${it.key}"[0]
+			commonGenes.ensembl = geneNames."${it.key}"[1]
+			commonGenes.uniprot = geneNames."${it.key}"[2]
 			commonGenes.location = geneLoc."${it.key}"
 			commonGenes.countScore = countGeneScore."${it.key}"
 			//print "commonGenes = "+commonGenes
@@ -653,7 +661,7 @@ class SearchController {
 		session.commonMList = mList
 		session.commonGList = gList
 		
-		return [commonGeneList:commonGeneList, fData:frData, mList:mList, gList:gList,]
+		return [famHeatList:famHeatList, commonGeneList:commonGeneList, fData:frData, mList:mList, gList:gList,]
 	}
 	
     def genes(){

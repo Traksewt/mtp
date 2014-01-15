@@ -617,7 +617,7 @@ def genes(){
 	def uniMap = [:]
 	gFile.eachLine{ line ->
 		def s = line.split("\t")
-		if (s.size() == 10){
+		if (s.size() > 8){
 			nameMap."${s[1]}" = s[2]
 			ensMap."${s[1]}" = s[8]
 			uniMap."${s[1]}" = s[7]
