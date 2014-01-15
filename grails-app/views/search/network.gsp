@@ -111,18 +111,6 @@
 =======
 	<script>
 		// get the data
-		//d3.csv("${resource(dir: 'js', file: 'd3/network.csv')}", function(error, links) { 
-// 		
-// 		var nodes = {};
-// 		// Compute the distinct nodes from the links.
-// 		links.forEach(function(link) { 
-// 			link.source = nodes[link.source] ||
-// 				(nodes[link.source] = {name: link.source});
-// 			link.target = nodes[link.target] ||
-// 				(nodes[link.target] = {name: link.target});
-// 			link.value = +link.value;
-// 		});
-		
 		var data = <%=ndata%>
 		
 		var width = 1200,

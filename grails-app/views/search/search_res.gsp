@@ -73,60 +73,6 @@
 						return ((a < b) ? 1 : ((a > b) ? -1 : 0));
 					}
 				} );
-				
-				$('#common').dataTable({
-					"sPaginationType": "full_numbers",
-					"aaSorting": [[ 4, "desc" ]],
-					"iDisplayLength": 10,
-                	"oLanguage": {
-                        "sSearch": "Filter records:"
-                	},
-                	"aLengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
-					"sDom": 'T<"clear">lfrtip',
-                	"oTableTools": {
-                        "sSwfPath": "${resource(dir: 'js', file: 'TableTools-2.1.5/media/swf/copy_csv_xls_pdf.swf')}",
-                        "sTitle": "My title"
-                	}
-				});
-				
-		//console.log(<%=mList%>)
-        //console.log(<%=gList%>)
-        //console.log(<%=fData%>)
-        
-        if (<%=mList.size()>2%>){
-        
-        	//set the width based on document size
-			//$("#canvas1").width($( document ).width() * 0.8);
-			
-			var cx2 = new CanvasXpress('canvas1',
-			  {
-				'z': {
-					'Family': <%=famHeatList%>
-				  //'Description': ['uncharacterized LOC645722', 'DSCAM antisense RNA 1', 'heat shock 70kDa protein 1A', 'plastin 3', 'epithelial membrane protein 1', 'calponin 3, acidic', 'serglycin', 'transforming growth factor, beta receptor II (70/80kDa)', 'anterior gradient 2 homolog (Xenopus laevis)', 'tumor protein D52-like 1', 'collagen, type XIII, alpha 1', 'plasminogen activator, urokinase', 'olfactomedin 1', 'BTG family, member 3', 'tissue factor pathway inhibitor (lipoprotein-associated coagulation inhibitor)', 'v-ets erythroblastosis virus E26 oncogene homolog 1 (avian)', 'branched chain amino-acid transaminase 1, cytosolic', 'v-erb-b2 erythroblastic leukemia viral oncogene homolog 3 (avian)', 'thiosulfate sulfurtransferase (rhodanese)-like domain containing 1']
-				},
-				'x': {
-				  //'Type': ['control', 'control', 'control', 'estrogen receptor knockdown', 'estrogen receptor knockdown', 'estrogen receptor knockdown']
-				},
-				'y': {
-				  'vars': <%=mList%>,
-				  'smps': <%=gList%>,
-				  'data': <%=fData%>,        
-				  'desc': ['Score']
-				},
-	   
-			  },
-			  {'graphType': 'Heatmap',
-			  'heatmapType':'red',
-			  'indicatorCenter':'rainbow-green',
-			  'smpOverlays': ['Type'],
-			  'title': 'StarBase gene target predictions for each miRNA',
-			  'varLabelRotate': 45,
-			  'varOverlays': ['Family']}
-			);
-			cx2.clusterSamples();
-			cx2.clusterVariables();
-		}
-			
 			});
 			
 		   $(function () { 
@@ -158,50 +104,6 @@
         			}
 				});
 			});
-			
-			//enrichr data
-			var eList = <%=gList%>;
-			var eList_split = ""
-			for (var i=0;i<eList.length;i++){
-				eList_split += eList[i]+"\r"
-			} 
-
-			function enrich(options) {
-				var defaultOptions = {
-					description: "",
-					popup: false
-				};
-
-				if (typeof options.description == 'undefined')
-					options.description = defaultOptions.description;
-				if (typeof options.popup == 'undefined')
-					options.popup = defaultOptions.popup;
-				if (typeof options.list == 'undefined')
-					alert('No genes defined.');
-
-				var form = document.createElement('form');
-				form.setAttribute('method', 'post');
-				form.setAttribute('action', 'http://amp.pharm.mssm.edu/Enrichr/enrich');
-				if (options.popup)
-					form.setAttribute('target', '_blank');
-				form.setAttribute('enctype', 'multipart/form-data');
-
-				var listField = document.createElement('input');
-				listField.setAttribute('type', 'hidden');
-				listField.setAttribute('name', 'list');
-				listField.setAttribute('value', options.list);
-				form.appendChild(listField);
-
-				var descField = document.createElement('input');
-				descField.setAttribute('type', 'hidden');
-				descField.setAttribute('name', 'description');
-				descField.setAttribute('value', options.description);
-				form.appendChild(descField);
-
-				document.body.appendChild(form);
-				form.submit();
-				document.body.removeChild(form);
-			}		
   		</script>
 	</head>
 	<body>
@@ -212,19 +114,15 @@
 			<td>Details for ${found.size() - missing.size()} of the ${found.size()} miRNAs were found in the database in ${duration}. <g:if test="${missing.size() > 0}">The missing entries were ${missing}.</g:if></td>
 		</tr>
 		<tr>
-			<td><b>miRNA-TF-gene network data</b></td>
+			<td><b>Targets</b></td>
 			<td>
-				<g:if test="${mList.size()>2}">
-					<g:link action="network">Available</g:link>
-					<!-- 
-						<g:form name="network" url="[action:'network']">
-						<g:hiddenField name="common_genes" value="${gList}"/>
-						<g:hiddenField name="common_mirs" value="${mList}"/>
-						<a href="javascript:void(0);" onclick="document.network.submit()">Available</a>
-					</g:form> 
- 					-->
-                </g:if>
-                <g:else>Not available</g:else>
+			<g:form name="targetSearch" action="targets">
+				StarBase <input type="checkbox" name="target" value="s" checked="true"><br>
+				MiRTarBase <input type="checkbox" name="target" value="m"><br>
+				TargetScan <input type="checkbox" name="target" value="t"><br>
+				DIANA MicroT-CDS <input type="checkbox" name="target" value="d">
+				<input type="submit" value="submit">
+			</g:form>
             </td>	
 		</tr>
 		</table>
@@ -240,7 +138,6 @@
 					<td><a href="http://mirbase.org/cgi-bin/mirna_summary.pl?fam=${r.famacc}" target="_blank">${r.famacc}</a><br>${r.famid}</td>
 					<td><a href="http://www.mirbase.org/cgi-bin/mirna_entry.pl?acc=${r.preacc}" target="_blank">${r.preacc}</a><br>${r.preid}</td>
 					<td><font face="courier new">${r.matseq.toUpperCase()[1..6]}</font></td>
-					<!--td><font face="courier new">${r.matseq.toUpperCase()[0]}<b>${r.matseq.toUpperCase()[1..6]}</b>${r.matseq.toUpperCase()[6..-1]}</font></td-->
 					<td><a href="http://asia.ensembl.org/Homo_sapiens/Location/View?db=core;r=<%="${r.chr}".replaceAll("chr","")%>:${r.start}-${r.stop}" target="_blank">${r.chr}: ${r.start}-${r.stop}</a></td>
 					<td><a href="http://starbase.sysu.edu.cn/viewMatureMirInfo.php?table=miRNAClipTargets&database=hg19&name=${r.matid}" target="_blank"><%=starMap."${r.matid}" %></a></td>
 					<td><a href="http://mirtarbase.mbc.nctu.edu.tw/index.php" target="_blank"><%=mtMap."${r.matid}" %></a></td>
@@ -252,48 +149,14 @@
 				</g:each>
 			</tbody>
 		</table>
-		<br><br>
-		<h1>StarBase data analysis</h1>
-		<h3>Gene counts</h3>
-		The table below lists the genes that are most commonly found in the miRNA StarBase predictions.
-		<table id="common">
-            <thead>
-				<tr><th>Gene symbol</th><th>Name</th><th width="30%">Location</th><th>Count</th><th>Combined score</th></tr>
-			</thead>
-			<tbody>
-				<g:each var="r" in="${commonGeneList}">
-				<tr>
-					<td><a href = "http://www.genecards.org/cgi-bin/carddisp.pl?gene=${r.name}" target="_blank">${r.name}</a></td>
-					<td>${r.fullname}</td>
-					<td><a href="http://asia.ensembl.org/Homo_sapiens/Location/View?db=core;r=${r.location}" target="_blank">${r.location}</a></td>
-					<td>${r.count}</td>
-					<td>${r.countScore}</td>
-				</tr>
-				</g:each>
-			</tbody>
-		</table>
-		<br><br>
 		
-		<g:if test="${mList.size()>2}">
-			<h3>Enrichr</h3>
-			Click the symbol <a onclick="enrich({list: eList_split, popup: true})" href="javascript:void(0); "><img src="${resource(dir: 'images', file: 'enrichr-icon.png')}"></a> to see Enrichr gene set enrichment analysis for the most common genes. 
-			<br><br>
-		</g:if>
-		
-		<g:if test="${mList.size()>2}">
-			<h3>Heatmap of gene counts</h3>
-			The 50 most common StarBase gene targets are represented below and clustered according to StarBase score. This score represents the number of computational predictions (1-5) that agree with the HITS-CLIP prediction. 
-			<div style="position:relative; margin-left:auto; margin-right:auto; width:1000px; height:650px;"=>
-				<canvas id='canvas1' width='1000' height='650'></canvas>
-			</div>
-		</g:if>
 		<br><br><div>
 			<h3>miRNAs per chromosome</h3>
 			Each bar represents a chromosome with size as height. The white lines are the locations of each miRNA and the red line is the relative frequency per chromosome based on the size of chromosome and number of miRNAs per chromosome. 
 			<svg id="mir_chart"></svg>
 		</div>
 		<br>
-		<g:if test="${mList.size()>0}">
+		<g:if test="${found.size() - missing.size()>0}">
 			<h3>miRNAs per family</h3>
 			To identify any over represented miRNA families, each miRNA has been assigned to its family and plotted below.
 			<div id="family" style="width:100%; height:400px;"></div>
