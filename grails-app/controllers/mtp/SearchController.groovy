@@ -523,10 +523,25 @@ class SearchController {
 		def sql = new Sql(dataSource)
 		def mirList = session.mirList
 		def starParam = session.starParam
+		print "starParam = "+starParam
 		def count = 0
+		def targetList = params.targetDB.toString().replaceAll(/[\]\[]/,"").split(",")
+		print "targets = "+targetList
+		def targetString = ""
+		targetList.each{
+			if (it.trim() == 's'){
+				targetString <<= " or (source = '"+it.trim()+"' "+starParam+")" 
+			}else{
+				targetString <<= " or source = '"+it.trim()+"'"
+			}
+		}
+		targetString = "("+targetString[4..-1]+")"
+		print "targetString = "+targetString
+		
+		
 		
 		//heatmap
-		def heatsql = "select distinct on (genes.id,matid,name) ensembl,uniprot,matid,score,genes.start,name,fullname,genes.id,famid,genes.chr,genes.start,genes.stop from family,precursor,mature,mir2mrna,genes where family.id = precursor.family_id and precursor.id = mature.precursor_id and mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") and (source = 's' ${starParam}) order by genes.id;";
+		def heatsql = "select distinct on (genes.id,matid,name) ensembl,uniprot,matid,score,genes.start,name,fullname,genes.id,famid,genes.chr,genes.start,genes.stop from family,precursor,mature,mir2mrna,genes where "+targetString+" and family.id = precursor.family_id and precursor.id = mature.precursor_id and mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") order by genes.id;";
 		print heatsql
 		def heat = sql.rows(heatsql)
 		

@@ -43,7 +43,7 @@
 				
 				$('#common').dataTable({
 					"sPaginationType": "full_numbers",
-					"aaSorting": [[ 4, "desc" ]],
+					"aaSorting": [[ 6, "desc" ]],
 					"iDisplayLength": 10,
                 	"oLanguage": {
                         "sSearch": "Filter records:"

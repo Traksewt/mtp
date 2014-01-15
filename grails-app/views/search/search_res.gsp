@@ -117,11 +117,11 @@
 			<td><b>Targets</b></td>
 			<td>
 			<g:form name="targetSearch" action="targets">
-				StarBase <input type="checkbox" name="target" value="s" checked="true"><br>
-				MiRTarBase <input type="checkbox" name="target" value="m"><br>
-				TargetScan <input type="checkbox" name="target" value="t"><br>
-				DIANA MicroT-CDS <input type="checkbox" name="target" value="d">
-				<input type="submit" value="submit">
+				StarBase <input type="checkbox" name="targetDB" value="s" checked="true"> | 
+				MiRTarBase <input type="checkbox" name="targetDB" value="m"> | 
+				TargetScan <input type="checkbox" name="targetDB" value="t"> |
+				DIANA MicroT-CDS <input type="checkbox" name="targetDB" value="d">
+				<input type="submit" value="search">
 			</g:form>
             </td>	
 		</tr>
