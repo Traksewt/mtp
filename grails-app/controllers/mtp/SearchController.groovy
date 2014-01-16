@@ -541,7 +541,7 @@ class SearchController {
 		
 		
 		//heatmap
-		def heatsql = "select distinct on (genes.id,matid,name) ensembl,uniprot,matid,score,genes.start,name,fullname,genes.id,famid,genes.chr,genes.start,genes.stop from family,precursor,mature,mir2mrna,genes where "+targetString+" and family.id = precursor.family_id and precursor.id = mature.precursor_id and mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") order by genes.id;";
+		def heatsql = "select source,ensembl,uniprot,matid,score,genes.start,name,fullname,genes.id,famid,genes.chr,genes.start,genes.stop from family,precursor,mature,mir2mrna,genes where "+targetString+" and family.id = precursor.family_id and precursor.id = mature.precursor_id and mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") order by genes.id;";
 		print heatsql
 		def heat = sql.rows(heatsql)
 		
@@ -568,14 +568,33 @@ class SearchController {
 			famMap."${it.matid}"=it.famid
 			geneNames."${it.name}"=[it.fullname,it.ensembl,it.uniprot]
 			geneLoc."${it.name}"=it.chr+":"+it.start+"-"+it.stop
+			
 			if (countGenes."${it.name}"){
-				countGenes."${it.name}" = countGenes."${it.name}" + 1
-				countGeneScore."${it.name}" = countGeneScore."${it.name}" + it.score
+				//add the mir counts
+				def m = countGenes."${it.name}"
+				if(!m.contains("${it.matid}")){
+					m.add(it.matid)
+				}
+				countGenes."${it.name}" = m
+				
+				//add the target counts
+				def t = countGeneScore."${it.name}"
+				if (t."${it.source}" > 0) {
+					t."${it.source}" = t."${it.source}" + 1
+				}else{
+					t."${it.source}" = 1
+				}
+				countGeneScore."${it.name}" = t
+				print countGeneScore."${it.name}"
 			}else{
-				countGenes."${it.name}" = 1
-				countGeneScore."${it.name}" = it.score
+				countGeneScore."${it.name}" = ["s":0,"t":0,"d":0,"m":0]
+				countGenes."${it.name}" = [it.matid]
+				def t = countGeneScore."${it.name}"
+				t."${it.source}" = 1
+				countGeneScore."${it.name}" = t
 			}
 		}
+		
 		countGenes.each{
 			commonGenes.name = it.key
 			commonGenes.count = it.value

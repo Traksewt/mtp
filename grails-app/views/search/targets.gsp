@@ -43,7 +43,7 @@
 				
 				$('#common').dataTable({
 					"sPaginationType": "full_numbers",
-					"aaSorting": [[ 6, "desc" ]],
+					"aaSorting": [[ 5, "desc" ]],
 					"iDisplayLength": 10,
                 	"oLanguage": {
                         "sSearch": "Filter records:"
@@ -147,7 +147,7 @@
 		The table below lists the genes that are most commonly found in the selected target predictions.
 		<table id="common">
             <thead>
-				<tr><th>Gene symbol</th><th>Ensembl ID</th><th>UniProt ID</th><th>Name</th><th width="30%">Location</th><th>Count</th><th>Combined score</th></tr>
+				<tr><th>Gene symbol</th><th>Ensembl ID</th><th>UniProt ID</th><th>Name</th><th width="30%">Location</th><th>Count</th><th>S</th><th>M</th><th>T</th><th>D</th></tr>
 			</thead>
 			<tbody>
 				<g:each var="r" in="${commonGeneList}">
@@ -157,8 +157,13 @@
 					<td><g:if test="${r.uniprot != 'n/a'}"><a href = "http://www.ncbi.nlm.nih.gov/nuccore/${r.uniprot}">${r.uniprot}</a></g:if><g:else>${r.uniprot}</g:else></td>
 					<td>${r.fullname}</td>
 					<td><a href="http://asia.ensembl.org/Homo_sapiens/Location/View?db=core;r=${r.location}" target="_blank">${r.location}</a></td>
-					<td>${r.count}</td>
-					<td>${r.countScore}</td>
+					<td>${r.count.size()}</td>
+					<g:each var="t" in="${r.countScore}">
+						<g:if test="${t.key == 's'}"><td>${t.value}</td></g:if>
+						<g:if test="${t.key == 'm'}"><td>${t.value}</td></g:if>
+						<g:if test="${t.key == 't'}"><td>${t.value}</td></g:if>
+						<g:if test="${t.key == 'd'}"><td>${t.value}</td></g:if>
+					</g:each>
 				</tr>
 				</g:each>
 			</tbody>
