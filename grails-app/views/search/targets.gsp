@@ -33,6 +33,55 @@
                 	}                	
 				});
 			});
+			function runEnrichr(){
+				//get genes
+				var gList = <%=session.commonGeneListJSON%>
+				var top = $("select[name='topEnrichr']").val()
+				gList = gList.splice(-top,top)
+				var gList_split = ""
+                for (var i=0;i<gList.length;i++){
+                   	gList_split += gList[i].name+"\r"
+                } 			
+				console.log('gList = '+gList_split)
+				
+				enrich({list:gList_split,popup:true,num:top})
+			}
+			function enrich(options) {
+                  var defaultOptions = {
+                          description: "Top "+options.num+" MTP gene target predictions",
+                          popup: false
+                  };
+
+                  if (typeof options.description == 'undefined')
+                          options.description = defaultOptions.description;
+                  if (typeof options.popup == 'undefined')
+                          options.popup = defaultOptions.popup;
+                  if (typeof options.list == 'undefined')
+                          alert('No genes defined.');
+
+                  var form = document.createElement('form');
+                  form.setAttribute('method', 'post');
+                  form.setAttribute('action', 'http://amp.pharm.mssm.edu/Enrichr/enrich');
+                  if (options.popup)
+                          form.setAttribute('target', '_blank');
+                  form.setAttribute('enctype', 'multipart/form-data');
+
+                  var listField = document.createElement('input');
+                  listField.setAttribute('type', 'hidden');
+                  listField.setAttribute('name', 'list');
+                  listField.setAttribute('value', options.list);
+                  form.appendChild(listField);
+
+                  var descField = document.createElement('input');
+                  descField.setAttribute('type', 'hidden');
+                  descField.setAttribute('name', 'description');
+                  descField.setAttribute('value', options.description);
+                  form.appendChild(descField);
+
+                  document.body.appendChild(form);
+                  form.submit();
+                  document.body.removeChild(form);
+             }                
   		</script>
 	</head>
 	<body>
@@ -43,47 +92,47 @@
 			<td>${sprintf("%,d\n",commonGeneList.size())} gene targets were found in the database in ${duration}.</td>
 		</tr>
 		<tr>
-			<td><b>Network</b></td>
+			<td><b>Network</b><img src="${resource(dir: 'images', file: 'network_image.png')}" height="30"></td>
 			<td>
 			<g:form name="network" action="network">
-				Auto <input type="radio" name="networkType" value="a" checked="true"> 
-				Top <select name="top">
+				<!--  Auto <input type="radio" name="networkType" value="a" checked="true">--> 
+				Top <select name="topNetwork">
 					<option value=5>5</option>
 					<option value=10>10</option>
 					<option value=20>20</option>
 					<option value=50>50</option>
-				</select> genes | 
-				Custom <input type="radio" name="networkType" value="c">
-				<input type="submit" value="search">
+				</select> genes  
+				<!-- | Custom <input type="radio" name="networkType" value="c"> -->
+				<input type="submit" value="Go">
 			</g:form>
             </td>	
           </tr>
           <tr>
-			<td><b>Heatmap</b></td>
+			<td><b>Heatmap</b><img src="${resource(dir: 'images', file: 'heatmap_image.png')}" height="30"></td>
             <td>
 			<g:form name="heatmap" action="heatmap"> 
-				Top <select name="top">
+				Top <select name="topHeatmap">
 					<option value=5>5</option>
 					<option value=10>10</option>
 					<option value=20>20</option>
 					<option value=50>50</option>
 				</select> genes
-				<input type="submit" value="search">
+				<input type="submit" value="Go">
 			</g:form>
             </td>	
 		</tr>
 		<tr>
-			<td><b>Enrichr GSEA</b></td>
+			<td><b>Enrichr GSEA</b><img src="${resource(dir: 'images', file: 'enrichr-icon.png')}" height="30"></td>
             <td>
-			<g:form name="enrichr" action="enrichr">
-				Top <select name="top">
+			
+				Top <select name="topEnrichr">
 					<option value=5>5</option>
 					<option value=10>10</option>
 					<option value=20>20</option>
 					<option value=50>50</option>
 				</select> genes
-				<input type="submit" value="search">
-			</g:form>
+				<input type="submit" value="Go" onclick="runEnrichr()" href="javascript:void(0);">
+
             </td>	
 		</tr>
 		</table>

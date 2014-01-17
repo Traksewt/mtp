@@ -160,9 +160,9 @@ class SearchController {
     	def sql = new Sql(dataSource)
     	print "Creating network... "+new Date()
     	
-		def top = params.top.toInteger()
+		def top = params.topNetwork.toInteger()
 		
-		def commonGeneList = session.commonGeneList.sort{it.count.size()}.drop( session.commonGeneList.size() - top )
+		def commonGeneList = session.commonGeneList.drop( session.commonGeneList.size() - top )
 		
 		def mList = session.mList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")
 		def gList = []
@@ -580,8 +580,10 @@ class SearchController {
 		mList = mList as JSON
 		session.mList = mList.decodeURL()
 		
-		session.commonGeneList = commonGeneList
-			
+		session.commonGeneList = commonGeneList.sort{it.count.size()}
+		def c = commonGeneList as JSON
+		session.commonGeneListJSON = c.decodeURL()
+		
 		def t2 = new Date()
 		def TimeDuration duration = TimeCategory.minus(t2, t1)
 		
@@ -608,7 +610,7 @@ class SearchController {
 		//to get miRs with no targets too use mirRes.each and for just those with targets use heat.each
 		//mirRes.each{
 		
-		def top = params.top.toInteger()
+		def top = params.topHeatmap.toInteger()
 		def heat = session.tData
 		
 		heat.each{
@@ -692,7 +694,7 @@ class SearchController {
 		mList = mList.decodeURL()
 		print "heatmap x = "+mList
 
-		commonGeneList = session.commonGeneList.sort{it.count.size()}.drop( session.commonGeneList.size() - top )
+		commonGeneList = session.commonGeneList.drop( session.commonGeneList.size() - top )
 		
 		//add things to the session
 		session.commonMListJSON = mList
