@@ -160,6 +160,20 @@ class SearchController {
     	def sql = new Sql(dataSource)
     	print "Creating network... "+new Date()
     	
+		def top = params.top.toInteger()
+		
+		def commonGeneList = session.commonGeneList.sort{it.count.size()}.drop( session.commonGeneList.size() - top )
+		
+		def mList = session.mList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")
+		def gList = []
+		commonGeneList.each{
+			gList.add(it.name)
+		}
+		gList = gList as JSON
+		gList = gList.decodeURL()
+		print "mList ="+mList
+		print "gList ="+gList
+		
     	def ndata = [:]
 		def nodeMap = [:]
 		def nodeList = []
@@ -168,8 +182,8 @@ class SearchController {
 		def ndataDecode
 		//def gList = session.commonGList.drop( session.commonGList.size() - params.top).replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")
 		//def mList = session.commonMList.drop( session.commonMList.size() - params.top).replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")
-		print "gList ="+session.commonGList.size()
-		def comsql1 = "select matid,name,score from mature,mir2mrna,genes where "+session.targetString+" and matid in ("+session.commonMListJSON.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and name in ("+session.commonGListJSON.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and mature.id = mir2mrna.mature_id and mir2mrna.genes_id = genes.id;"
+		
+		def comsql1 = "select matid,name,count(name) as score from mature,mir2mrna,genes where "+session.targetString+" and matid in ("+mList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and name in ("+gList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and mature.id = mir2mrna.mature_id and mir2mrna.genes_id = genes.id group by matid,name;"
     	print comsql1
     	def c1 = sql.rows(comsql1)
 		c1.each{
@@ -199,7 +213,7 @@ class SearchController {
 			linkMap = [:]
 		}
 		
-		def comsql2 = "select matid,tfname from precursor,mature,chipbase_mir where matid in ("+session.commonMListJSON.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and mature.precursor_id = precursor.id and precursor.id = chipbase_mir.pre_id;";
+		def comsql2 = "select matid,tfname from precursor,mature,chipbase_mir where matid in ("+mList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and mature.precursor_id = precursor.id and precursor.id = chipbase_mir.pre_id;";
 		print comsql2
 		def c2 = sql.rows(comsql2)
 		c2.each{
@@ -229,7 +243,7 @@ class SearchController {
 			linkMap = [:]
 		}
 		
-		def comsql3 = "select name,tfname from genes,chipbase_gene where name in ("+session.commonGListJSON.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and genes.id = chipbase_gene.genes_id;";
+		def comsql3 = "select name,tfname from genes,chipbase_gene where name in ("+gList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and genes.id = chipbase_gene.genes_id;";
 		print comsql3
 		def c3 = sql.rows(comsql3)
 		c3.each{
@@ -256,7 +270,7 @@ class SearchController {
     	ndataDecode = ndataJSON.decodeURL()
 		//print ndataDecode
 	
-    	return [ndata:ndataDecode]
+    	return [ndata:ndataDecode,commonGeneList:commonGeneList]
     }
     
     def ajaxMirFinder = {
@@ -559,6 +573,14 @@ class SearchController {
 			commonGenes = [:]
 		}
 		
+		//add list of mirs to session
+		mMap.each{
+			mList.add(it.key)
+		}
+		mList = mList as JSON
+		session.mList = mList.decodeURL()
+		
+		session.commonGeneList = commonGeneList
 			
 		def t2 = new Date()
 		def TimeDuration duration = TimeCategory.minus(t2, t1)
@@ -592,45 +614,6 @@ class SearchController {
 		heat.each{
 			mMap."${it.matid}"=0
 			famMap."${it.matid}"=it.famid
-			geneNames."${it.name}"=[it.fullname,it.ensembl,it.uniprot]
-			geneLoc."${it.name}"=it.chr+":"+it.start+"-"+it.stop
-			
-			if (countGenes."${it.name}"){
-				//add the mir counts
-				def m = countGenes."${it.name}"
-				if(!m.contains("${it.matid}")){
-					m.add(it.matid)
-				}
-				countGenes."${it.name}" = m
-				
-				//add the target counts
-				def t = countGeneScore."${it.name}"
-				if (t."${it.source}" > 0) {
-					t."${it.source}" = t."${it.source}" + 1
-				}else{
-					t."${it.source}" = 1
-				}
-				countGeneScore."${it.name}" = t
-			}else{
-				countGeneScore."${it.name}" = ["s":0,"t":0,"d":0,"m":0]
-				countGenes."${it.name}" = [it.matid]
-				def t = countGeneScore."${it.name}"
-				t."${it.source}" = 1
-				countGeneScore."${it.name}" = t
-			}
-		}
-		
-		countGenes.each{
-			commonGenes.name = it.key
-			commonGenes.count = it.value
-			commonGenes.fullname = geneNames."${it.key}"[0]
-			commonGenes.ensembl = geneNames."${it.key}"[1]
-			commonGenes.uniprot = geneNames."${it.key}"[2]
-			commonGenes.location = geneLoc."${it.key}"
-			commonGenes.countScore = countGeneScore."${it.key}"
-			//print "commonGenes = "+commonGenes
-			commonGeneList.add(commonGenes)
-			commonGenes = [:]
 		}
 		
 		if (mMap.size()>1){
@@ -709,7 +692,7 @@ class SearchController {
 		mList = mList.decodeURL()
 		print "heatmap x = "+mList
 
-		commonGeneList = commonGeneList.sort{it.count.size()}.drop( commonGeneList.size() - top )
+		commonGeneList = session.commonGeneList.sort{it.count.size()}.drop( session.commonGeneList.size() - top )
 		
 		//add things to the session
 		session.commonMListJSON = mList
