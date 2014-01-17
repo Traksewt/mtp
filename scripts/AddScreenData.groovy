@@ -1,6 +1,6 @@
 package mtp
 
-/**
+
 n1()
 n2()
 p1()
@@ -17,9 +17,7 @@ b9()
 b10()
 b11()
 b12()
-**/
 
-b4()
 
 def n1(){
 	def metaMap = [:]
@@ -29,7 +27,7 @@ def n1(){
 	metaMap.d2name = "Vincristine"
 	ScreenMeta smeta = new ScreenMeta(metaMap)
 	smeta.save(flush:true)
-	addFunData("screen/20130930_SHEP_both_drugs_summary_data.csv",smeta)
+	addFunData("screen/20130930_SHEP_both_drugs_summary_data_edit.csv",smeta)
 }
 
 def n2(){
@@ -40,7 +38,7 @@ def n2(){
 	metaMap.d2name = "Vincristine"
 	ScreenMeta smeta = new ScreenMeta(metaMap)
 	smeta.save(flush:true)
-	addFunData("screen/20131003_Kelly_both_drugs_summary_data.csv",smeta)
+	addFunData("screen/20131003_Kelly_both_drugs_summary_data_edit.csv",smeta)
 }
 
 def p1(){
@@ -51,7 +49,7 @@ def p1(){
 	metaMap.d2name = "Cabazitaxel"
 	ScreenMeta smeta = new ScreenMeta(metaMap)
 	smeta.save(flush:true)
-	addFunData("screen/20131029_DU145_both_drugs_summary_data.csv",smeta)
+	addFunData("screen/20131029_DU145_both_drugs_summary_data_edit.csv",smeta)
 }
 
 def p2(){
@@ -62,7 +60,7 @@ def p2(){
 	metaMap.d2name = "Cabazitaxel"
 	ScreenMeta smeta = new ScreenMeta(metaMap)
 	smeta.save(flush:true)
-	addFunData("screen/20131031_PC3_both_drugs_summary_data.csv",smeta)
+	addFunData("screen/20131031_PC3_both_drugs_summary_data_edit.csv",smeta)
 }
 
 def b1(){
