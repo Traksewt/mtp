@@ -68,10 +68,8 @@
 			  {
 				'z': {
 					'Family': <%=famHeatList%>
-				  //'Description': ['uncharacterized LOC645722', 'DSCAM antisense RNA 1', 'heat shock 70kDa protein 1A', 'plastin 3', 'epithelial membrane protein 1', 'calponin 3, acidic', 'serglycin', 'transforming growth factor, beta receptor II (70/80kDa)', 'anterior gradient 2 homolog (Xenopus laevis)', 'tumor protein D52-like 1', 'collagen, type XIII, alpha 1', 'plasminogen activator, urokinase', 'olfactomedin 1', 'BTG family, member 3', 'tissue factor pathway inhibitor (lipoprotein-associated coagulation inhibitor)', 'v-ets erythroblastosis virus E26 oncogene homolog 1 (avian)', 'branched chain amino-acid transaminase 1, cytosolic', 'v-erb-b2 erythroblastic leukemia viral oncogene homolog 3 (avian)', 'thiosulfate sulfurtransferase (rhodanese)-like domain containing 1']
 				},
 				'x': {
-				  //'Type': ['control', 'control', 'control', 'estrogen receptor knockdown', 'estrogen receptor knockdown', 'estrogen receptor knockdown']
 				},
 				'y': {
 				  'vars': <%=mList%>,
@@ -98,7 +96,7 @@
 	<body>
 		<h1>Heatmap of gene counts</h1>
 		
-		<p>Gene targets are represented below and clustered according to StarBase score. This score represents the number of computational predictions (1-5) that agree with the HITS-CLIP prediction. 
+		<p>Gene targets are represented below and clustered according to the number of independent target predictions.  
 		<div style="position:relative; margin-left:auto; margin-right:auto; width:1000px; height:650px;"=>
 			<canvas id='canvas1' width='1000' height='650'></canvas>
 		</div>
@@ -107,7 +105,7 @@
 		The table below lists the predicted gene targets in the heatmap. Count represents the number of times each gene was predicted to be the target of an independent miRNA.
 		<table id="common">
             <thead>
-				<tr><th>Gene symbol</th><th>Ensembl ID</th><th>UniProt ID</th><th>Name</th><th width="30%">Location</th><th>Count</th><th>S</th><th>M</th><th>T</th><th>D</th></tr>
+				<tr><th>Gene symbol</th><th>Ensembl ID</th><th>UniProt ID</th><th>Name</th><th width="30%">Location</th><th>Count</th><th>S</th><th>T</th><th>D</th><th>M</th></tr>
 			</thead>
 			<tbody>
 				<g:each var="r" in="${commonGeneList}">
@@ -120,9 +118,9 @@
 					<td>${r.count.size()}</td>
 					<g:each var="t" in="${r.countScore}">
 						<g:if test="${t.key == 's'}"><td>${t.value}</td></g:if>
-						<g:if test="${t.key == 'm'}"><td>${t.value}</td></g:if>
 						<g:if test="${t.key == 't'}"><td>${t.value}</td></g:if>
 						<g:if test="${t.key == 'd'}"><td>${t.value}</td></g:if>
+						<g:if test="${t.key == 'm'}"><td>${t.value}</td></g:if>
 					</g:each>
 				</tr>
 				</g:each>

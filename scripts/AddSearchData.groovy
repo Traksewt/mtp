@@ -445,39 +445,31 @@ def mirtarbase_full(){
 	print "Adding mirtarbase data..."
 	def mtMap = [:]
 	def gene
-	def mt_file = new File("data/miRTarBase_hsa_MTI.txt")
+	def mt_file = new File("data/mirtarbase_no_redundancy.txt")
 	//def mt_file = new File("data/mirtarbase_10000.txt")
 
 	mt_file.eachLine{ line ->
-		if ((matcher = line =~ /^MIR.*/)){
-			def s = line.split("\t")
-			if (s.size() == 9){
-				if ((matcher = s[1] =~ /^hsa.*/)){
-					gene = s[3]
-					mtMap.source = "m"
-					mtMap.score = 0
-					//print mtMap
-					count++
-					Mature mat = Mature.findByMatid(s[1])
-					Genes g = Genes.findByName(gene)
-					if (mat != null && g !=null){
-						Mir2mrna mt = new Mir2mrna(mtMap)
-						mat.addToMir2mrna(mt)
-						g.addToMir2mrna(mt)
-						if ((count % 1000) == 0){
-							mat.save(flush:true)
-							g.save(flush:true)
-							println new Date()
-							cleanUpGorm()
-							print count
-						}else{
-							mat.save()
-							g.save()
-						}
-					}
-				}
+		def s = line.split("\t")		
+		gene = s[1]
+		mtMap.source = "m"
+		mtMap.score = 0
+		//print mtMap
+		count++
+		Mature mat = Mature.findByMatid(s[0])
+		Genes g = Genes.findByName(gene)
+		if (mat != null && g !=null){
+			Mir2mrna mt = new Mir2mrna(mtMap)
+			mat.addToMir2mrna(mt)
+			g.addToMir2mrna(mt)
+			if ((count % 1000) == 0){
+				mat.save(flush:true)
+				g.save(flush:true)
+				println new Date()
+				cleanUpGorm()
+				print count
 			}else{
-				print "Missing data!!! - "+mtMap
+				mat.save()
+				g.save()
 			}
 		}
 	}
@@ -489,33 +481,31 @@ def tscan_full(){
 	print "Adding targetscan data..."
 	def tsMap = [:]
 	def gene
-	def ts_file = new File("data/TCS_0.5_hsa.txt")
+	def ts_file = new File("data/TCS_0.5_filtered_hsa.txt")
 	//def ts_file = new File("data/tscan_10000.txt")
-	ts_file.eachLine{ line ->
-		if ((matcher = line =~ /^NM_.*/)){
-			def s = line.split("\t")
-			if ((matcher = s[12] =~ /^hsa.*/)){
-				gene = s[1]
-				tsMap.source = "t"
-				tsMap.score = s[13]
-				//print tsMap
-				count++
-				Mature mat = Mature.findByMatid(s[12])
-				Genes g = Genes.findByName(gene)
-				if (mat != null && g !=null){
-					Mir2mrna ts = new Mir2mrna(tsMap)
-					mat.addToMir2mrna(ts)
-					g.addToMir2mrna(ts)
-					if ((count % 1000) == 0){
-						mat.save(flush:true)
-						g.save(flush:true)
-						println new Date()
-						cleanUpGorm()
-						print count
-					}else{
-						mat.save()
-						g.save()
-					}
+	ts_file.eachLine{ line ->		
+		def s = line.split("\t")
+		if ((matcher = s[0] =~ /^hsa.*/)){
+			gene = s[1]
+			tsMap.source = "t"
+			tsMap.score = s[2]
+			//print tsMap
+			count++
+			Mature mat = Mature.findByMatid(s[0])
+			Genes g = Genes.findByName(gene)
+			if (mat != null && g !=null){
+				Mir2mrna ts = new Mir2mrna(tsMap)
+				mat.addToMir2mrna(ts)
+				g.addToMir2mrna(ts)
+				if ((count % 1000) == 0){
+					mat.save(flush:true)
+					g.save(flush:true)
+					println new Date()
+					cleanUpGorm()
+					print count
+				}else{
+					mat.save()
+					g.save()
 				}
 			}
 		}

@@ -91,7 +91,7 @@
 		The table below lists the predicted gene targets. Count represents the number of times each gene was predicted to be the target of an independent miRNA.
 		<table id="common">
             <thead>
-				<tr><th>Gene symbol</th><th>Ensembl ID</th><th>UniProt ID</th><th>Name</th><th width="30%">Location</th><th>Count</th><th>S</th><th>M</th><th>T</th><th>D</th></tr>
+				<tr><th>Gene symbol</th><th>Ensembl ID</th><th>UniProt ID</th><th>Name</th><th width="30%">Location</th><th>Count</th><th>S</th><th>T</th><th>D</th><th>M</th></tr>
 			</thead>
 			<tbody>
 				<g:each var="r" in="${commonGeneList}">
@@ -104,9 +104,9 @@
 					<td>${r.count.size()}</td>
 					<g:each var="t" in="${r.countScore}">
 						<g:if test="${t.key == 's'}"><td>${t.value}</td></g:if>
-						<g:if test="${t.key == 'm'}"><td>${t.value}</td></g:if>
 						<g:if test="${t.key == 't'}"><td>${t.value}</td></g:if>
 						<g:if test="${t.key == 'd'}"><td>${t.value}</td></g:if>
+						<g:if test="${t.key == 'm'}"><td>${t.value}</td></g:if>
 					</g:each>
 				</tr>
 				</g:each>

@@ -490,7 +490,7 @@ class SearchController {
 		
 		
 		
-		//heatmap
+		//target data
 		def tsql = "select source,ensembl,uniprot,matid,score,genes.start,name,fullname,genes.id,famid,genes.chr,genes.start,genes.stop from family,precursor,mature,mir2mrna,genes where "+targetString+" and family.id = precursor.family_id and precursor.id = mature.precursor_id and mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") order by genes.id;";
 		print tsql
 		def tData = sql.rows(tsql)
@@ -634,16 +634,19 @@ class SearchController {
 		}
 		
 		if (mMap.size()>1){
+			//generate family data
 			famMap.each{
 				famHeatList.add(it.value)
 			}
 			famHeatList = famHeatList as JSON
 			famHeatList = famHeatList.decodeURL()
 			print "famHeatList = "+famHeatList
-
+			
+			//generate heatmap numbers
 			mMap.each{
 				mList.add(it.key)
 			}
+			//print "mMap = "+mMap
 			def mMapReset = mMap;
 			def old_id = ""
 			def old_name = ""
@@ -658,15 +661,7 @@ class SearchController {
 					mMap.each{
 						data.add(it.value)
 					}
-					//find arrays with most entries or sum the scores
-					def gr = 0
-					data.each{
-						if (it > 0){
-							gr++
-						}
-					}
-					sumData."${old_name}" = gr
-					//sumData."${old_name}" = data.sum()
+					sumData."${old_name}" = data.sum()
 					dList."${old_name}" = data
 					//reset the map
 					mMap = [:]
@@ -674,7 +669,7 @@ class SearchController {
 						mMap."${it.key}"=0
 					}
 				}
-				mMap."${it.matid}"=it.score
+				mMap."${it.matid}"= mMap."${it.matid}" + 1
 				old_name = it.name
 				old_id = it.id
 			}
@@ -683,7 +678,7 @@ class SearchController {
 				data.add(it.value)
 			}
 			dList."${old_name}" = data
-		
+			//print "sumData = "+sumData
 			//sort and generate lists
 			def sortData = sumData.sort{it.value}.drop( sumData.size() - top )
 			print "top = "+sortData
@@ -705,14 +700,14 @@ class SearchController {
 				tmp = []
 			}
 		}
-		//print "heatmap data = "+frData
+		print "heatmap data = "+frData
 		gList = gList as JSON
 		gList = gList.decodeURL()
-		//print "heatmap y = "+gList
+		print "heatmap y = "+gList
 		
 		mList = mList as JSON
 		mList = mList.decodeURL()
-		//print "heatmap x = "+mList
+		print "heatmap x = "+mList
 
 		commonGeneList = commonGeneList.sort{it.count.size()}.drop( commonGeneList.size() - top )
 		
