@@ -46,6 +46,14 @@ class SearchController {
     	return [n1:n1, ndata:ndataDecode]
     }
     
+    def network_build = {
+    	print "Getting network data..."
+		def sql = new Sql(dataSource)
+		print params.link
+		def ndata = [:]
+		render(template:"networkUpdateResponse", model: [ndata:ndata])
+    }
+    
     
     def screen_res(){
     	def t1 = new Date()

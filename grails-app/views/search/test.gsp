@@ -13,7 +13,7 @@
 		<script src="${resource(dir: 'js', file: 'd3/d3.v3.min.js')}" type="text/javascript"></script>  	
 		<script>
 		$(document).ready(function() {
-				
+
 				$('#mirTable').dataTable({
 					"sPaginationType": "full_numbers",
 					"aaSorting": [[ 1, "desc" ]],
@@ -126,8 +126,7 @@
 	<p>- Each circle is sticky and can be moved and placed anywhere. To unstick just double click on the node. 
 	- 
 	<svg id="network_svg"></svg>
-	
-	<a href="javascript:void(0);" onclick="updateNetwork()"><h1>Update</h1></a>
+	${ndata}
 	<div id="n_1">
 		 <input type="button" class="tabbuttons" value="1- MiRNA" style="color:#BFBFBF"/>
          <input type="button" class="tabbuttons" onclick="switchTab('2','1');" value="2 - Gene targets"/>
@@ -145,7 +144,7 @@
 					<tbody>
 						<g:each var="r" in="${n1}">
 						<tr>
-							<td><g:checkBox name="funCheck" value="${r.id}" checked="true"/></td>
+							<td><input name="mirCheck" type="checkbox" id="${r.matid}" value="${r.id}" checked="true" onclick="updateNetwork('${r.matid}')"/></td>
 							<td>${r.matid}</td>
 							<td><a href="http://mirbase.org/cgi-bin/mirna_entry.pl?acc=${r.matacc}" target="_blank">${r.matacc}</a></td>				
 							<td><font face="courier new">${r.matseq.toUpperCase()[1..6]}</font></td>
@@ -156,12 +155,9 @@
 						</g:each>
 					</tbody>
 				</table>
-			 </fieldset>
-			<g:form name="network" url="[action:'network']">
-				<g:hiddenField name="common_genes" value="${gList}"/>
-				<g:hiddenField name="common_mirs" value="${mList}"/>
-				<a href="javascript:void(0);" onclick="document.network.submit()"><h1>Next Step</h1></a>
-			</g:form> 
+			 </fieldset>				
+			<a href="javascript:void(0);" onclick="${remoteFunction(action:'network_build',update:'networkUpdate',params:'\'link=\'+getChecks(\'mirCheck\')')};"><h1>Next Step</h1></a>
+			<a href="javascript:void(0);" onclick="${remoteFunction(action:'network_build',update:'networkUpdate',params:'\'link=\'+$(\'.mirCheck:checked").map(function () {return this.value;}).get().join(\',\')')};"><h1>Next Step</h1></a>
 		</div>
 	</div>
 	<table id="common">
@@ -194,10 +190,11 @@
 // 			link.value = +link.value;
 // 		});
 		
+		var alldata = <%=ndata%>
 		var ndata = <%=ndata%>
 		
 		var width = 1200,
-		height = 800,
+		height = 300,
 		root;
 				
 		var color = d3.scale.category20c();
@@ -233,6 +230,8 @@
 			.linkStrength(0.5)
 			.friction(0.5)
 			.gravity(0.5)
+			.nodes(ndata.nodes)
+			.links(ndata.links)
 		
 		d3.json(ndata, function(json) {
 			root = json;
@@ -241,13 +240,6 @@
 		
 		function update(){
 			console.log("updating")
-			var nodes = ndata.nodes;
-			var links = ndata.links;
-			
-			force
-				.nodes(nodes)
-				.links(links)
-				.start();
 			
 			var v = d3.scale.linear().range([0, 100]);
 		
@@ -277,8 +269,7 @@
 			});
 		
 
-			// build the arrow.
-		
+			// build the arrow.		
 			svg.append("svg:defs").selectAll("marker")
 				.data(["end"]) // Different link/path types can be defined here
 			  .enter().append("svg:marker")
@@ -307,27 +298,24 @@
 			//link.exit().remove();
 			
 			// Update the nodes…
-			//node = node.data(nodes, function(d) { return d.name; }).style("fill", "blue");
-			node = node.data(nodes)
+			node = node.data(ndata.nodes, function(d) { return d.name; });
 			
 			// Exit any old nodes.
 			node.exit().remove();
-			console.log('node = '+node)
 				
 			// define the nodes
-			//node = svg.selectAll(".node") 
-			   node.enter().append("g")
+			var g = node.enter().append("g")
  			  	.data(force.nodes())
  				.attr("class", "node")
-// 				//.on("click", click) 
+ 				//.on("click", click) 
  				.on("dblclick", dblclick)
-// 				.call(force.drag)
-// 				//.on("mouseover", fade(.1)).on("mouseout", fade(1));;
-// 			
+ 				.call(force.drag)
+ 				//.on("mouseover", fade(.1)).on("mouseout", fade(1));;
+ 			
 					
 			// add the nodes and change colour and sizes accordingly
-			node.append("circle")
-			.attr("class", "node")
+			g.append("circle")
+			//.attr("class", "node")
 			.on("dblclick", dblclick)
 				.call(force.drag)
 				.attr("r", function(d) { 
@@ -348,7 +336,7 @@
 				})
 			
 			// add the text
-			node.append("text")
+			g.append("text")
 				.attr("x", 12)
 				.attr("dy", ".35em") 
 				.text(function(d) { 
@@ -361,6 +349,9 @@
 		
 			//make nodes sticky when moved
 			node.on("mousedown", function(d) { d.fixed = true; });
+			
+			force
+				.start();
 		}
 		
 		
@@ -383,13 +374,35 @@
 			.attr("transform", function(d) {
 				return "translate(" + d.x + "," + d.y + ")"; });
 		} 
-		var i = 0;
-		function updateNetwork(){
-			ndata.nodes.splice(1, 1);
-			console.log(ndata.nodes + 'i = '+i)
-			i++;
+		
+		function updateNetwork(nodeName){
+			if ($('#' + nodeName).is(":checked")){
+				console.log("Adding "+nodeName)
+				for (var key in alldata.nodes) {
+					console.log(key + ' is ' + alldata.nodes[key].name);
+					if (alldata.nodes[key].name == nodeName){
+						ndata.nodes.push(alldata.nodes[key]);	
+					}
+				}
+			}else{
+				var index
+				console.log('finding location for '+nodeName)
+				for (var key in ndata.nodes) {
+					console.log(key + ' is ' + ndata.nodes[key].name);
+					if (ndata.nodes[key].name == nodeName){
+						index = key
+					}
+				}
+				console.log('index for '+nodeName+' = '+index)
+				ndata.nodes.splice(index, 1);
+			}
 			update()
-			
+		}
+		
+		function getChecks(name){
+			var checks = ($("input[name="+name+"]:checked").map(function () {return this.value;}).get().join(","));
+			//alert(checks)
+			return checks
 		}
 		
 		</script>
