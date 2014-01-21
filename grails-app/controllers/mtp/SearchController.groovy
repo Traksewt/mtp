@@ -568,7 +568,12 @@ class SearchController {
 			commonGenes.uniprot = geneNames."${it.key}"[2]
 			commonGenes.location = geneLoc."${it.key}"
 			commonGenes.countScore = countGeneScore."${it.key}"
-			//print "commonGenes = "+commonGenes
+			//print "num of miRs = "+it.value.size()
+			//print "total number of miRs = "+mMap.size()
+			//print "num of dbs = "+countGeneScore."${it.key}".collect{it.value}.sum()
+			//print "total num of dsbs = "+countGeneScore."${it.key}".size()
+			commonGenes.nScore = ( ( it.value.unique().size() / mMap.size()) * (countGeneScore."${it.key}".collect{it.value}.sum() / countGeneScore."${it.key}".size() ) )
+			//print "nScore = "+commonGenes.nScore
 			commonGeneList.add(commonGenes)
 			commonGenes = [:]
 		}
@@ -580,7 +585,7 @@ class SearchController {
 		mList = mList as JSON
 		session.mList = mList.decodeURL()
 		
-		session.commonGeneList = commonGeneList.sort{it.count.size()}
+		session.commonGeneList = commonGeneList.sort{it.nScore}
 		def c = commonGeneList as JSON
 		session.commonGeneListJSON = c.decodeURL()
 		

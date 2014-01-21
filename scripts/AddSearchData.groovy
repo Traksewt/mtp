@@ -446,30 +446,30 @@ def mirtarbase_full(){
 	def mtMap = [:]
 	def gene
 	def mt_file = new File("data/mirtarbase_no_redundancy.txt")
-	//def mt_file = new File("data/mirtarbase_10000.txt")
-
 	mt_file.eachLine{ line ->
-		def s = line.split("\t")		
-		gene = s[1]
-		mtMap.source = "m"
-		mtMap.score = 0
-		//print mtMap
-		count++
-		Mature mat = Mature.findByMatid(s[0])
-		Genes g = Genes.findByName(gene)
-		if (mat != null && g !=null){
-			Mir2mrna mt = new Mir2mrna(mtMap)
-			mat.addToMir2mrna(mt)
-			g.addToMir2mrna(mt)
-			if ((count % 1000) == 0){
-				mat.save(flush:true)
-				g.save(flush:true)
-				println new Date()
-				cleanUpGorm()
-				print count
-			}else{
-				mat.save()
-				g.save()
+		def s = line.split("\t")	
+		if(s.size() == 2){	
+			gene = s[1]
+			mtMap.source = "m"
+			mtMap.score = 0
+			print mtMap
+			count++
+			Mature mat = Mature.findByMatid(s[0])
+			Genes g = Genes.findByName(gene)
+			if (mat != null && g !=null){
+				Mir2mrna mt = new Mir2mrna(mtMap)
+				mat.addToMir2mrna(mt)
+				g.addToMir2mrna(mt)
+				if ((count % 1000) == 0){
+					mat.save(flush:true)
+					g.save(flush:true)
+					println new Date()
+					cleanUpGorm()
+					print count
+				}else{
+					mat.save()
+					g.save()
+				}
 			}
 		}
 	}

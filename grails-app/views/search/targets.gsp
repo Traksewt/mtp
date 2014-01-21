@@ -140,7 +140,7 @@
 		The table below lists the predicted gene targets. Count represents the number of times each gene was predicted to be the target of an independent miRNA.
 		<table id="common">
             <thead>
-				<tr><th>Gene symbol</th><th>Ensembl ID</th><th>UniProt ID</th><th>Name</th><th width="30%">Location</th><th>Count</th><th>S</th><th>T</th><th>D</th><th>M</th></tr>
+				<tr><th>Gene symbol</th><th>Ensembl ID</th><th>UniProt ID</th><th>Name</th><th width="30%">Location</th><th>Score</th><th># MiRNAs</th><th># Predictions</th><th>S</th><th>T</th><th>D</th><th>M</th></tr>
 			</thead>
 			<tbody>
 				<g:each var="r" in="${commonGeneList}">
@@ -150,13 +150,13 @@
 					<td><g:if test="${r.uniprot != 'n/a'}"><a href = "http://www.ncbi.nlm.nih.gov/nuccore/${r.uniprot}">${r.uniprot}</a></g:if><g:else>${r.uniprot}</g:else></td>
 					<td>${r.fullname}</td>
 					<td><a href="http://asia.ensembl.org/Homo_sapiens/Location/View?db=core;r=${r.location}" target="_blank">${r.location}</a></td>
-					<td>${r.count.size()}</td>
-					<g:each var="t" in="${r.countScore}">
-						<g:if test="${t.key == 's'}"><td>${t.value}</td></g:if>
-						<g:if test="${t.key == 't'}"><td>${t.value}</td></g:if>
-						<g:if test="${t.key == 'd'}"><td>${t.value}</td></g:if>
-						<g:if test="${t.key == 'm'}"><td>${t.value}</td></g:if>
-					</g:each>
+					<td>${sprintf("%.2f",r.nScore)}</td>
+					<td>${r.count.unique().size()}</td>
+					<td>${r.countScore.collect{it.value}.sum()}</td>
+					<td>${r.countScore.collect{it.value}[0]}</td>
+					<td>${r.countScore.collect{it.value}[1]}</td>
+					<td>${r.countScore.collect{it.value}[2]}</td>
+					<td>${r.countScore.collect{it.value}[3]}</td>
 				</tr>
 				</g:each>
 			</tbody>
