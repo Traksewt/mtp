@@ -160,68 +160,16 @@ class SearchController {
     	def sql = new Sql(dataSource)
     	print "Creating network... "+new Date()
     	
-    	// def mirs = params.mirs
-//     	mirs = mirs.replaceAll(/[\]\[]/,"");
-//     	mirs = mirs.replaceAll(/"/,"");
-//     	print "mirs = "+mirs.getClass()
-//     	def mirs2 = mirs.split(",")
-//     	def mirs3 = []
-//     	
-//     	def mirString = ""
-//     	mirs2.each{
-//     		print "each = "+it
-//     		mirs3.add(it)
-//     		mirString <<= "'"+it+"',"
-//     	}
-//     	mirString = mirString[0..-2]
-//     	print "mirString = "+mirString
-//     	
-//     	print "mirs2 = "+mirs2.getClass()
-// 		print "mirs3 = "+mirs3.getClass()
-// 		print "mirs3 = "+mirs3
-		
-    	//one sql command - too much!
-    	//def nsql = "select genes.name,matid,chipbase_gene.tfname as gene_tfname,chipbase_mir.tfname as mir_tfname from mature,mir2mrna,genes,chipbase_gene,chipbase_mir where ("+mirString+") and source = 's' and mir2mrna.genes_id = genes.id and mir2mrna.mature_id = mature.id and chipbase_gene.genes_id = genes.id and chipbase_mir.pre_id = mature.precursor_id order by name;";
-    	//print nsql
-    	
-//    	def ndata = []
-//    	def nmap = [:]
-//     	mirs2.each{
-//     		//get the genes and tf-gene data
-//     		print "Getting network data for "+it
-//     		//def nsql = "select genes.name,matid,chipbase_gene.tfname as gene_tfname from mature,mir2mrna,genes,chipbase_gene where mature.matid = '"+it+"' and source = 's' and mir2mrna.genes_id = genes.id and mir2mrna.mature_id = mature.id and chipbase_gene.genes_id = genes.id order by name;";
-// 			def nsql = "select count(distinct(genes.name)) as gcount, count(distinct(chipbase_gene.tfname)) as tfg from mature,mir2mrna,genes,chipbase_gene where mature.matid = '"+it+"' and source = 's' and mir2mrna.genes_id = genes.id and mir2mrna.mature_id = mature.id and chipbase_gene.genes_id = genes.id group by matid;";
-// 			print nsql   
-// 			def nres = sql.rows(nsql)
-// 			nmap.mir = it
-// 			nmap.gcount = nres.gcount[0]
-// 			nmap.tfg = nres.tfg[0]
-// 			nsql = "select count(distinct(chipbase_mir.tfname)) as tfm from precursor,mature,chipbase_mir where mature.matid = '"+it+"' and mature.precursor_id = precursor.id and chipbase_mir.pre_id = precursor.id group by matid;";
-// 			nres = sql.rows(nsql)
-// 			nmap.tfm = nres.tfm[0]
-// 			print "nmap = "+nmap
-// 			ndata.add(nmap) 	
-// 			nmap = [:]
-//     	}
-//    	print "ndata = "+ndata
-    	// def nres = Mature.findAllByMatidInList(mirs3)
-//     	nres.each{mir->
-//     		print "mir = "+mir.matid			
-//  		   	def star = mir.mir2mrna.findAll{
-//  		   		mir.mir2mrna.source=="s"
-//  		   	}
-//  		    //def star = mir.mir2mrna.findAll({mir.mir2mrna.source=="s"}).genes.name.unique()
-// 			print "star = "+star.size()
-//     	}
-//     	//a.mir2mrna.findAllWhere(source:"s" )
-    	
     	def ndata = [:]
 		def nodeMap = [:]
 		def nodeList = []
 		def linkMap = [:]
 		def linkList = []
 		def ndataDecode
-		def comsql1 = "select matid,name,score from mature,mir2mrna,genes where matid in ("+session.commonMList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and name in ("+session.commonGList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and mature.id = mir2mrna.mature_id and mir2mrna.genes_id = genes.id and (mir2mrna.source = 's' ${session.starParam});"
+		//def gList = session.commonGList.drop( session.commonGList.size() - params.top).replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")
+		//def mList = session.commonMList.drop( session.commonMList.size() - params.top).replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")
+		print "gList ="+session.commonGList.size()
+		def comsql1 = "select matid,name,score from mature,mir2mrna,genes where "+session.targetString+" and matid in ("+session.commonMListJSON.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and name in ("+session.commonGListJSON.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and mature.id = mir2mrna.mature_id and mir2mrna.genes_id = genes.id;"
     	print comsql1
     	def c1 = sql.rows(comsql1)
 		c1.each{
@@ -251,7 +199,7 @@ class SearchController {
 			linkMap = [:]
 		}
 		
-		def comsql2 = "select matid,tfname from precursor,mature,chipbase_mir where matid in ("+session.commonMList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and mature.precursor_id = precursor.id and precursor.id = chipbase_mir.pre_id;";
+		def comsql2 = "select matid,tfname from precursor,mature,chipbase_mir where matid in ("+session.commonMListJSON.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and mature.precursor_id = precursor.id and precursor.id = chipbase_mir.pre_id;";
 		print comsql2
 		def c2 = sql.rows(comsql2)
 		c2.each{
@@ -281,7 +229,7 @@ class SearchController {
 			linkMap = [:]
 		}
 		
-		def comsql3 = "select name,tfname from genes,chipbase_gene where name in ("+session.commonGList.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and genes.id = chipbase_gene.genes_id;";
+		def comsql3 = "select name,tfname from genes,chipbase_gene where name in ("+session.commonGListJSON.replaceAll(/[\]\[]/,"").replaceAll(/"/,"'")+") and genes.id = chipbase_gene.genes_id;";
 		print comsql3
 		def c3 = sql.rows(comsql3)
 		c3.each{
@@ -520,6 +468,7 @@ class SearchController {
     
 	def targets(){
 		def top = 50
+		def t1 = new Date()
 		def sql = new Sql(dataSource)
 		def mirList = session.mirList
 		def starParam = session.starParam
@@ -536,14 +485,17 @@ class SearchController {
 			}
 		}
 		targetString = "("+targetString[4..-1]+")"
+		session.targetString = targetString
 		print "targetString = "+targetString
 		
 		
 		
 		//heatmap
-		def heatsql = "select source,ensembl,uniprot,matid,score,genes.start,name,fullname,genes.id,famid,genes.chr,genes.start,genes.stop from family,precursor,mature,mir2mrna,genes where "+targetString+" and family.id = precursor.family_id and precursor.id = mature.precursor_id and mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") order by genes.id;";
-		print heatsql
-		def heat = sql.rows(heatsql)
+		def tsql = "select source,ensembl,uniprot,matid,score,genes.start,name,fullname,genes.id,famid,genes.chr,genes.start,genes.stop from family,precursor,mature,mir2mrna,genes where "+targetString+" and family.id = precursor.family_id and precursor.id = mature.precursor_id and mature.id = mir2mrna.mature_id and genes.id = mir2mrna.genes_id and ("+mirList+") order by genes.id;";
+		print tsql
+		def tData = sql.rows(tsql)
+		
+		session.tData = tData
 		
 		def dMap = []
 		def dList = [:]
@@ -563,6 +515,80 @@ class SearchController {
 		//to get miRs with no targets too use mirRes.each and for just those with targets use heat.each
 		//mirRes.each{
 	
+		tData.each{
+			mMap."${it.matid}"=0
+			famMap."${it.matid}"=it.famid
+			geneNames."${it.name}"=[it.fullname,it.ensembl,it.uniprot]
+			geneLoc."${it.name}"=it.chr+":"+it.start+"-"+it.stop
+			
+			if (countGenes."${it.name}"){
+				//add the mir counts
+				def m = countGenes."${it.name}"
+				if(!m.contains("${it.matid}")){
+					m.add(it.matid)
+				}
+				countGenes."${it.name}" = m
+				
+				//add the target counts
+				def t = countGeneScore."${it.name}"
+				if (t."${it.source}" > 0) {
+					t."${it.source}" = t."${it.source}" + 1
+				}else{
+					t."${it.source}" = 1
+				}
+				countGeneScore."${it.name}" = t
+			}else{
+				countGeneScore."${it.name}" = ["s":0,"t":0,"d":0,"m":0]
+				countGenes."${it.name}" = [it.matid]
+				def t = countGeneScore."${it.name}"
+				t."${it.source}" = 1
+				countGeneScore."${it.name}" = t
+			}
+		}
+		
+		countGenes.each{
+			commonGenes.name = it.key
+			commonGenes.count = it.value
+			commonGenes.fullname = geneNames."${it.key}"[0]
+			commonGenes.ensembl = geneNames."${it.key}"[1]
+			commonGenes.uniprot = geneNames."${it.key}"[2]
+			commonGenes.location = geneLoc."${it.key}"
+			commonGenes.countScore = countGeneScore."${it.key}"
+			//print "commonGenes = "+commonGenes
+			commonGeneList.add(commonGenes)
+			commonGenes = [:]
+		}
+		
+			
+		def t2 = new Date()
+		def TimeDuration duration = TimeCategory.minus(t2, t1)
+		
+		return [duration:duration,  commonGeneList:commonGeneList,]
+	}
+	
+	def heatmap(){
+		def count
+		def dMap = []
+		def dList = [:]
+		def mMap = [:]
+		def mList = []
+		def famMap = [:]
+		def famHeatList = []
+		def fData = []
+		def gList = []
+		def frData = []
+		def countGenes = [:]
+		def countGeneScore = [:]
+		def commonGenes = [:]
+		def commonGeneList = []
+		def geneNames = [:]
+		def geneLoc = [:]
+		//to get miRs with no targets too use mirRes.each and for just those with targets use heat.each
+		//mirRes.each{
+		
+		def top = params.top.toInteger()
+		def heat = session.tData
+		
 		heat.each{
 			mMap."${it.matid}"=0
 			famMap."${it.matid}"=it.famid
@@ -585,7 +611,6 @@ class SearchController {
 					t."${it.source}" = 1
 				}
 				countGeneScore."${it.name}" = t
-				print countGeneScore."${it.name}"
 			}else{
 				countGeneScore."${it.name}" = ["s":0,"t":0,"d":0,"m":0]
 				countGenes."${it.name}" = [it.matid]
@@ -688,14 +713,15 @@ class SearchController {
 		mList = mList as JSON
 		mList = mList.decodeURL()
 		//print "heatmap x = "+mList
-		//print "commonGeneList = "+commonGeneList
+
+		commonGeneList = commonGeneList.sort{it.count.size()}.drop( commonGeneList.size() - top )
 		
 		//add things to the session
-		session.commonGenes = commonGeneList.sort{it.countScore}.drop( commonGeneList.size() - top )
-		session.commonMList = mList
-		session.commonGList = gList
+		session.commonMListJSON = mList
+		session.commonGListJSON = gList
 		
 		return [famHeatList:famHeatList, commonGeneList:commonGeneList, fData:frData, mList:mList, gList:gList,]
+
 	}
 	
     def genes(){
