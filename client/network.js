@@ -10,6 +10,7 @@
 //(nodes[link.target] = {name: link.target});
 //link.value = +link.value;
 //});
+var ForcePanelContainer = require('./forcePanelContainer');
 
 
 var width = 1200,
@@ -84,20 +85,11 @@ d3.json(data, function(json) {
 		o.fixed = true;
 	})
 
+	var forcePanelContainer = ForcePanelContainer(data.nodes, data.links);
 	
-	var force = d3.layout.force() 
-	// .nodes(d3.values(nodes))
-	.nodes(data.nodes)
-	// .links(links)
-	.links(data.links)
-	.size([width, height]) 
-	.linkDistance(60) 
-	.charge(-2000) 
-	.on("tick", tick) 
-	.linkStrength(1)
-	.friction(0.5)
-	.gravity(0)
-	.start();
+	var force = forcePanelContainer.force
+		.size([width, height]) 
+		.start();
 
 
 
