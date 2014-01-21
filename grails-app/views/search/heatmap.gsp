@@ -105,7 +105,7 @@
 		The table below lists the predicted gene targets in the heatmap. Count represents the number of times each gene was predicted to be the target of an independent miRNA.
 		<table id="common">
             <thead>
-				<tr><th>Gene symbol</th><th>Ensembl ID</th><th>UniProt ID</th><th>Name</th><th width="30%">Location</th><th>Score</th><th># MiRNAs</th><th># Predictions</th><th>S</th><th>T</th><th>D</th><th>M</th></tr>
+				<tr><th>Gene symbol</th><th>Ensembl ID</th><th>UniProt ID</th><th>Name</th><th width="20%">Location</th><th><a href="#" title="(Number of miRNAs with target as prediction / total number of miRNAs in search) * (number of target databases predicting this gene / total number of target databases in search)">Score</th><th># MiRNAs</th><th># DBs</th><th>S</th><th>T</th><th>D</th><th>M</th></tr>
 			</thead>
 			<tbody>
 				<g:each var="r" in="${commonGeneList}">

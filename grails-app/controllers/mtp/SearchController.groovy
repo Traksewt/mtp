@@ -223,13 +223,13 @@ class SearchController {
 			if (!nodeList.name.contains("${source}")){
 				nodeMap.name = "${source}"
 				nodeMap.type = "TF-mir"
-				nodeList.add(nodeMap)
+				//nodeList.add(nodeMap)
 				nodeMap = [:] 
 			}
 			if (!nodeList.name.contains("${target}")){
 				nodeMap.name = "${target}"
 				nodeMap.type = "miRNA"
-				nodeList.add(nodeMap)
+				//nodeList.add(nodeMap)
 				nodeMap = [:] 
 			}
 			//do the links
@@ -239,7 +239,7 @@ class SearchController {
 			linkMap.source = tf_index
 			linkMap.target = gene_index
 			linkMap.name = "tf-mir"
-			linkList.add(linkMap)
+			//linkList.add(linkMap)
 			linkMap = [:]
 		}
 		
@@ -568,11 +568,13 @@ class SearchController {
 			commonGenes.uniprot = geneNames."${it.key}"[2]
 			commonGenes.location = geneLoc."${it.key}"
 			commonGenes.countScore = countGeneScore."${it.key}"
-			//print "num of miRs = "+it.value.size()
-			//print "total number of miRs = "+mMap.size()
-			//print "num of dbs = "+countGeneScore."${it.key}".collect{it.value}.sum()
-			//print "total num of dsbs = "+countGeneScore."${it.key}".size()
-			commonGenes.nScore = ( ( it.value.unique().size() / mMap.size()) * (countGeneScore."${it.key}".collect{it.value}.sum() / countGeneScore."${it.key}".size() ) )
+			if (it.key == 'CSRNP3'){
+			print "num of miRs = "+it.value.unique().size()
+			print "total number of miRs = "+mMap.size()
+			print "num of dbs = "+countGeneScore."${it.key}".findAll({it.value > 0}).collect{it.value}.size()
+			print "total num of dsbs in search = "+targetList.size()
+			}
+			commonGenes.nScore = ( ( it.value.unique().size() / mMap.size()) * (countGeneScore."${it.key}".findAll({it.value > 0}).collect{it.value}.size() / targetList.size() ) )
 			//print "nScore = "+commonGenes.nScore
 			commonGeneList.add(commonGenes)
 			commonGenes = [:]
